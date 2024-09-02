@@ -1,0 +1,5 @@
+orjson==3.10.7
+redis==5.0.8
+fastapi-0.112.2
+pydantic==2.8.2
+pydantic-settings==2.2.1
