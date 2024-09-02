@@ -148,3 +148,15 @@ class Messanger:
                 message_entity.MessageStatus.DELETED,
             )
             await repository.commit()
+
+    async def get_history(
+        self,
+        account: typing.Text,
+        partner: typing.Text,
+        limit: int,
+        earliest_id: uuid.UUID | None = None,
+    ) -> typing.List[message_entity.Message]:
+        """
+        Returns messaging history for specified partner
+        """
+        raise NotImplementedError

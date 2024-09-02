@@ -4,9 +4,11 @@ import typing
 import uuid
 
 import fastapi
+import pydantic
 from starlette import status
 
 from presentation.api.dependencies import messangers
+from presentation.api.schema import responses
 from service import messanger as messanger_service
 
 router = fastapi.APIRouter(prefix="/incoming-messages", tags=["Incoming messages"])
@@ -128,3 +130,36 @@ async def delete_message(
 
     await messanger.delete_message(account_id, message_id)
     return fastapi.Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/history/{partner}", status_code=status.HTTP_200_OK)
+async def get_history(
+    partner: typing.Text,
+    limit: pydantic.NonNegativeInt = fastapi.Query(default=10),
+    earliest: uuid.UUID | None = fastapi.Query(default=None),
+    account_id: typing.Optional[typing.Text] = fastapi.Header(
+        None,
+        description="Target account ID",
+        alias="UserID",
+        example="account-id",
+    ),
+    messanger: messanger_service.Messanger = fastapi.Depends(
+        dependency=messangers.get_messanger,
+    ),
+) -> responses.HistoryPage:
+    """
+    # Return messaging history for specified partner
+    """
+    if account_id is None:
+        raise fastapi.HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="UserID header not provided",
+        )
+
+    history = await messanger.get_history(account_id, partner, limit, earliest)
+    return responses.HistoryPage(
+        partner=partner,
+        messages=history,
+        limit=limit,
+        earliest_id=history[-1].message_id if history else None,
+    )
