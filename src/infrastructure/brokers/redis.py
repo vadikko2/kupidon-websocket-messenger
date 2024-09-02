@@ -11,8 +11,9 @@ logger = logging.getLogger(__name__)
 
 class RedisMessageBroker(protocol.MessageBroker):
 
-    def __init__(self, connect: redis.Redis, timeout_ms: pydantic.PositiveInt = 500):
-        self.connect = connect
+    def __init__(self, url: pydantic.RedisDsn, timeout_ms: pydantic.PositiveInt = 500):
+        self.connect = redis.Redis.from_url(str(url))
+
         self.pubsub: redis.client.PubSub | None = None
         self.timeout = float(timeout_ms) / 1000
         self.subscribed_channels = set()
