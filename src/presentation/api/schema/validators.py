@@ -2,7 +2,7 @@ import functools
 
 import fastapi
 
-from precendation.api.schema import constants
+from presentation.api.schema import constants
 
 _MessageValidationParams = dict(
     description="Message content",

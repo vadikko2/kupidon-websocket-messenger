@@ -3,13 +3,12 @@ import typing
 
 
 class MessageBroker(abc.ABC):
-
     @abc.abstractmethod
     async def start(self) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def send_message(self, receiver: typing.Text, message: bytes) -> None:
+    async def send_message(self, channel_name: typing.Text, message: bytes) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -17,11 +16,11 @@ class MessageBroker(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def subscribe(self, receiver: typing.Text) -> None:
+    async def subscribe(self, channel_name: typing.Text) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def unsubscribe(self, receiver: typing.Text) -> None:
+    async def unsubscribe(self, channel_name: typing.Text) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod

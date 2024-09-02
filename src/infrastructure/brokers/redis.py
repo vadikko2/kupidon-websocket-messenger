@@ -3,6 +3,7 @@ import typing
 
 import pydantic
 import redis.asyncio as redis
+from redis.asyncio import client
 
 from infrastructure.brokers import protocol
 
@@ -10,15 +11,14 @@ logger = logging.getLogger(__name__)
 
 
 class RedisMessageBroker(protocol.MessageBroker):
+    def __init__(self, url: typing.Text, timeout_ms: pydantic.PositiveInt = 500):
+        self.connect = redis.Redis.from_url(url)
 
-    def __init__(self, url: pydantic.RedisDsn, timeout_ms: pydantic.PositiveInt = 500):
-        self.connect = redis.Redis.from_url(str(url))
-
-        self.pubsub: redis.client.PubSub | None = None
+        self.pubsub: client.PubSub | None = None
         self.timeout = float(timeout_ms) / 1000
         self.subscribed_channels = set()
 
-    def start(self) -> None:
+    async def start(self) -> None:
         self.pubsub = self.connect.pubsub()
 
     async def send_message(self, channel_name: typing.Text, message: bytes) -> None:
@@ -29,19 +29,31 @@ class RedisMessageBroker(protocol.MessageBroker):
         if self.pubsub is None or not self.pubsub.subscribed:
             raise Exception("Not subscribed")
 
-        message = await self.pubsub.get_message(ignore_subscribe_messages=True, timeout=self.timeout)
+        message = await self.pubsub.get_message(
+            ignore_subscribe_messages=True,
+            timeout=self.timeout,
+        )
+
+        if message is None:
+            return
 
         if message["type"] != "message":
             return
 
-        return message
+        return message.get("data")
 
     async def subscribe(self, channel_name: typing.Text) -> None:
+        if self.pubsub is None or not self.pubsub.subscribed:
+            raise Exception("Broker not started")
+
         logger.debug(f"Subscribing to {channel_name}")
         await self.pubsub.subscribe(channel_name)
         self.subscribed_channels.add(channel_name)
 
     async def unsubscribe(self, channel_name: typing.Text) -> None:
+        if self.pubsub is None or not self.pubsub.subscribed:
+            raise Exception("Broker not started")
+
         logger.debug(f"Unsubscribing from {channel_name}")
         await self.pubsub.unsubscribe(channel_name)
         self.subscribed_channels.remove(channel_name)
