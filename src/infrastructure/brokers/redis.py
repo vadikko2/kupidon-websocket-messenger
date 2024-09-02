@@ -43,7 +43,7 @@ class RedisMessageBroker(protocol.MessageBroker):
         return message.get("data")
 
     async def subscribe(self, channel_name: typing.Text) -> None:
-        if self.pubsub is None or not self.pubsub.subscribed:
+        if self.pubsub is None:
             raise Exception("Broker not started")
 
         logger.debug(f"Subscribing to {channel_name}")

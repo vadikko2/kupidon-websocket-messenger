@@ -14,7 +14,7 @@ router = fastapi.APIRouter(prefix="/incoming-messages", tags=["Incoming messages
 logger = logging.getLogger(__name__)
 
 
-@router.websocket("/{account_id}")
+@router.websocket("/ws")
 async def websocket_endpoint(
     websocket: fastapi.WebSocket,
     account_id: typing.Optional[typing.Text] = fastapi.Header(

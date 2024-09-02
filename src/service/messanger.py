@@ -22,7 +22,7 @@ class Messanger:
     ) -> None:
         self.broker = broker
         self.uow = uow
-        self._subscription_started = False
+        self.subscription_started = False
 
     @contextlib.asynccontextmanager
     async def start_subscription(self, target_account: typing.Text):
@@ -32,13 +32,13 @@ class Messanger:
         try:
             await self.broker.start()
             await self.broker.subscribe(target_account)
-            self._subscription_started = True
+            self.subscription_started = True
             yield
         except Exception as e:
             raise exceptions.StartSubscriptionError(target_account, e)
         finally:
             await self.broker.stop()
-            self._subscription_started = False
+            self.subscription_started = False
 
     async def send_message(self, message: message_entity.Message) -> None:
         """
@@ -56,7 +56,7 @@ class Messanger:
         """
         Returns new messages from broker in real-time mode for the specified account.
         """
-        if not self._subscription_started:
+        if not self.subscription_started:
             raise Exception(
                 "Not subscribed. Open context manager to start subscription.",
             )

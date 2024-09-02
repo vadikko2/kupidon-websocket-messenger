@@ -14,10 +14,18 @@ class MessageStatus(enum.IntEnum):
     DELETED = 5
 
 
+class AttachmentType(enum.StrEnum):
+    IMAGE = "image"
+    VIDEO = "video"
+    AUDIO = "audio"
+    FILE = "file"
+
+
 class Attachment(pydantic.BaseModel, frozen=True):
-    attachment_id: uuid.UUID
+    attachment_id: uuid.UUID = pydantic.Field(default_factory=uuid.uuid4)
     url: pydantic.AnyUrl
     name: typing.Optional[typing.Text] = pydantic.Field(default=None, max_length=100)
+    content_type: AttachmentType
 
 
 class Message(pydantic.BaseModel):
