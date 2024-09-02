@@ -136,7 +136,7 @@ async def delete_message(
 async def get_history(
     partner: typing.Text,
     limit: pydantic.NonNegativeInt = fastapi.Query(default=10),
-    earliest: uuid.UUID | None = fastapi.Query(default=None),
+    latest: uuid.UUID | None = fastapi.Query(default=None),
     account_id: typing.Optional[typing.Text] = fastapi.Header(
         None,
         description="Target account ID",
@@ -156,10 +156,10 @@ async def get_history(
             detail="UserID header not provided",
         )
 
-    history = await messanger.get_history(account_id, partner, limit, earliest)
+    history = await messanger.get_history(account_id, partner, limit, latest)
     return responses.HistoryPage(
         partner=partner,
         messages=history,
         limit=limit,
-        earliest_id=history[-1].message_id if history else None,
+        latest_id=history[-1].message_id if history else None,
     )

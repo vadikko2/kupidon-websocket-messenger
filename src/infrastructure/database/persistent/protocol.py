@@ -7,9 +7,25 @@ from domain import message as message_entity
 
 class MessageRepository(abc.ABC):
     @abc.abstractmethod
-    async def get_new_messages(self, receiver: typing.Text) -> typing.List[message_entity.Message]:
+    async def get_new_messages(
+        self,
+        receiver: typing.Text,
+    ) -> typing.List[message_entity.Message]:
         """
         Returns new messages for the specified account
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    async def get_history(
+        self,
+        account: typing.Text,
+        partner: typing.Text,
+        limit: int,
+        latest_id: uuid.UUID | None = None,
+    ) -> typing.List[message_entity.Message]:
+        """
+        Returns messaging history for specified partner
         """
         raise NotImplementedError
 
@@ -28,7 +44,11 @@ class MessageRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def change_status(self, message_id: uuid.UUID, status: message_entity.MessageStatus) -> None:
+    async def change_status(
+        self,
+        message_id: uuid.UUID,
+        status: message_entity.MessageStatus,
+    ) -> None:
         """
         Changes message status
         """

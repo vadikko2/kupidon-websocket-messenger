@@ -45,12 +45,13 @@ class Messanger:
         Sends message to broker
         """
         async with self.uow as repository:
+            await repository.add(message)
+            await repository.commit()
+
             await self.broker.send_message(
                 message.receiver,
                 orjson.dumps(message.model_dump(mode="json")),
             )
-            await repository.add(message)
-            await repository.commit()
 
     async def wait_message(self) -> message_entity.Message | None:
         """
@@ -149,14 +150,46 @@ class Messanger:
             )
             await repository.commit()
 
+    async def get_new_messages(
+        self,
+        receiver: typing.Text,
+    ) -> typing.List[message_entity.Message]:
+        """
+        Returns not delivered messages for specified account.
+        """
+        async with self.uow as repository:
+            messages = await repository.get_new_messages(receiver)
+
+            for message in messages:
+                await repository.change_status(
+                    message.message_id,
+                    message_entity.MessageStatus.DELIVERED,
+                )
+            await repository.commit()
+            return messages
+
     async def get_history(
         self,
         account: typing.Text,
         partner: typing.Text,
         limit: int,
-        earliest_id: uuid.UUID | None = None,
+        latest_id: uuid.UUID | None = None,
     ) -> typing.List[message_entity.Message]:
         """
         Returns messaging history for specified partner
         """
-        raise NotImplementedError
+        async with self.uow as repository:
+            messages = await repository.get_history(
+                account,
+                partner,
+                limit,
+                latest_id,
+            )
+
+            for message in messages:
+                await repository.change_status(
+                    message.message_id,
+                    message_entity.MessageStatus.DELIVERED,
+                )
+            await repository.commit()
+            return messages
