@@ -27,8 +27,8 @@ app = fastapi_app.create(
     version=settings.VERSION,
     description="Messanger API",
     env_title=app_settings.ENV,
-    query_routers=[routes.incoming.router],
-    command_routers=[routes.outgoing.router],
+    query_routers=[routes.chats.router, routes.subscription.router],
+    command_routers=[routes.messages.router],
     cors_enable=True,
     log_config=log_config,
 )

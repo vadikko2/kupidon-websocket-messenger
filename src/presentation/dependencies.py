@@ -1,0 +1,23 @@
+import functools
+
+from cqrs.requests.bootstrap import bootstrap
+
+from infrastructure import dependencies
+from infrastructure.brokers import redis
+from service import mapping, subscription_service, unit_of_work
+
+
+@functools.lru_cache
+def get_request_mediator():
+    return bootstrap(
+        di_container=dependencies.container,
+        queries_mapper=mapping.init_queries,
+        commands_mapper=mapping.init_commands,
+    )
+
+
+async def get_subscription_service() -> subscription_service.SubscriptionService:
+    return subscription_service.SubscriptionService(
+        broker=redis.RedisMessageBroker("redis://localhost:6379"),
+        uow=unit_of_work.MockMessageUoW(),
+    )

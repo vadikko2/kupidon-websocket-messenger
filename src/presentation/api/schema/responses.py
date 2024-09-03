@@ -4,33 +4,66 @@ import uuid
 
 import pydantic
 
-from domain import message
+from domain import messages as messages_entity
 
 
 class MessageSent(pydantic.BaseModel):
     message_id: uuid.UUID
-    receiver: typing.Text
     timestamp: datetime.datetime
 
 
+class ChatCreated(pydantic.BaseModel):
+    chat_id: uuid.UUID
+
+
+class ChatInfo(pydantic.BaseModel):
+    chat_id: uuid.UUID
+    name: typing.Text | None
+    last_activity_timestamp: typing.Optional[datetime.datetime]
+    last_message_id: uuid.UUID | None
+
+
+class ChatList(pydantic.BaseModel):
+    _next_page: typing.ClassVar[str] = "/chats/?limit={limit}?offset={offset}"
+
+    chats: typing.List[ChatInfo] = pydantic.Field(default_factory=list)
+    limit: pydantic.NonNegativeInt
+    offset: pydantic.NonNegativeInt
+
+    @pydantic.computed_field()
+    def next_page(self) -> str | None:
+        if not len(self.chats):
+            return None
+        return self._next_page.format(
+            limit=self.limit,
+            offset=self.offset + self.count,  # type: ignore
+        )
+
+    @pydantic.computed_field()
+    def count(self) -> pydantic.NonNegativeInt:
+        return len(self.chats)
+
+
 class HistoryPage(pydantic.BaseModel):
-    _history_page_url: typing.ClassVar[str] = (
-        "/history/{partner}?limit={limit}&latest={latest}"
+    _next_page: typing.ClassVar[str] = (
+        "/history/{chat_id}?limit={limit}&latest={latest}"
     )
 
-    partner: typing.Text
-    messages: typing.List[message.Message] = pydantic.Field(default_factory=list)
+    chat_id: uuid.UUID
+    messages: typing.List[messages_entity.Message] = pydantic.Field(
+        default_factory=list,
+    )
 
     limit: pydantic.NonNegativeInt
     latest_id: uuid.UUID | None
 
     @pydantic.computed_field()
     def next_page(self) -> str | None:
-        if self.latest_id is None:
+        if self.latest_id is None or not len(self.messages):
             return None
 
-        return self._history_page_url.format(
-            partner=self.partner,
+        return self._next_page.format(
+            chat_id=self.chat_id,
             limit=self.limit,
             latest=self.latest_id,
         )
