@@ -4,6 +4,7 @@ import uuid
 
 import cqrs
 import fastapi
+from fastapi_app import response
 from fastapi_app.exception_handlers import registry
 from starlette import status
 
@@ -44,7 +45,7 @@ async def send_message(
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.get_request_mediator,
     ),
-) -> responses.MessageSent:
+) -> response.Response[responses.MessageSent]:
     """
     # Send message to receiver
     """
@@ -70,9 +71,11 @@ async def send_message(
 
     result: send_message_command.MessageSent = await mediator.send(command)
 
-    return responses.MessageSent(
-        message_id=result.message_id,
-        timestamp=result.created,
+    return response.Response(
+        result=responses.MessageSent(
+            message_id=result.message_id,
+            timestamp=result.created,
+        ),
     )
 
 
