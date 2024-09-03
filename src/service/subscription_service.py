@@ -30,6 +30,7 @@ class SubscriptionService:
         Opens subscription to broker for the specified account.
         """
         try:
+            self.target_account = target_account
             await self.broker.start()
             await self.broker.subscribe(target_account)
             self.subscription_started = True
@@ -39,6 +40,7 @@ class SubscriptionService:
         finally:
             await self.broker.stop()
             self.subscription_started = False
+            self.target_account = None
 
     async def wait_message(self) -> messages.Message | None:
         """

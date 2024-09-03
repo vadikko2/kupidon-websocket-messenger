@@ -19,7 +19,7 @@ router = fastapi.APIRouter(prefix="/messages", tags=["Messages"])
 logger = logging.getLogger(__name__)
 
 
-@router.post("/{receiver}", status_code=status.HTTP_201_CREATED)
+@router.post("/{chat_id}", status_code=status.HTTP_201_CREATED)
 async def send_message(
     chat_id: uuid.UUID,
     account_id: typing.Optional[typing.Text] = fastapi.Header(
