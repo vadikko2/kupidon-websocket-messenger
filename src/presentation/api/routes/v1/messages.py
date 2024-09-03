@@ -4,10 +4,13 @@ import uuid
 
 import cqrs
 import fastapi
+from fastapi_app.exception_handlers import registry
 from starlette import status
 
+from domain import exceptions as domain_exceptions
 from presentation import dependencies
 from presentation.api.schema import requests, responses, validators
+from service import exceptions
 from service.commands import (
     apply_message as apply_message_command,
     delete_message as delete_message_command,
@@ -19,7 +22,15 @@ router = fastapi.APIRouter(prefix="/messages", tags=["Messages"])
 logger = logging.getLogger(__name__)
 
 
-@router.post("/{chat_id}", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{chat_id}",
+    status_code=status.HTTP_201_CREATED,
+    responses=registry.get_exception_responses(
+        domain_exceptions.DuplicateMessage,
+        exceptions.ChatNotFound,
+        exceptions.ParticipantNotInChat,
+    ),
+)
 async def send_message(
     chat_id: uuid.UUID,
     account_id: typing.Optional[typing.Text] = fastapi.Header(
@@ -65,7 +76,15 @@ async def send_message(
     )
 
 
-@router.put("/{message_id}/receive", status_code=status.HTTP_204_NO_CONTENT)
+@router.put(
+    "/{message_id}/receive",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses=registry.get_exception_responses(
+        exceptions.ChatNotFound,
+        exceptions.MessageNotFound,
+        exceptions.ChangeStatusAccessDonated,
+    ),
+)
 async def apply_message_receive(
     message_id: uuid.UUID,
     account_id: typing.Optional[typing.Text] = fastapi.Header(
@@ -96,7 +115,15 @@ async def apply_message_receive(
     return fastapi.Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.put("/{message_id}/read", status_code=status.HTTP_204_NO_CONTENT)
+@router.put(
+    "/{message_id}/read",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses=registry.get_exception_responses(
+        exceptions.ChatNotFound,
+        exceptions.MessageNotFound,
+        exceptions.ChangeStatusAccessDonated,
+    ),
+)
 async def apply_message_read(
     message_id: uuid.UUID,
     account_id: typing.Optional[typing.Text] = fastapi.Header(
@@ -127,7 +154,15 @@ async def apply_message_read(
     return fastapi.Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.put("/{message_id}/delete", status_code=status.HTTP_204_NO_CONTENT)
+@router.put(
+    "/{message_id}/delete",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses=registry.get_exception_responses(
+        exceptions.ChatNotFound,
+        exceptions.MessageNotFound,
+        exceptions.ChangeStatusAccessDonated,
+    ),
+)
 async def delete_message(
     message_id: uuid.UUID,
     account_id: typing.Optional[typing.Text] = fastapi.Header(

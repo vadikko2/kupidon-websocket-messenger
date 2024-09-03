@@ -5,7 +5,7 @@ import fastapi_app
 from fastapi_app import logging as fastapi_logging
 
 import settings
-from presentation.api import routes
+from presentation.api import errors, routes
 
 log_settings = settings.Logging()
 app_settings = settings.App()
@@ -29,6 +29,16 @@ app = fastapi_app.create(
     env_title=app_settings.ENV,
     query_routers=[routes.chats.router, routes.subscription.router],
     command_routers=[routes.messages.router],
+    exception_handlers=[
+        errors.handlers.change_status_access_donated_handler,
+        errors.handlers.message_not_found_handler,
+        errors.handlers.chat_not_found_handler,
+        errors.handlers.not_participant_in_chat_handler,
+        errors.handlers.duplicate_message_handler,
+        errors.handlers.already_chat_participant_handler,
+        errors.handlers.subscription_not_started_handler,
+        errors.handlers.start_subscription_error_handler,
+    ],
     cors_enable=True,
     log_config=log_config,
 )

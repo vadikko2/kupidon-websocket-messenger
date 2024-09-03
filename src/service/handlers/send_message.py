@@ -1,3 +1,4 @@
+import logging
 import typing
 
 import cqrs
@@ -8,6 +9,8 @@ from domain import messages
 from infrastructure.brokers import protocol as broker_protocol
 from service import exceptions, unit_of_work
 from service.commands import send_message
+
+logger = logging.getLogger(__name__)
 
 
 class SendMessageHandler(
@@ -32,13 +35,15 @@ class SendMessageHandler(
         Sends message to broker for all receivers.
         """
         for receiver in receivers:
-            if receiver == message.sender:
-                continue
-
-            await self.broker.send_message(
-                receiver,
-                orjson.dumps(message.model_dump(mode="json")),
-            )
+            try:
+                await self.broker.send_message(
+                    receiver,
+                    orjson.dumps(message.model_dump(mode="json")),
+                )
+            except Exception as e:
+                logger.error(
+                    f"Failed to send message {message.message_id} to {receiver}: {e}",
+                )
 
     async def handle(
         self,
@@ -60,8 +65,17 @@ class SendMessageHandler(
 
         async with self.uow:
             chat = await self.uow.chat_repository.get(request.chat_id)
+
             if chat is None:
                 raise exceptions.ChatNotFound(new_message.chat_id)
+
+            if request.sender not in chat.participants:
+                raise exceptions.ParticipantNotInChat(
+                    request.sender,
+                    chat.chat_id,
+                )
+
+            chat.add_message(new_message)
 
             await self.uow.message_repository.add(new_message)
             await self.uow.commit()

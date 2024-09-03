@@ -5,10 +5,12 @@ import uuid
 import cqrs
 import fastapi
 import pydantic
+from fastapi_app.exception_handlers import registry
 from starlette import status
 
 from presentation import dependencies
 from presentation.api.schema import responses
+from service import exceptions
 from service.commands import open_chat as open_chat_command
 from service.queries import (
     get_chats as get_chats_query,
@@ -101,7 +103,15 @@ async def get_chats(
     )
 
 
-@router.get("/history/{chat_id}", status_code=status.HTTP_200_OK)
+@router.get(
+    "/history/{chat_id}",
+    status_code=status.HTTP_200_OK,
+    responses=registry.get_exception_responses(
+        exceptions.ChatNotFound,
+        exceptions.ParticipantNotInChat,
+        exceptions.ChangeStatusAccessDonated,
+    ),
+)
 async def get_history(
     chat_id: uuid.UUID,
     limit: pydantic.NonNegativeInt = fastapi.Query(default=10),

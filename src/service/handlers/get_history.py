@@ -54,6 +54,12 @@ class GetHistoryHandler(
             if chat_history is None:
                 raise exceptions.ChatNotFound(request.chat_id)
 
+            if request.account not in chat_history.participants:
+                raise exceptions.ParticipantNotInChat(
+                    request.account,
+                    chat_history.chat_id,
+                )
+
             for message in chat_history.history:
                 if request.account in chat_history.participants:
                     await self.mark_message_as_delivered(

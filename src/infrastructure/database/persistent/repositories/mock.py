@@ -19,8 +19,6 @@ class MockMessageRepository(message_repository.MessageRepository):
         self._seen_messages = set()
 
     async def add(self, message: messages.Message) -> None:
-        _GLOBAL_CHATS_STORAGE[message.chat_id].add_message(message)
-
         self.committed = False
 
     async def get(self, message_id: uuid.UUID) -> messages.Message | None:

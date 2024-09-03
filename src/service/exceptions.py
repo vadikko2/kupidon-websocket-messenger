@@ -16,6 +16,13 @@ class ChangeStatusAccessDonated(Exception):
         )
 
 
+class ParticipantNotInChat(Exception):
+    def __init__(self, account_id: typing.Text, chat_id: uuid.UUID) -> None:
+        super().__init__(
+            f"Account {account_id} is not a participant in chat {chat_id}",
+        )
+
+
 class MessageNotFound(Exception):
     def __init__(self, message_id: uuid.UUID) -> None:
         super().__init__(f"Message {message_id} not found")
