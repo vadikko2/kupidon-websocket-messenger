@@ -1,10 +1,7 @@
-import typing
-import uuid
-
 import cqrs
 from cqrs.events import event
 
-from domain import messages
+from domain import messages as messages_entity
 from service import exceptions, unit_of_work
 from service.requests import get_history
 
@@ -14,34 +11,11 @@ class GetHistoryHandler(
 ):
     def __init__(self, uow: unit_of_work.UoW):
         self.uow = uow
+        self._events = []
 
     @property
     def events(self) -> list[event.Event]:
-        return []
-
-    async def mark_message_as_delivered(
-        self,
-        account: typing.Text,
-        message_id: uuid.UUID,
-    ) -> None:
-        message = await self.uow.message_repository.get(message_id)
-
-        if message is None:
-            raise exceptions.MessageNotFound(message_id)
-
-        chat = await self.uow.chat_repository.get(message.chat_id)
-        if chat is None:
-            raise exceptions.ChatNotFound(message.chat_id)
-
-        if account not in chat.participants:
-            raise exceptions.ChangeStatusAccessDonated(
-                account,
-                message_id,
-                messages.MessageStatus.DELIVERED,
-            )
-
-        message.deliver(account)
-        await self.uow.message_repository.update(message)
+        return self._events
 
     async def handle(self, request: get_history.GetHistory) -> get_history.History:
         async with self.uow:
@@ -60,13 +34,14 @@ class GetHistoryHandler(
                     chat_history.chat_id,
                 )
 
+            messages = []
+
             for message in chat_history.history:
-                if request.account in chat_history.participants:
-                    await self.mark_message_as_delivered(
-                        request.account,
-                        message.message_id,
-                    )
+                if message.status == messages_entity.MessageStatus.DELETED:
+                    continue
 
-            await self.uow.commit()
+                messages.append(message)
+                message.deliver(request.account)
 
-        return get_history.History(messages=chat_history.history)
+        self._events += self.uow.get_events()
+        return get_history.History(messages=messages)

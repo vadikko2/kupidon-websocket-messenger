@@ -19,7 +19,6 @@ class MessageStatus(enum.IntEnum):
 
     SENT = 1
     RECEIVED = 2
-    DELIVERED = 3
     READ = 4
     DELETED = 5
 
@@ -82,9 +81,7 @@ class Message(pydantic.BaseModel):
     event_list: typing.List[cqrs.DomainEvent] = pydantic.Field(default_factory=list)
 
     def deliver(self, receiver: typing.Text) -> None:
-        self.status = MessageStatus.DELIVERED
-        self.updated = datetime.datetime.now()
-        logger.debug(f"Message {self.message_id} delivered by {receiver}")
+        logger.debug(f"Message {self.message_id} delivered to {receiver}")
         self.event_list.append(
             events.MessageDelivered(
                 chat_id=self.chat_id,
