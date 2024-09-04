@@ -5,7 +5,7 @@ from service.handlers import (
     apply_message as apply_message_handler,
     delete_message as delete_message_handler,
     get_chats as get_chats_handler,
-    get_history as get_history_handler,
+    get_messages as get_history_handler,
     new_message_added as new_message_added_handler,
     open_chat as open_chat_handler,
     send_message as send_message_handler,
@@ -14,7 +14,7 @@ from service.requests import (
     apply_message as apply_message_request,
     delete_message as delete_message_request,
     get_chats as get_chats_request,
-    get_history as get_history_request,
+    get_messages as get_history_request,
     open_chat as open_chat_request,
     send_message as send_message_request,
 )
@@ -39,7 +39,7 @@ def init_requests(mapper: requests.RequestMap) -> None:
         send_message_handler.SendMessageHandler,
     )
     mapper.bind(get_chats_request.GetChats, get_chats_handler.GetChatsHandler)
-    mapper.bind(get_history_request.GetHistory, get_history_handler.GetHistoryHandler)
+    mapper.bind(get_history_request.GetMessages, get_history_handler.GetMessagesHandler)
 
 
 def init_events(mapper: events.EventMap) -> None:

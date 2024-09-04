@@ -3,11 +3,11 @@ from cqrs.events import event
 
 from domain import messages as messages_entity
 from service import exceptions, unit_of_work
-from service.requests import get_history
+from service.requests import get_messages
 
 
-class GetHistoryHandler(
-    cqrs.RequestHandler[get_history.GetHistory, get_history.History],
+class GetMessagesHandler(
+    cqrs.RequestHandler[get_messages.GetMessages, get_messages.Messages],
 ):
     def __init__(self, uow: unit_of_work.UoW):
         self.uow = uow
@@ -17,7 +17,7 @@ class GetHistoryHandler(
     def events(self) -> list[event.Event]:
         return self._events
 
-    async def handle(self, request: get_history.GetHistory) -> get_history.History:
+    async def handle(self, request: get_messages.GetMessages) -> get_messages.Messages:
         async with self.uow:
             chat_history = await self.uow.chat_repository.get_chat_history(
                 chat_id=request.chat_id,
@@ -44,4 +44,4 @@ class GetHistoryHandler(
                 message.deliver(request.account)
 
         self._events += self.uow.get_events()
-        return get_history.History(messages=messages)
+        return get_messages.Messages(messages=messages)
