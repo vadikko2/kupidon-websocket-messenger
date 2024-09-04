@@ -81,9 +81,6 @@ class Message(pydantic.BaseModel):
 
     event_list: typing.List[cqrs.DomainEvent] = pydantic.Field(default_factory=list)
 
-    def __hash__(self):
-        return str(hash(self.message_id))
-
     def deliver(self, receiver: typing.Text) -> None:
         self.status = MessageStatus.DELIVERED
         self.updated = datetime.datetime.now()
@@ -136,3 +133,6 @@ class Message(pydantic.BaseModel):
         while self.event_list:
             new_events.append(self.event_list.pop())
         return new_events
+
+    def __hash__(self):
+        return hash(self.message_id)

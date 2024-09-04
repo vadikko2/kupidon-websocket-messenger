@@ -27,8 +27,11 @@ app = fastapi_app.create(
     version=settings.VERSION,
     description="Messanger API",
     env_title=app_settings.ENV,
-    query_routers=[routes.chats.router, routes.subscription.router],
-    command_routers=[routes.messages.router],
+    query_routers=[
+        routes.messages.router,
+        routes.chats.router,
+        routes.subscription.router,
+    ],
     exception_handlers=[
         errors.handlers.change_status_access_donated_handler,
         errors.handlers.message_not_found_handler,

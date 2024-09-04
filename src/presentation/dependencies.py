@@ -11,8 +11,8 @@ from service import mapping, subscription_service, unit_of_work
 def get_request_mediator():
     return bootstrap(
         di_container=dependencies.container,
-        queries_mapper=mapping.init_queries,
-        commands_mapper=mapping.init_commands,
+        commands_mapper=mapping.init_requests,
+        domain_events_mapper=mapping.init_events,
     )
 
 

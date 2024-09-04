@@ -9,14 +9,14 @@ from presentation import dependencies
 from service import subscription_service as messanger_service
 
 router = fastapi.APIRouter(
-    prefix="/subscription",
+    prefix="/subscriptions",
     tags=["Incoming messages subscription"],
 )
 
 logger = logging.getLogger(__name__)
 
 
-@router.websocket("/ws")
+@router.websocket("")
 async def websocket_endpoint(
     websocket: fastapi.WebSocket,
     account_id: typing.Optional[typing.Text] = fastapi.Header(

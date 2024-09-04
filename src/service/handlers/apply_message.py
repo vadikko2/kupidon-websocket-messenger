@@ -2,7 +2,7 @@ import cqrs
 
 from domain import messages
 from service import exceptions, unit_of_work
-from service.commands import apply_message
+from service.requests import apply_message
 
 
 class ApplyMessageReadHandler(

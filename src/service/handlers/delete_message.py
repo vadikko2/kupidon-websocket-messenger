@@ -4,7 +4,7 @@ import cqrs
 
 from domain import messages
 from service import exceptions, unit_of_work
-from service.commands import delete_message
+from service.requests import delete_message
 
 logger = logging.getLogger(__name__)
 

@@ -6,7 +6,7 @@ from cqrs.events import event
 
 from domain import messages
 from service import exceptions, unit_of_work
-from service.queries import get_history
+from service.requests import get_history
 
 
 class GetHistoryHandler(

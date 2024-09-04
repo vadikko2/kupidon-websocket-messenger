@@ -25,9 +25,11 @@ class MockMessageRepository(message_repository.MessageRepository):
         for chat in _GLOBAL_CHATS_STORAGE.values():
             for message in chat.history:
                 if message.message_id == message_id:
+                    self._seen_messages.add(message)
                     return message
 
     async def update(self, message: messages.Message) -> None:
+        self._seen_messages.add(message)
         for i, exist_message in enumerate(
             _GLOBAL_CHATS_STORAGE[message.chat_id].history,
         ):
@@ -56,9 +58,11 @@ class MockChatRepository(chat_repository.ChatRepository):
 
     async def add(self, chat: chats.Chat) -> None:
         _GLOBAL_CHATS_STORAGE[chat.chat_id] = chat
+        self._seen_chats.add(chat)
         self.committed = False
 
     async def get(self, chat_id: uuid.UUID) -> chats.Chat | None:
+        self._seen_chats.add(_GLOBAL_CHATS_STORAGE[chat_id])
         return _GLOBAL_CHATS_STORAGE.get(chat_id)
 
     async def get_chat_history(
@@ -82,13 +86,16 @@ class MockChatRepository(chat_repository.ChatRepository):
         chat_dict["history"] = chat_dict["history"][
             latest_message_position : latest_message_position + messages_limit
         ]
-        return chats.Chat.model_validate(chat_dict)
+        new_chat = chats.Chat.model_validate(chat_dict)
+        self._seen_chats.add(new_chat)
+        return new_chat
 
     async def get_all(self, participant: typing.Text) -> typing.List[chats.Chat]:
         chats_list: typing.List[chats.Chat] = []
         for chat in _GLOBAL_CHATS_STORAGE.values():
             if participant in chat.participants:
                 chats_list.append(chat)
+                self._seen_chats.add(chat)
         return chats_list
 
     async def commit(self):

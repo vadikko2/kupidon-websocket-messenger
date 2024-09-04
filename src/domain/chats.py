@@ -84,3 +84,6 @@ class Chat(pydantic.BaseModel):
         while self.event_list:
             new_events.append(self.event_list.pop())
         return new_events
+
+    def __hash__(self):
+        return hash(self.chat_id)

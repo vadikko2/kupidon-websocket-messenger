@@ -12,10 +12,10 @@ from starlette import status
 from presentation import dependencies
 from presentation.api.schema import responses
 from service import exceptions
-from service.commands import open_chat as open_chat_command
-from service.queries import (
-    get_chats as get_chats_query,
-    get_history as get_history_query,
+from service.requests import (
+    get_chats as get_chats_request,
+    get_history as get_history_request,
+    open_chat as open_chat_request,
 )
 
 router = fastapi.APIRouter(prefix="/chats", tags=["Chats"])
@@ -23,7 +23,7 @@ router = fastapi.APIRouter(prefix="/chats", tags=["Chats"])
 logger = logging.getLogger(__name__)
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED)
 async def open_chat(
     participants: typing.List[typing.Text] = fastapi.Body(
         ...,
@@ -49,8 +49,8 @@ async def open_chat(
             detail="UserID header not provided",
         )
 
-    result: open_chat_command.ChatOpened = await mediator.send(
-        open_chat_command.OpenChat(
+    result: open_chat_request.ChatOpened = await mediator.send(
+        open_chat_request.OpenChat(
             initiator=account_id,
             participants=participants,
             name=name,
@@ -59,7 +59,7 @@ async def open_chat(
     return response.Response(result=responses.ChatCreated(chat_id=result.chat_id))
 
 
-@router.get("/", status_code=status.HTTP_201_CREATED)
+@router.get("", status_code=status.HTTP_201_CREATED)
 async def get_chats(
     limit: pydantic.NonNegativeInt = fastapi.Query(default=10),
     offset: pydantic.NonNegativeInt = fastapi.Query(default=0),
@@ -82,8 +82,8 @@ async def get_chats(
             detail="UserID header not provided",
         )
 
-    result: get_chats_query.Chats = await mediator.send(
-        get_chats_query.GetChats(
+    result: get_chats_request.Chats = await mediator.send(
+        get_chats_request.GetChats(
             participant=account_id,
             limit=limit,
             offset=offset,
@@ -138,8 +138,8 @@ async def get_history(
             detail="UserID header not provided",
         )
 
-    result: get_history_query.History = await mediator.send(
-        get_history_query.GetHistory(
+    result: get_history_request.History = await mediator.send(
+        get_history_request.GetHistory(
             chat_id=chat_id,
             account=account_id,
             messages_limit=limit,

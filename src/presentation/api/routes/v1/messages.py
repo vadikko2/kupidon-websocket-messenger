@@ -12,10 +12,10 @@ from domain import exceptions as domain_exceptions
 from presentation import dependencies
 from presentation.api.schema import requests, responses, validators
 from service import exceptions
-from service.commands import (
-    apply_message as apply_message_command,
-    delete_message as delete_message_command,
-    send_message as send_message_command,
+from service.requests import (
+    apply_message as apply_message_request,
+    delete_message as delete_message_request,
+    send_message as send_message_request,
 )
 
 router = fastapi.APIRouter(prefix="/messages", tags=["Messages"])
@@ -55,12 +55,12 @@ async def send_message(
             detail="UserID header not provided",
         )
 
-    command = send_message_command.SendMessage(
+    command = send_message_request.SendMessage(
         chat_id=chat_id,
         sender=account_id,
         content=content,
         attachments=[
-            send_message_command.Attachment(
+            send_message_request.Attachment(
                 url=attachment.url,
                 name=attachment.name,
                 content_type=attachment.content_type,
@@ -69,7 +69,7 @@ async def send_message(
         ],
     )
 
-    result: send_message_command.MessageSent = await mediator.send(command)
+    result: send_message_request.MessageSent = await mediator.send(command)
 
     return response.Response(
         result=responses.MessageSent(
@@ -110,7 +110,7 @@ async def apply_message_receive(
         )
 
     await mediator.send(
-        apply_message_command.ApplyMessageReceive(
+        apply_message_request.ApplyMessageReceive(
             message_id=message_id,
             receiver=account_id,
         ),
@@ -149,7 +149,7 @@ async def apply_message_read(
         )
 
     await mediator.send(
-        apply_message_command.ApplyMessageRead(
+        apply_message_request.ApplyMessageRead(
             message_id=message_id,
             reader=account_id,
         ),
@@ -188,6 +188,6 @@ async def delete_message(
         )
 
     await mediator.send(
-        delete_message_command.DeleteMessage(message_id=message_id, deleter=account_id),
+        delete_message_request.DeleteMessage(message_id=message_id, deleter=account_id),
     )
     return fastapi.Response(status_code=status.HTTP_204_NO_CONTENT)
