@@ -62,7 +62,9 @@ class MockChatRepository(chat_repository.ChatRepository):
         self.committed = False
 
     async def get(self, chat_id: uuid.UUID) -> chats.Chat | None:
-        self._seen_chats.add(_GLOBAL_CHATS_STORAGE[chat_id])
+        chat = _GLOBAL_CHATS_STORAGE.get(chat_id)
+        if chat:
+            self._seen_chats.add(chat)
         return _GLOBAL_CHATS_STORAGE.get(chat_id)
 
     async def get_chat_history(

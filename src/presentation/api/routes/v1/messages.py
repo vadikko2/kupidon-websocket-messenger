@@ -40,6 +40,7 @@ async def send_message(
         alias="UserID",
         example="account-id",
     ),
+    reply_to: typing.Optional[uuid.UUID] = fastapi.Body(default=None, examples=[None]),
     content: typing.Text = validators.MessageBody(),
     attachments: typing.List[requests.Attachment] = fastapi.Body(default_factory=list),
     mediator: cqrs.RequestMediator = fastapi.Depends(
@@ -58,6 +59,7 @@ async def send_message(
     command = send_message_request.SendMessage(
         chat_id=chat_id,
         sender=account_id,
+        reply_to=reply_to,
         content=content,
         attachments=[
             send_message_request.Attachment(

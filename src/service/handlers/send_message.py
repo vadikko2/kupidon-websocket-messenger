@@ -29,6 +29,7 @@ class SendMessageHandler(
         new_message = messages.Message(
             chat_id=request.chat_id,
             sender=request.sender,
+            reply_to=request.reply_to,
             content=request.content,
             attachments=[
                 messages.Attachment(
