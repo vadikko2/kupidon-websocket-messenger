@@ -62,7 +62,9 @@
 pip install -r requirements.txt
 ```
 
-## Локальный запуск
+## Запуск
+
+### Локальный запуск
 
 ```bash
 uvicorn --app-dir ./src/ presentation.api.main:app --host 0.0.0.0 --port 80 --reload
@@ -76,13 +78,13 @@ docker compose up --build -d
 
 ## Настройка среды разработки
 
-1. Установка зависимостей
+### Установка зависимостей
 
 ```bash
 pip install -r requirements-dev.txt
 ```
 
-2. Настройка `pre-commit`
+### Настройка `pre-commit`
 
 ```bash
 pre-commit install
