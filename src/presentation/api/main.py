@@ -28,8 +28,8 @@ app = fastapi_app.create(
     description="Messanger API",
     env_title=app_settings.ENV,
     query_routers=[
-        routes.messages.router,
         routes.chats.router,
+        routes.messages.router,
         routes.subscription.router,
     ],
     exception_handlers=[

@@ -22,12 +22,8 @@ from service.requests import (
 
 def init_requests(mapper: requests.RequestMap) -> None:
     mapper.bind(
-        apply_message_request.ApplyMessageRead,
+        apply_message_request.ApplyMessage,
         apply_message_handler.ApplyMessageReadHandler,
-    )
-    mapper.bind(
-        apply_message_request.ApplyMessageReceive,
-        apply_message_handler.ApplyMessageReceiveHandler,
     )
     mapper.bind(
         delete_message_request.DeleteMessage,

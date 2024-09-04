@@ -1,4 +1,4 @@
-from presentation.api.routes.v1 import chats, messages, subscription
+from presentation.api.routes.v1 import chats, subscription, messages
 
 __all__ = [
     "subscription",

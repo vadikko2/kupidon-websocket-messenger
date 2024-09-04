@@ -4,9 +4,10 @@ import uuid
 
 import cqrs
 import fastapi
+from fastapi import status
 from fastapi_app.exception_handlers import registry
-from starlette import status
 
+from domain import messages
 from presentation import dependencies
 from service import exceptions
 from service.requests import (
@@ -50,9 +51,10 @@ async def apply_message_receive(
         )
 
     await mediator.send(
-        apply_message_request.ApplyMessageReceive(
+        apply_message_request.ApplyMessage(
+            applier=account_id,
             message_id=message_id,
-            receiver=account_id,
+            status=messages.MessageStatus.RECEIVED,
         ),
     )
     return fastapi.Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -89,9 +91,10 @@ async def apply_message_read(
         )
 
     await mediator.send(
-        apply_message_request.ApplyMessageRead(
+        apply_message_request.ApplyMessage(
+            applier=account_id,
             message_id=message_id,
-            reader=account_id,
+            status=messages.MessageStatus.READ,
         ),
     )
     return fastapi.Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -107,6 +110,7 @@ async def apply_message_read(
     ),
 )
 async def delete_message(
+    chat_id: uuid.UUID,
     message_id: uuid.UUID,
     account_id: typing.Optional[typing.Text] = fastapi.Header(
         None,
@@ -128,6 +132,9 @@ async def delete_message(
         )
 
     await mediator.send(
-        delete_message_request.DeleteMessage(message_id=message_id, deleter=account_id),
+        delete_message_request.DeleteMessage(
+            message_id=message_id,
+            deleter=account_id,
+        ),
     )
     return fastapi.Response(status_code=status.HTTP_204_NO_CONTENT)
