@@ -13,7 +13,14 @@ RUN apt-get update && \
 WORKDIR /code
 
 COPY ./requirements.txt /code/requirements.txt
-RUN pip install -r /code/requirements.txt --root-user-action=ignore
+
+# Getting token variable
+ARG GITHUB_TOKEN
+
+# Install requirements
+RUN sed -i.bak "s|https://github.com/vadikko2|https://$GITHUB_TOKEN@github.com/vadikko2|g" /code/requirements.txt &&  \
+    cat /code/requirements.txt && \
+    pip install --no-cache-dir -r /code/requirements.txt --root-user-action=ignore
 
 COPY ./src/ /code/src/
 

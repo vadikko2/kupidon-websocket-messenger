@@ -17,11 +17,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
     container_name: api
     volumes:
       - .:/core
     environment:
       - REDIS_URL=redis://redis_dev:6379
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
     ports:
       - 80:80
     restart: always
