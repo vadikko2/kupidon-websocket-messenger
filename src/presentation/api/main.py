@@ -31,6 +31,7 @@ app = fastapi_app.create(
         routes.chats.router,
         routes.messages.router,
         routes.subscription.router,
+        routes.service.router,
     ],
     exception_handlers=[
         errors.handlers.change_status_access_donated_handler,
