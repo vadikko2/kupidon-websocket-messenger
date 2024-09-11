@@ -4,6 +4,7 @@ from cqrs.requests.bootstrap import bootstrap
 
 from infrastructure import dependencies
 from infrastructure.brokers import redis
+from infrastructure.settings import redis_settings
 from service import mapping, subscription_service, unit_of_work
 
 
@@ -18,6 +19,6 @@ def get_request_mediator():
 
 async def get_subscription_service() -> subscription_service.SubscriptionService:
     return subscription_service.SubscriptionService(
-        broker=redis.RedisMessageBroker("redis://localhost:6379"),
+        broker=redis.RedisMessageBroker(redis_settings.dsn()),
         uow=unit_of_work.MockMessageUoW(),
     )
