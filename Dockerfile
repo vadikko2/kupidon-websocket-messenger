@@ -13,7 +13,7 @@ RUN apt-get update && \
 WORKDIR /code
 
 COPY ./requirements.txt /code/requirements.txt
-RUN pip install -r /code/requirements.txt
+RUN pip install -r /code/requirements.txt --root-user-action=ignore
 
 COPY ./src/ /code/src/
 
