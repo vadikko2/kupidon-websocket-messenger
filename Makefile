@@ -61,6 +61,6 @@ docker-down:
 
 pre-commit: dev
 	@echo "Starting pre-commit"
-	@bash -c "source ./venv/bin/activate; pre-commit run --all-files --show-diff-on-failure"
+	@bash -c "source ./venv/bin/activate; pre-commit install; pre-commit run --all-files --show-diff-on-failure"
 
 .PHONY: run install

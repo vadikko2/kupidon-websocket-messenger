@@ -59,7 +59,8 @@
 ## Установка
 
 ```bash
-pip install -r requirements.txt
+python3.12 -m venv venv
+make install
 ```
 
 ## Запуск
@@ -67,13 +68,14 @@ pip install -r requirements.txt
 ### Локальный запуск
 
 ```bash
-uvicorn --app-dir ./src/ presentation.api.main:app --host 0.0.0.0 --port 80 --reload
+make run
 ```
 
 ### Запуск в docker-compose
 
 ```bash
-docker compose up --build -d
+make docker-up
+make docker-down
 ```
 
 ## Настройка среды разработки
@@ -81,11 +83,11 @@ docker compose up --build -d
 ### Установка зависимостей
 
 ```bash
-pip install -r requirements-dev.txt
+make dev
 ```
 
 ### Настройка `pre-commit`
 
 ```bash
-pre-commit install
+make pre-commit
 ```
