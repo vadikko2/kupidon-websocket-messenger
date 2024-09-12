@@ -32,8 +32,9 @@ class ChatList(pydantic.BaseModel):
 
     @pydantic.computed_field()
     def next_page(self) -> str | None:
-        if not len(self.chats):
+        if len(self.chats) < self.limit:
             return None
+
         return self._next_page.format(
             limit=self.limit,
             offset=self.offset + self.count,  # type: ignore
@@ -59,7 +60,7 @@ class HistoryPage(pydantic.BaseModel):
 
     @pydantic.computed_field()
     def next_page(self) -> str | None:
-        if self.latest_id is None or not len(self.messages):
+        if self.latest_id is None or len(self.messages) < self.limit:
             return None
 
         return self._next_page.format(
