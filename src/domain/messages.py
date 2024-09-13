@@ -7,7 +7,7 @@ import uuid
 import cqrs
 import pydantic
 
-from domain import events
+from domain import attachments as attachment_entities, events
 
 logger = logging.getLogger(__name__)
 
@@ -23,33 +23,6 @@ class MessageStatus(enum.IntEnum):
     DELETED = 5
 
 
-class AttachmentType(enum.StrEnum):
-    """
-    Attachment types
-    """
-
-    IMAGE = "image"
-    VIDEO = "video"
-    AUDIO = "audio"
-    FILE = "file"
-
-
-class Attachment(pydantic.BaseModel, frozen=True):
-    """
-    Attachment entity
-    """
-
-    attachment_id: uuid.UUID = pydantic.Field(default_factory=uuid.uuid4)
-    created: datetime.datetime = pydantic.Field(default_factory=datetime.datetime.now)
-
-    url: pydantic.AnyUrl
-    name: typing.Optional[typing.Text] = pydantic.Field(default=None, max_length=100)
-    content_type: AttachmentType
-
-    def __hash__(self):
-        return str(hash(self.attachment_id))
-
-
 class Message(pydantic.BaseModel):
     """
     Message entity
@@ -63,7 +36,7 @@ class Message(pydantic.BaseModel):
     reply_to: typing.Optional[uuid.UUID] = pydantic.Field(default=None, frozen=True)
 
     content: typing.Text = pydantic.Field(frozen=True)
-    attachments: typing.List[Attachment] = pydantic.Field(
+    attachments: typing.List[attachment_entities.Attachment] = pydantic.Field(
         default_factory=list,
         max_length=5,
         frozen=True,

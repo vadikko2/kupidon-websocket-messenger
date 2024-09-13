@@ -5,6 +5,7 @@ import uuid
 import pydantic
 
 from domain import messages as messages_entity
+from service.requests import get_attachments
 
 
 class MessageSent(pydantic.BaseModel):
@@ -45,9 +46,9 @@ class ChatList(pydantic.BaseModel):
         return len(self.chats)
 
 
-class HistoryPage(pydantic.BaseModel):
+class MessagesPage(pydantic.BaseModel):
     _next_page: typing.ClassVar[str] = (
-        "/history/{chat_id}?limit={limit}&latest={latest}"
+        "/chats/{chat_id}/messages/?limit={limit}&latest={latest}"
     )
 
     chat_id: uuid.UUID
@@ -72,3 +73,32 @@ class HistoryPage(pydantic.BaseModel):
     @pydantic.computed_field()
     def count(self) -> pydantic.NonNegativeInt:
         return len(self.messages)
+
+
+class AttachmentsPage(pydantic.BaseModel):
+    _next_page: typing.ClassVar[str] = (
+        "/chats/{chat_id}/attachments/?limit={limit}&offset={offset}"
+    )
+
+    chat_id: uuid.UUID
+    attachments: typing.List[get_attachments.Attachment] = pydantic.Field(
+        default_factory=list,
+    )
+
+    limit: pydantic.NonNegativeInt
+    offset: pydantic.NonNegativeInt
+
+    @pydantic.computed_field()
+    def next_page(self) -> str | None:
+        if len(self.attachments) < self.limit:
+            return None
+
+        return self._next_page.format(
+            chat_id=self.chat_id,
+            limit=self.limit,
+            offset=self.offset + self.count,  # type: ignore
+        )
+
+    @pydantic.computed_field()
+    def count(self) -> pydantic.NonNegativeInt:
+        return len(self.attachments)

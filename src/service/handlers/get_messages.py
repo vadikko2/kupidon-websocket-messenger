@@ -28,7 +28,7 @@ class GetMessagesHandler(
             if chat_history is None:
                 raise exceptions.ChatNotFound(request.chat_id)
 
-            if request.account not in chat_history.participants:
+            if not chat_history.is_participant(request.account):
                 raise exceptions.ParticipantNotInChat(
                     request.account,
                     chat_history.chat_id,

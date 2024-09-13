@@ -16,3 +16,10 @@ MessageBody = functools.partial(
     fastapi.Body,
     **_MessageValidationParams,
 )
+AccountId = functools.partial(
+    fastapi.Header,
+    default=None,
+    description="Target account ID",
+    alias="AccountID",
+    example="account-id",
+)

@@ -58,7 +58,10 @@ class Chat(pydantic.BaseModel):
         logger.debug(f"Message {message.message_id} added to chat {self.chat_id}")
 
         self.event_list.append(
-            events.NewMessageAdded(chat_id=self.chat_id, message_id=message.message_id),
+            events.NewMessageAdded(
+                chat_id=self.chat_id,
+                message_id=message.message_id,
+            ),
         )
 
     def add_participant(self, account_id: typing.Text) -> None:
@@ -73,8 +76,17 @@ class Chat(pydantic.BaseModel):
         logger.debug(f"Account {account_id} added to chat {self.chat_id}")
 
         self.event_list.append(
-            events.NewParticipantAdded(chat_id=self.chat_id, account_id=account_id),
+            events.NewParticipantAdded(
+                chat_id=self.chat_id,
+                account_id=account_id,
+            ),
         )
+
+    def is_participant(self, account_id: typing.Text) -> bool:
+        """
+        Checks if account is participant
+        """
+        return account_id in self.participants
 
     def get_events(self) -> typing.List[cqrs.DomainEvent]:
         """

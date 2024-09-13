@@ -3,15 +3,6 @@ import typing
 import uuid
 
 import cqrs
-import pydantic
-
-from domain import messages
-
-
-class Attachment(pydantic.BaseModel, frozen=True):
-    url: pydantic.AnyUrl
-    name: typing.Optional[typing.Text]
-    content_type: messages.AttachmentType
 
 
 class SendMessage(cqrs.Request):
@@ -21,7 +12,7 @@ class SendMessage(cqrs.Request):
     reply_to: typing.Optional[uuid.UUID] = None
 
     content: typing.Text
-    attachments: typing.List[Attachment]
+    attachments: typing.List[uuid.UUID]
 
 
 class MessageSent(cqrs.Response):

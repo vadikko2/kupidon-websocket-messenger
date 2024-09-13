@@ -20,6 +20,7 @@ log_config = fastapi_logging.generate_log_config(
 config.dictConfig(log_config)
 logging.getLogger("asyncio").setLevel(logging.ERROR)
 logging.getLogger("urllib3").setLevel(logging.ERROR)
+logging.getLogger("multipart").setLevel(logging.ERROR)
 
 app = fastapi_app.create(
     debug=app_settings.DEBUG,
@@ -28,9 +29,7 @@ app = fastapi_app.create(
     description="Messanger API",
     env_title=app_settings.ENV,
     query_routers=[
-        routes.chats.router,
-        routes.messages.router,
-        routes.subscription.router,
+        routes.v1_router,
         routes.service.router,
     ],
     exception_handlers=[
