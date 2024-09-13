@@ -6,7 +6,7 @@ from fastapi import status
 import settings
 
 router = fastapi.APIRouter(
-    tags=["Служебные методы"],
+    tags=["Service methods"],
 )
 
 

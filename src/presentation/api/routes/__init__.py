@@ -1,9 +1,7 @@
-from presentation.api.routes.v1 import chats, subscription, messages
 from presentation.api.routes import service
+from presentation.api.routes.v1 import v1_router
 
 __all__ = [
-    "subscription",
-    "messages",
-    "chats",
+    "v1_router",
     "service",
 ]

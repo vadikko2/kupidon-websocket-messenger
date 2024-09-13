@@ -26,32 +26,46 @@ class SendMessageHandler(
         self,
         request: send_message.SendMessage,
     ) -> send_message.MessageSent:
-        new_message = messages.Message(
-            chat_id=request.chat_id,
-            sender=request.sender,
-            reply_to=request.reply_to,
-            content=request.content,
-            attachments=[
-                messages.Attachment(
-                    url=attachment.url,
-                    name=attachment.name,
-                    content_type=attachment.content_type,
-                )
-                for attachment in request.attachments
-            ],
-        )
-
         async with self.uow:
             chat = await self.uow.chat_repository.get(request.chat_id)
 
             if chat is None:
-                raise exceptions.ChatNotFound(new_message.chat_id)
+                raise exceptions.ChatNotFound(request.chat_id)
 
-            if request.sender not in chat.participants:
+            if not chat.is_participant(request.sender):
                 raise exceptions.ParticipantNotInChat(
                     request.sender,
                     chat.chat_id,
                 )
+
+            attachments = await self.uow.attachment_repository.get_many(
+                *request.attachments,
+            )
+            for attachment in attachments:
+                if attachment.chat_id != request.chat_id:
+                    raise exceptions.AttachmentNotForChat(
+                        attachment.attachment_id,
+                        request.chat_id,
+                    )
+
+            attachment_difference = set(
+                [att.attachment_id for att in attachments],
+            ).difference(request.attachments)
+
+            logger.error(
+                f"Requested and read attachments has difference: {','.join(map(str, attachment_difference))}",
+            )
+
+            if len(attachment_difference):
+                raise exceptions.AttachmentNotFound(attachment_difference.pop())
+
+            new_message = messages.Message(
+                chat_id=request.chat_id,
+                sender=request.sender,
+                reply_to=request.reply_to,
+                content=request.content,
+                attachments=attachments,
+            )
 
             chat.add_message(new_message)
 

@@ -30,6 +30,22 @@ def chat_not_found_handler(
     return models.ErrorResponse(message=str(error))
 
 
+@bind_exception(status.HTTP_404_NOT_FOUND)
+def attachment_not_found_handler(
+    _: requests.Request,
+    error: service_exceptions.AttachmentNotFound,
+) -> models.ErrorResponse:
+    return models.ErrorResponse(message=str(error))
+
+
+@bind_exception(status.HTTP_400_BAD_REQUEST)
+def attachment_not_for_chat_handler(
+    _: requests.Request,
+    error: service_exceptions.AttachmentNotForChat,
+) -> models.ErrorResponse:
+    return models.ErrorResponse(message=str(error))
+
+
 @bind_exception(status.HTTP_403_FORBIDDEN)
 def not_participant_in_chat_handler(
     _: requests.Request,

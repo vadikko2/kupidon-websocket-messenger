@@ -31,12 +31,7 @@ logger = logging.getLogger(__name__)
 )
 async def apply_message_receive(
     message_id: uuid.UUID,
-    account_id: typing.Optional[typing.Text] = fastapi.Header(
-        None,
-        description="Target account ID",
-        alias="UserID",
-        example="account-id",
-    ),
+    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.get_request_mediator,
     ),
@@ -44,12 +39,6 @@ async def apply_message_receive(
     """
     # Apply message as received
     """
-    if account_id is None:
-        raise fastapi.HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="UserID header not provided",
-        )
-
     await mediator.send(
         apply_message_request.ApplyMessage(
             applier=account_id,
@@ -71,12 +60,7 @@ async def apply_message_receive(
 )
 async def apply_message_read(
     message_id: uuid.UUID,
-    account_id: typing.Optional[typing.Text] = fastapi.Header(
-        None,
-        description="Target account ID",
-        alias="UserID",
-        example="account-id",
-    ),
+    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.get_request_mediator,
     ),
@@ -84,12 +68,6 @@ async def apply_message_read(
     """
     # Apply message as read
     """
-    if account_id is None:
-        raise fastapi.HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="UserID header not provided",
-        )
-
     await mediator.send(
         apply_message_request.ApplyMessage(
             applier=account_id,
@@ -112,12 +90,7 @@ async def apply_message_read(
 async def delete_message(
     chat_id: uuid.UUID,
     message_id: uuid.UUID,
-    account_id: typing.Optional[typing.Text] = fastapi.Header(
-        None,
-        description="Target account ID",
-        alias="UserID",
-        example="account-id",
-    ),
+    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.get_request_mediator,
     ),
@@ -125,12 +98,6 @@ async def delete_message(
     """
     # Apply message as read
     """
-    if account_id is None:
-        raise fastapi.HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="UserID header not provided",
-        )
-
     await mediator.send(
         delete_message_request.DeleteMessage(
             message_id=message_id,

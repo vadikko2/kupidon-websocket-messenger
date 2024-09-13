@@ -33,6 +33,16 @@ class ChatNotFound(Exception):
         super().__init__(f"Chat {chat_id} not found")
 
 
+class AttachmentNotFound(Exception):
+    def __init__(self, attachment_id: uuid.UUID) -> None:
+        super().__init__(f"Attachment {attachment_id} not found")
+
+
+class AttachmentNotForChat(Exception):
+    def __init__(self, attachment_id: uuid.UUID, chat_id: uuid.UUID) -> None:
+        super().__init__(f"Attachment {attachment_id} not for chat {chat_id}")
+
+
 class StartSubscriptionError(Exception):
     def __init__(self, account_id: typing.Text, exception: Exception) -> None:
         super().__init__(

@@ -4,13 +4,15 @@ import uuid
 import cqrs
 import pydantic
 
-from domain import chats, messages
+from domain import attachments, chats, messages
 from infrastructure.database.persistent.repositories import (
+    attachment_repository,
     chat_repository,
     message_repository,
 )
 
 _GLOBAL_CHATS_STORAGE: typing.Dict[uuid.UUID, chats.Chat] = dict()
+_GLOBAL_ATTACHMENT_STORAGE: typing.Dict[uuid.UUID, attachments.Attachment] = dict()
 
 
 class MockMessageRepository(message_repository.MessageRepository):
@@ -111,3 +113,40 @@ class MockChatRepository(chat_repository.ChatRepository):
         for message in self._seen_chats:
             events += message.get_events()
         return events
+
+
+class MockAttachmentRepository(attachment_repository.AttachmentRepository):
+    async def add(self, attachment: attachments.Attachment) -> None:
+        _GLOBAL_ATTACHMENT_STORAGE[attachment.attachment_id] = attachment
+
+    async def get(self, attachment_id: uuid.UUID) -> attachments.Attachment | None:
+        return _GLOBAL_ATTACHMENT_STORAGE.get(attachment_id)
+
+    async def get_many(
+        self,
+        *attachment_ids: uuid.UUID,
+    ) -> typing.List[attachments.Attachment]:
+        return [
+            _GLOBAL_ATTACHMENT_STORAGE[attachment_id]
+            for attachment_id in attachment_ids
+            if attachment_id in _GLOBAL_ATTACHMENT_STORAGE
+        ]
+
+    async def get_all(
+        self,
+        chat_id: uuid.UUID,
+        limit: int,
+        offset: int,
+    ) -> typing.List[attachments.Attachment]:
+        attachments_in_chat = [
+            attachment
+            for attachment in _GLOBAL_ATTACHMENT_STORAGE.values()
+            if attachment.chat_id == chat_id
+        ]
+        return list(
+            sorted(
+                attachments_in_chat,
+                key=lambda attachment: attachment.uploaded,
+                reverse=True,
+            ),
+        )[offset : offset + limit]
