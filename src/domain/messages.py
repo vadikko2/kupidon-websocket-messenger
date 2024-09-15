@@ -98,7 +98,11 @@ class Message(pydantic.BaseModel):
         self.updated = datetime.datetime.now()
         logger.debug(f"Message {self.message_id} deleted")
         self.event_list.append(
-            events.MessageDeleted(chat_id=self.chat_id, message_id=self.message_id),
+            events.MessageDeleted(
+                chat_id=self.chat_id,
+                message_id=self.message_id,
+                message_sender=self.sender,
+            ),
         )
 
     def _get_reactions_per_reactor(self, reactor: typing.Text) -> int:

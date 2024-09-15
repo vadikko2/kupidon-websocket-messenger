@@ -30,6 +30,7 @@ class MessageReceived(cqrs.DomainEvent, frozen=True):
 class MessageDeleted(cqrs.DomainEvent, frozen=True):
     chat_id: uuid.UUID
     message_id: uuid.UUID
+    message_sender: typing.Text
 
 
 class NewAttachmentUploaded(cqrs.DomainEvent, frozen=True):

@@ -7,12 +7,14 @@ from service.handlers import (
     get_attachments as get_attachments_handler,
     get_chats as get_chats_handler,
     get_messages as get_messages_handler,
-    new_message_added as new_message_added_handler,
     message_reacted as message_reacted_handler,
+    message_unreacted as message_unreacted_handler,
+    new_message_added as new_message_added_handler,
     open_chat as open_chat_handler,
     react_message as react_message_handler,
-    unreact_message as unreact_message_handler,
     send_message as send_message_handler,
+    unreact_message as unreact_message_handler,
+    message_deleted as message_deleted_handler,
 )
 from service.requests import (
     apply_message as apply_message_request,
@@ -22,8 +24,8 @@ from service.requests import (
     get_messages as get_messages_request,
     open_chat as open_chat_request,
     react_message as react_message_request,
-    unreact_message as unreact_message_request,
     send_message as send_message_request,
+    unreact_message as unreact_message_request,
 )
 
 
@@ -68,4 +70,12 @@ def init_events(mapper: events.EventMap) -> None:
     mapper.bind(
         domain_events.MessageReacted,
         message_reacted_handler.MessageReactedHandler,
+    )
+    mapper.bind(
+        domain_events.MessageUnreacted,
+        message_unreacted_handler.MessageUnreactedHandler,
+    )
+    mapper.bind(
+        domain_events.MessageDeleted,
+        message_deleted_handler.MessageDeletedHandler,
     )
