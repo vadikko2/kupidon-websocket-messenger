@@ -33,7 +33,7 @@ async def react(
     ),
 ) -> fastapi.Response:
     """
-    # Add reaction
+    # Adds reaction
     """
     await mediator.send(
         react_message.ReactMessage(
@@ -62,7 +62,7 @@ async def unreact(
     ),
 ) -> fastapi.Response:
     """
-    # Remove reaction
+    # Removes reaction
     """
     await mediator.send(
         unreact_message.UnreactMessage(

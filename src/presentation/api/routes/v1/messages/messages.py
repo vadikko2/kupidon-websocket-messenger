@@ -95,7 +95,7 @@ async def delete_message(
     ),
 ) -> fastapi.Response:
     """
-    # Apply message as read
+    # Deletes message
     """
     await mediator.send(
         delete_message_request.DeleteMessage(
