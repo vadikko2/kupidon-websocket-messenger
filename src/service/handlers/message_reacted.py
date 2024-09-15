@@ -1,7 +1,7 @@
 import cqrs
 import orjson
 
-from domain import events
+from domain import events, messages
 from infrastructure.brokers import protocol as broker_protocol
 from service import events as notification_events, exceptions, unit_of_work
 
@@ -15,7 +15,7 @@ class MessageReactedHandler(cqrs.EventHandler[events.MessageReacted]):
         async with self.uow:
             message = await self.uow.message_repository.get(event.message_id)
 
-            if message is None:
+            if message is None or message.status == messages.MessageStatus.DELETED:
                 raise exceptions.MessageNotFound(event.message_id)
 
             await self.broker.send_message(

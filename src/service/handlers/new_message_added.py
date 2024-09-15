@@ -5,7 +5,7 @@ import typing
 import cqrs
 import orjson
 
-from domain import events as domain_events
+from domain import events as domain_events, messages
 from infrastructure.brokers import protocol as broker_protocol
 from service import events as notification_events, exceptions, unit_of_work
 
@@ -33,7 +33,7 @@ class NewMessageAddedHandler(cqrs.EventHandler[domain_events.NewMessageAdded]):
         async with self.uow:
             message = await self.uow.message_repository.get(event.message_id)
 
-            if message is None:
+            if message is None or message.status == messages.MessageStatus.DELETED:
                 raise exceptions.MessageNotFound(event.message_id)
 
             chat = await self.uow.chat_repository.get(event.chat_id)

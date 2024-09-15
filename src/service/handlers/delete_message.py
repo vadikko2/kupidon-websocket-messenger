@@ -21,7 +21,7 @@ class DeleteMessageHandler(cqrs.RequestHandler[delete_message.DeleteMessage, Non
     async def handle(self, request: delete_message.DeleteMessage) -> None:
         async with self.uow:
             message = await self.uow.message_repository.get(request.message_id)
-            if message is None:
+            if message is None or message.status == messages.MessageStatus.DELETED:
                 raise exceptions.MessageNotFound(request.message_id)
 
             if message.chat_id != request.chat_id:

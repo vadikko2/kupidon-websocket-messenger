@@ -27,8 +27,6 @@ class MockMessageRepository(message_repository.MessageRepository):
         for chat in _GLOBAL_CHATS_STORAGE.values():
             for message in chat.history:
                 if message.message_id == message_id:
-                    if message.status == messages.MessageStatus.DELETED:
-                        return
                     self._seen_messages.add(message)
                     return message
 

@@ -20,7 +20,7 @@ class ApplyMessageHandler(
         async with self.uow:
             message = await self.uow.message_repository.get(request.message_id)
 
-            if message is None:
+            if message is None or message.status == messages.MessageStatus.DELETED:
                 raise exceptions.MessageNotFound(request.message_id)
 
             chat = await self.uow.chat_repository.get(message.chat_id)

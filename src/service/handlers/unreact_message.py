@@ -3,6 +3,7 @@ import typing
 import cqrs
 from cqrs.events import event
 
+from domain import messages
 from service import exceptions, unit_of_work
 from service.requests import unreact_message
 
@@ -20,7 +21,7 @@ class UnreactMessageHandler(cqrs.RequestHandler[unreact_message.UnreactMessage, 
         async with self.uow:
             message = await self.uow.message_repository.get(request.message_id)
 
-            if message is None:
+            if message is None or message.status == messages.MessageStatus.DELETED:
                 raise exceptions.MessageNotFound(request.message_id)
 
             reaction = next(
