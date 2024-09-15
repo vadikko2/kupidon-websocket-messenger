@@ -39,9 +39,7 @@ class GetMessagesHandler(
             for message in chat_history.history:
                 if message.status == messages_entity.MessageStatus.DELETED:
                     continue
-
                 messages.append(message)
-                message.deliver(request.account)
 
         self._events += self.uow.get_events()
         return get_messages.Messages(messages=messages)

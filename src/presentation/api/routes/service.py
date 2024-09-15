@@ -12,5 +12,7 @@ router = fastapi.APIRouter(
 
 @router.get("/", status_code=status.HTTP_200_OK)
 async def get_version() -> typing.Text:
-    """Возвращает версию приложения"""
+    """
+    # Returns service version
+    """
     return settings.VERSION

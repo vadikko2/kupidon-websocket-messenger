@@ -35,10 +35,10 @@ async def upload_attachment(
     attachment: fastapi.UploadFile = fastapi.File(...),
     content_type: attachment_entities.AttachmentType = fastapi.Body(...),
     upload_attachment_handler: upload_attachment_service.UploadAttachmentService = fastapi.Depends(
-        dependency=dependencies.get_upload_attachment_service,
+        dependency=dependencies.upload_attachment_service_factory,
     ),
     emitter: cqrs.EventEmitter = fastapi.Depends(
-        dependency=dependencies.get_event_emitter,
+        dependency=dependencies.event_emitter_factory,
     ),
 ) -> response.Response[upload_attachment_request.AttachmentUploaded]:
     """
@@ -72,7 +72,7 @@ async def get_attachments(
     offset: pydantic.NonNegativeInt = fastapi.Query(default=0),
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
-        dependency=dependencies.get_request_mediator,
+        dependency=dependencies.request_mediator_factory,
     ),
 ) -> response.Response[responses.AttachmentsPage]:
     """

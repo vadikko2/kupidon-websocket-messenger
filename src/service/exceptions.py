@@ -43,6 +43,11 @@ class AttachmentNotForChat(Exception):
         super().__init__(f"Attachment {attachment_id} not for chat {chat_id}")
 
 
+class AttachmentNotForSender(Exception):
+    def __init__(self, attachment_id: uuid.UUID, account_id: typing.Text) -> None:
+        super().__init__(f"Attachment {attachment_id} not for account {account_id}")
+
+
 class StartSubscriptionError(Exception):
     def __init__(self, account_id: typing.Text, exception: Exception) -> None:
         super().__init__(
@@ -53,3 +58,13 @@ class StartSubscriptionError(Exception):
 class SubscriptionNotStarted(Exception):
     def __init__(self) -> None:
         super().__init__("Subscription not started")
+
+
+class ReactionNotFound(Exception):
+    def __init__(self, reaction_id: uuid.UUID) -> None:
+        super().__init__(f"Reaction {reaction_id} not found")
+
+
+class MessageNotDeleted(Exception):
+    def __init__(self, message_id: uuid.UUID) -> None:
+        super().__init__(f"Message {message_id} not deleted")

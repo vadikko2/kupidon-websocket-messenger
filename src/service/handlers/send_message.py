@@ -27,17 +27,20 @@ class SendMessageHandler(
         request: send_message.SendMessage,
     ) -> send_message.MessageSent:
         async with self.uow:
+            # Check chat
             chat = await self.uow.chat_repository.get(request.chat_id)
 
             if chat is None:
                 raise exceptions.ChatNotFound(request.chat_id)
 
+            # Check participants
             if not chat.is_participant(request.sender):
                 raise exceptions.ParticipantNotInChat(
                     request.sender,
                     chat.chat_id,
                 )
 
+            # Check attachments
             attachments = await self.uow.attachment_repository.get_many(
                 *request.attachments,
             )
@@ -47,18 +50,20 @@ class SendMessageHandler(
                         attachment.attachment_id,
                         request.chat_id,
                     )
+                if attachment.uploader != request.sender:
+                    raise exceptions.AttachmentNotForSender(
+                        attachment.attachment_id,
+                        request.sender,
+                    )
 
-            attachment_difference = set(
+            difference = set(request.attachments) - set(
                 [att.attachment_id for att in attachments],
-            ).difference(request.attachments)
-
-            logger.error(
-                f"Requested and read attachments has difference: {','.join(map(str, attachment_difference))}",
             )
 
-            if len(attachment_difference):
-                raise exceptions.AttachmentNotFound(attachment_difference.pop())
+            if difference:
+                raise exceptions.AttachmentNotFound(next(iter(difference)))
 
+            # Create message
             new_message = messages.Message(
                 chat_id=request.chat_id,
                 sender=request.sender,
