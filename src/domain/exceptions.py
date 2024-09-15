@@ -10,3 +10,15 @@ class AlreadyChatParticipant(Exception):
 class DuplicateMessage(Exception):
     def __init__(self, message_id: uuid.UUID, chat_id: uuid.UUID) -> None:
         super().__init__(f"Message {message_id} in chat {chat_id} already exists")
+
+
+class TooManyReactions(Exception):
+    def __init__(
+        self,
+        reactor: typing.Text,
+        reaction_id: uuid.UUID,
+        message_id: uuid.UUID,
+    ) -> None:
+        super().__init__(
+            f"Too many reactions on message {message_id} to react by {reactor} with reaction {reaction_id}",
+        )

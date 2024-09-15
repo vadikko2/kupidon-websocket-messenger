@@ -22,7 +22,7 @@ class RedisMessageBroker(protocol.MessageBroker):
         self.pubsub = self.connect.pubsub()
 
     async def send_message(self, channel_name: typing.Text, message: bytes) -> None:
-        logger.debug(f"Sending new message {channel_name}")
+        logger.debug(f"Sending new message {message} to {channel_name}")
         await self.connect.publish(channel_name, message)
 
     async def get_message(self) -> bytes | None:

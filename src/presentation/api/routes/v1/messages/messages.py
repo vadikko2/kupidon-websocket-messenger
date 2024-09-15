@@ -15,13 +15,13 @@ from service.requests import (
     delete_message as delete_message_request,
 )
 
-router = fastapi.APIRouter(prefix="/messages", tags=["Messages"])
+router = fastapi.APIRouter(prefix="", tags=["Messages"])
 
 logger = logging.getLogger(__name__)
 
 
 @router.put(
-    "/{message_id}/receive",
+    "/receive",
     status_code=status.HTTP_204_NO_CONTENT,
     responses=registry.get_exception_responses(
         exceptions.ChatNotFound,
@@ -33,7 +33,7 @@ async def apply_message_receive(
     message_id: uuid.UUID,
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
-        dependency=dependencies.get_request_mediator,
+        dependency=dependencies.request_mediator_factory,
     ),
 ) -> fastapi.Response:
     """
@@ -50,7 +50,7 @@ async def apply_message_receive(
 
 
 @router.put(
-    "/{message_id}/read",
+    "/read",
     status_code=status.HTTP_204_NO_CONTENT,
     responses=registry.get_exception_responses(
         exceptions.ChatNotFound,
@@ -62,7 +62,7 @@ async def apply_message_read(
     message_id: uuid.UUID,
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
-        dependency=dependencies.get_request_mediator,
+        dependency=dependencies.request_mediator_factory,
     ),
 ) -> fastapi.Response:
     """
@@ -79,7 +79,7 @@ async def apply_message_read(
 
 
 @router.delete(
-    "/{message_id}",
+    "",
     status_code=status.HTTP_204_NO_CONTENT,
     responses=registry.get_exception_responses(
         exceptions.ChatNotFound,
@@ -92,7 +92,7 @@ async def delete_message(
     message_id: uuid.UUID,
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
-        dependency=dependencies.get_request_mediator,
+        dependency=dependencies.request_mediator_factory,
     ),
 ) -> fastapi.Response:
     """

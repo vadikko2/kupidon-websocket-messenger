@@ -28,7 +28,7 @@ async def open_chat(
     name: typing.Optional[typing.Text] = fastapi.Body(None, examples=["Chat name"]),
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
-        dependency=dependencies.get_request_mediator,
+        dependency=dependencies.request_mediator_factory,
     ),
 ) -> response.Response[responses.ChatCreated]:
     """
@@ -50,7 +50,7 @@ async def get_chats(
     offset: pydantic.NonNegativeInt = fastapi.Query(default=0),
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
-        dependency=dependencies.get_request_mediator,
+        dependency=dependencies.request_mediator_factory,
     ),
 ) -> response.Response[responses.ChatList]:
     """

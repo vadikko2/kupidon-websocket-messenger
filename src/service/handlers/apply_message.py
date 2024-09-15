@@ -5,7 +5,7 @@ from service import exceptions, unit_of_work
 from service.requests import apply_message
 
 
-class ApplyMessageReadHandler(
+class ApplyMessageHandler(
     cqrs.RequestHandler[apply_message.ApplyMessage, None],
 ):
     def __init__(self, uow: unit_of_work.UoW):

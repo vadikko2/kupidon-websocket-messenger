@@ -7,9 +7,17 @@ import uuid
 import cqrs
 import pydantic
 
-from domain import attachments as attachment_entities, events
+from domain import (
+    attachments as attachment_entities,
+    events,
+    exceptions,
+    reactions as reaction_entities,
+)
 
 logger = logging.getLogger(__name__)
+
+TOTAL_EMOJI_NUMBER = 12
+EMOJI_PER_REACTOR = 3
 
 
 class MessageStatus(enum.IntEnum):
@@ -28,8 +36,8 @@ class Message(pydantic.BaseModel):
     Message entity
     """
 
-    message_id: uuid.UUID = pydantic.Field(default_factory=uuid.uuid4, frozen=True)
     chat_id: uuid.UUID = pydantic.Field(frozen=True)
+    message_id: uuid.UUID = pydantic.Field(default_factory=uuid.uuid4, frozen=True)
 
     sender: typing.Text = pydantic.Field(frozen=True)
 
@@ -40,6 +48,10 @@ class Message(pydantic.BaseModel):
         default_factory=list,
         max_length=5,
         frozen=True,
+    )
+    reactions: typing.List[reaction_entities.Reaction] = pydantic.Field(
+        default_factory=list,
+        max_length=TOTAL_EMOJI_NUMBER,
     )
     status: MessageStatus = pydantic.Field(default=MessageStatus.SENT)
 
@@ -52,16 +64,6 @@ class Message(pydantic.BaseModel):
     )
 
     event_list: typing.List[cqrs.DomainEvent] = pydantic.Field(default_factory=list)
-
-    def deliver(self, receiver: typing.Text) -> None:
-        logger.debug(f"Message {self.message_id} delivered to {receiver}")
-        self.event_list.append(
-            events.MessageDelivered(
-                chat_id=self.chat_id,
-                message_id=self.message_id,
-                receiver_id=receiver,
-            ),
-        )
 
     def receive(self, receiver: typing.Text) -> None:
         self.status = MessageStatus.RECEIVED
@@ -88,11 +90,63 @@ class Message(pydantic.BaseModel):
         )
 
     def delete(self) -> None:
+        if self.status == MessageStatus.DELETED:
+            logger.debug(f"Message {self.message_id} already deleted")
+            return
+
         self.status = MessageStatus.DELETED
         self.updated = datetime.datetime.now()
         logger.debug(f"Message {self.message_id} deleted")
         self.event_list.append(
             events.MessageDeleted(chat_id=self.chat_id, message_id=self.message_id),
+        )
+
+    def _get_reactions_per_reactor(self, reactor: typing.Text) -> int:
+        """
+        Returns number of reactions per reactor
+        """
+        return len(
+            [reaction for reaction in self.reactions if reaction.reactor == reactor],
+        )
+
+    def react(self, reaction: reaction_entities.Reaction) -> None:
+        """
+        Reacts to message
+        """
+        if len(self.reactions) == TOTAL_EMOJI_NUMBER:
+            raise exceptions.TooManyReactions(
+                reactor=reaction.reactor,
+                reaction_id=reaction.reaction_id,
+                message_id=self.message_id,
+            )
+
+        if self._get_reactions_per_reactor(reaction.reactor) == EMOJI_PER_REACTOR:
+            raise exceptions.TooManyReactions(
+                reactor=reaction.reactor,
+                reaction_id=reaction.reaction_id,
+                message_id=self.message_id,
+            )
+
+        self.reactions.append(reaction)
+        logger.debug(
+            f"Message {self.message_id} reacted by {reaction.reactor} with {reaction.emoji}",
+        )
+        self.event_list.append(
+            events.NewReactionAdded(
+                reaction_id=reaction.reaction_id,
+                reactor=reaction.reactor,
+                message_id=self.message_id,
+                emoji=reaction.emoji,
+            ),
+        )
+
+    def unreact(self, reaction: reaction_entities.Reaction) -> None:
+        """
+        Unreacts from message
+        """
+        self.reactions.remove(reaction)
+        logger.debug(
+            f"Message {self.message_id} unreacted by {reaction.reactor} with {reaction.emoji}",
         )
 
     def get_events(self) -> typing.List[cqrs.DomainEvent]:

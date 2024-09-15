@@ -43,6 +43,11 @@ class AttachmentNotForChat(Exception):
         super().__init__(f"Attachment {attachment_id} not for chat {chat_id}")
 
 
+class AttachmentNotForSender(Exception):
+    def __init__(self, attachment_id: uuid.UUID, account_id: typing.Text) -> None:
+        super().__init__(f"Attachment {attachment_id} not for account {account_id}")
+
+
 class StartSubscriptionError(Exception):
     def __init__(self, account_id: typing.Text, exception: Exception) -> None:
         super().__init__(

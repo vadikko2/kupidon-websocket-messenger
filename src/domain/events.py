@@ -32,12 +32,13 @@ class MessageDeleted(cqrs.DomainEvent, frozen=True):
     message_id: uuid.UUID
 
 
-class MessageDelivered(cqrs.DomainEvent, frozen=True):
-    chat_id: uuid.UUID
-    message_id: uuid.UUID
-    receiver_id: typing.Text
-
-
 class NewAttachmentUploaded(cqrs.DomainEvent, frozen=True):
     attachment_id: uuid.UUID
     url: pydantic.AnyHttpUrl
+
+
+class NewReactionAdded(cqrs.DomainEvent, frozen=True):
+    reaction_id: uuid.UUID
+    reactor: typing.Text
+    message_id: uuid.UUID
+    emoji: typing.Text

@@ -28,6 +28,7 @@ router = fastapi.APIRouter(prefix="/{chat_id}/messages")
         exceptions.ChatNotFound,
         exceptions.AttachmentNotFound,
         exceptions.AttachmentNotForChat,
+        exceptions.AttachmentNotForSender,
         exceptions.ParticipantNotInChat,
     ),
 )
@@ -39,9 +40,10 @@ async def send_message(
     attachments: typing.List[uuid.UUID] = fastapi.Body(
         default_factory=list,
         max_length=5,
+        examples=[[]],
     ),
     mediator: cqrs.RequestMediator = fastapi.Depends(
-        dependency=dependencies.get_request_mediator,
+        dependency=dependencies.request_mediator_factory,
     ),
 ) -> response.Response[responses.MessageSent]:
     """
@@ -80,7 +82,7 @@ async def get_messages(
     latest_message_id: uuid.UUID | None = fastapi.Query(default=None),
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
-        dependency=dependencies.get_request_mediator,
+        dependency=dependencies.request_mediator_factory,
     ),
 ) -> response.Response[responses.MessagesPage]:
     """

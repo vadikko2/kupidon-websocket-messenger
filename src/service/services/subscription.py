@@ -1,12 +1,15 @@
 import contextlib
+import logging
 import typing
 
 import cqrs
-import orjson
 
-from domain import messages
 from infrastructure.brokers import protocol as broker_protocol
-from service import exceptions, unit_of_work
+from service import exceptions
+
+logger = logging.getLogger(__name__)
+
+_E: typing.TypeAlias = cqrs.ECSTEvent | cqrs.NotificationEvent
 
 
 class SubscriptionService:
@@ -17,10 +20,8 @@ class SubscriptionService:
     def __init__(
         self,
         broker: broker_protocol.MessageBroker,
-        uow: unit_of_work.UoW,
     ) -> None:
         self.broker = broker
-        self.uow = uow
         self.subscription_started = False
         self.target_account: typing.Text | None = None
 
@@ -42,25 +43,16 @@ class SubscriptionService:
             self.subscription_started = False
             self.target_account = None
 
-    async def wait_message(self) -> messages.Message | None:
+    async def wait_events(self) -> bytes | None:
         """
-        Returns new messages from broker in real-time mode for the specified account.
+        Returns new events from broker in real-time mode for the specified account.
         """
         if not self.subscription_started or not self.target_account:
             raise exceptions.SubscriptionNotStarted()
 
-        message_bytes = await self.broker.get_message()
-        if message_bytes is None:
+        event_bytes = await self.broker.get_message()
+        if event_bytes is None:
             return None
 
-        message = messages.Message.model_validate(orjson.loads(message_bytes))
-        message.deliver(self.target_account)
-
-        async with self.uow:
-            await self.uow.message_repository.update(message)
-            await self.uow.message_repository.commit()
-
-        return message
-
-    def events(self) -> typing.List[cqrs.DomainEvent]:
-        return self.uow.get_events()
+        logger.debug(f"Got event from broker: {event_bytes}")
+        return event_bytes
