@@ -11,6 +11,7 @@ from domain import messages
 from presentation import dependencies
 from service import exceptions
 from service.requests import (
+    delete_message as delete_message_request,
     apply_message as apply_message_request,
 )
 
@@ -72,6 +73,34 @@ async def apply_message_read(
             applier=account_id,
             message_id=message_id,
             status=messages.MessageStatus.READ,
+        ),
+    )
+    return fastapi.Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.delete(
+    "",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses=registry.get_exception_responses(
+        exceptions.ChatNotFound,
+        exceptions.MessageNotFound,
+        exceptions.ChangeStatusAccessDonated,
+    ),
+)
+async def delete_message(
+    message_id: uuid.UUID,
+    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    mediator: cqrs.RequestMediator = fastapi.Depends(
+        dependency=dependencies.request_mediator_factory,
+    ),
+) -> fastapi.Response:
+    """
+    # Apply message as read
+    """
+    await mediator.send(
+        delete_message_request.DeleteMessage(
+            message_id=message_id,
+            deleter=account_id,
         ),
     )
     return fastapi.Response(status_code=status.HTTP_204_NO_CONTENT)

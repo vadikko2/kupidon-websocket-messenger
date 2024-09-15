@@ -39,14 +39,6 @@ def chat_not_found_handler(
     return models.ErrorResponse(message=str(error))
 
 
-@bind_exception(status.HTTP_400_BAD_REQUEST)
-def message_not_for_chat_handler(
-    _: requests.Request,
-    error: service_exceptions.MessageNotForChat,
-) -> models.ErrorResponse:
-    return models.ErrorResponse(message=str(error))
-
-
 @bind_exception(status.HTTP_404_NOT_FOUND)
 def attachment_not_found_handler(
     _: requests.Request,

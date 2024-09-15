@@ -33,11 +33,6 @@ class ChatNotFound(Exception):
         super().__init__(f"Chat {chat_id} not found")
 
 
-class MessageNotForChat(Exception):
-    def __init__(self, message_id: uuid.UUID, chat_id: uuid.UUID) -> None:
-        super().__init__(f"Message {message_id} not for chat {chat_id}")
-
-
 class AttachmentNotFound(Exception):
     def __init__(self, attachment_id: uuid.UUID) -> None:
         super().__init__(f"Attachment {attachment_id} not found")
