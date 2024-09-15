@@ -37,8 +37,13 @@ class NewAttachmentUploaded(cqrs.DomainEvent, frozen=True):
     url: pydantic.AnyHttpUrl
 
 
-class NewReactionAdded(cqrs.DomainEvent, frozen=True):
+class MessageReacted(cqrs.DomainEvent, frozen=True):
     reaction_id: uuid.UUID
     reactor: typing.Text
     message_id: uuid.UUID
     emoji: typing.Text
+
+
+class MessageUnreacted(cqrs.DomainEvent, frozen=True):
+    reaction_id: uuid.UUID
+    message_id: uuid.UUID

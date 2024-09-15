@@ -132,7 +132,7 @@ class Message(pydantic.BaseModel):
             f"Message {self.message_id} reacted by {reaction.reactor} with {reaction.emoji}",
         )
         self.event_list.append(
-            events.NewReactionAdded(
+            events.MessageReacted(
                 reaction_id=reaction.reaction_id,
                 reactor=reaction.reactor,
                 message_id=self.message_id,
@@ -147,6 +147,12 @@ class Message(pydantic.BaseModel):
         self.reactions.remove(reaction)
         logger.debug(
             f"Message {self.message_id} unreacted by {reaction.reactor} with {reaction.emoji}",
+        )
+        self.event_list.append(
+            events.MessageUnreacted(
+                reaction_id=reaction.reaction_id,
+                message_id=self.message_id,
+            ),
         )
 
     def get_events(self) -> typing.List[cqrs.DomainEvent]:

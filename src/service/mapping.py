@@ -8,9 +8,10 @@ from service.handlers import (
     get_chats as get_chats_handler,
     get_messages as get_messages_handler,
     new_message_added as new_message_added_handler,
-    new_reaction_added as new_reaction_added_handler,
+    message_reacted as message_reacted_handler,
     open_chat as open_chat_handler,
     react_message as react_message_handler,
+    unreact_message as unreact_message_handler,
     send_message as send_message_handler,
 )
 from service.requests import (
@@ -21,6 +22,7 @@ from service.requests import (
     get_messages as get_messages_request,
     open_chat as open_chat_request,
     react_message as react_message_request,
+    unreact_message as unreact_message_request,
     send_message as send_message_request,
 )
 
@@ -52,6 +54,10 @@ def init_requests(mapper: requests.RequestMap) -> None:
         react_message_request.ReactMessage,
         react_message_handler.ReactMessageHandler,
     )
+    mapper.bind(
+        unreact_message_request.UnreactMessage,
+        unreact_message_handler.UnreactMessageHandler,
+    )
 
 
 def init_events(mapper: events.EventMap) -> None:
@@ -60,6 +66,6 @@ def init_events(mapper: events.EventMap) -> None:
         new_message_added_handler.NewMessageAddedHandler,
     )
     mapper.bind(
-        domain_events.NewReactionAdded,
-        new_reaction_added_handler.NewReactionAddedHandler,
+        domain_events.MessageReacted,
+        message_reacted_handler.MessageReactedHandler,
     )

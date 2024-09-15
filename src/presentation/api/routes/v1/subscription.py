@@ -3,7 +3,6 @@ import logging
 import typing
 
 import fastapi
-import orjson
 from fastapi import status
 
 from presentation import dependencies
@@ -39,7 +38,7 @@ async def websocket_endpoint(
                         await asyncio.sleep(0.05)
                         continue
                     logger.debug(f"{account_id} got message {message}")
-                    await websocket.send_json(orjson.loads(message))
+                    await websocket.send_bytes(message)
                 except (fastapi.WebSocketDisconnect, fastapi.WebSocketException):
                     logger.debug(f"Websocket disconnected from {account_id}")
                     return

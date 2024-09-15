@@ -2,14 +2,10 @@ import contextlib
 import logging
 import typing
 
-import cqrs
-
 from infrastructure.brokers import protocol as broker_protocol
 from service import exceptions
 
 logger = logging.getLogger(__name__)
-
-_E: typing.TypeAlias = cqrs.ECSTEvent | cqrs.NotificationEvent
 
 
 class SubscriptionService:

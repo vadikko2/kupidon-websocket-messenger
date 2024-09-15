@@ -17,16 +17,26 @@ class MessageAddedPayload(pydantic.BaseModel):
     created: datetime.datetime
 
 
-class NewMessageAdded(cqrs.ECSTEvent[MessageAddedPayload], frozen=True):
+class NewMessageAddedECST(cqrs.ECSTEvent[MessageAddedPayload], frozen=True):
     pass
 
 
-class ReactionAddedPayload(pydantic.BaseModel):
+class MessageReactedPayload(pydantic.BaseModel):
     chat_id: uuid.UUID
     message_id: uuid.UUID
     reactor: typing.Text
     emoji: typing.Text
 
 
-class NewReactionAdded(cqrs.ECSTEvent[ReactionAddedPayload], frozen=True):
+class MessageReactedECST(cqrs.ECSTEvent[MessageReactedPayload], frozen=True):
+    pass
+
+
+class MessageUnreactedPayload(pydantic.BaseModel):
+    chat_id: uuid.UUID
+    message_id: uuid.UUID
+    reaction_id: uuid.UUID
+
+
+class MessageUnreactedECST(cqrs.ECSTEvent[MessageUnreactedPayload], frozen=True):
     pass

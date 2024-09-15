@@ -58,3 +58,8 @@ class StartSubscriptionError(Exception):
 class SubscriptionNotStarted(Exception):
     def __init__(self) -> None:
         super().__init__("Subscription not started")
+
+
+class ReactionNotFound(Exception):
+    def __init__(self, reaction_id: uuid.UUID) -> None:
+        super().__init__(f"Reaction {reaction_id} not found")

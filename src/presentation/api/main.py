@@ -35,6 +35,7 @@ app = fastapi_app.create(
     exception_handlers=[
         errors.handlers.change_status_access_donated_handler,
         errors.handlers.message_not_found_handler,
+        errors.handlers.reaction_not_found_handler,
         errors.handlers.chat_not_found_handler,
         errors.handlers.attachment_not_found_handler,
         errors.handlers.attachment_not_for_chat_handler,
