@@ -24,6 +24,9 @@ class DeleteMessageHandler(cqrs.RequestHandler[delete_message.DeleteMessage, Non
             if message is None:
                 raise exceptions.MessageNotFound(request.message_id)
 
+            if message.chat_id != request.chat_id:
+                raise exceptions.MessageNotForChat(request.message_id, request.chat_id)
+
             if request.deleter != message.sender:
                 raise exceptions.ChangeStatusAccessDonated(
                     request.deleter,
