@@ -3,6 +3,8 @@ import typing
 
 from domain import attachments
 
+FileName: typing.TypeAlias = typing.Text
+
 
 class AttachmentPreprocessor(typing.Protocol):
     name: typing.Text
@@ -11,7 +13,7 @@ class AttachmentPreprocessor(typing.Protocol):
     def __call__(self, file_object: typing.BinaryIO) -> typing.BinaryIO:
         raise NotImplementedError
 
-    def new_filename(self, file_name: typing.Text) -> typing.Text:
+    def new_filename(self, file_name: FileName) -> FileName:
         raise NotImplementedError
 
 
@@ -36,7 +38,7 @@ class PreprocessingChain:
         self._file_name: typing.Text | None = None
         self._iterator: typing.Iterator[AttachmentPreprocessor] | None = None
 
-    def __next__(self) -> typing.Tuple[typing.Text, typing.BinaryIO]:
+    def __next__(self) -> typing.Tuple[FileName, typing.BinaryIO]:
         if self._file_name is None or self._context is None or self._iterator is None:
             raise ValueError(
                 "Preprocessing chain not initialized. Please call `iterator` method first",
@@ -46,9 +48,7 @@ class PreprocessingChain:
         result = target_processor(file_object=self._context)
         result_data = result.read()
         self._context = io.BytesIO(result_data)
-        return target_processor.new_filename(self._file_name), io.BytesIO(
-            result_data,
-        )
+        return target_processor.new_filename(self._file_name), io.BytesIO(result_data)
 
     def __iter__(self):
         return self
@@ -56,7 +56,7 @@ class PreprocessingChain:
     def iterator(
         self,
         content: typing.BinaryIO,
-        file_name: typing.Text,
+        file_name: FileName,
     ) -> typing.Self:
         self._context = content
         self._file_name = file_name

@@ -81,7 +81,7 @@ async def upload_attachment_service_factory(
     return upload_attachment_service.UploadAttachmentService(
         storage=storage,
         uow=uow,
-        preprocessor_chains=[
+        preprocessing_chains=[
             chain.PreprocessingChain(
                 content_type=attachments.AttachmentType.IMAGE,
                 chain_name="image",

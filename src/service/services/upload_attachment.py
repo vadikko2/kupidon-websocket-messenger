@@ -20,12 +20,12 @@ class UploadAttachmentService:
         self,
         storage: attachment_storage.AttachmentStorage,
         uow: unit_of_work.UoW,
-        preprocessor_chains: typing.List[chain.PreprocessingChain] | None = None,
+        preprocessing_chains: typing.List[chain.PreprocessingChain] | None = None,
     ):
         self.storage = storage
         self.uow = uow
         self._events = []
-        self.preprocessors_chains = preprocessor_chains or []
+        self.preprocessing_chains = preprocessing_chains or []
 
     async def _upload_file_to_storage(
         self,
@@ -75,11 +75,14 @@ class UploadAttachmentService:
             )
 
             # preprocess
-            for processing_chain in self.preprocessors_chains:
-                if not processing_chain.content_type == content_type:
+            for preprocessing_chain in self.preprocessing_chains:
+                if not preprocessing_chain.content_type == content_type:
                     continue
 
-                for processed_filename, processed_content in processing_chain.iterator(
+                for (
+                    processed_filename,
+                    processed_content,
+                ) in preprocessing_chain.iterator(
                     io.BytesIO(content),
                     uploading_file_name,
                 ):
