@@ -48,6 +48,13 @@ class AttachmentNotForSender(Exception):
         super().__init__(f"Attachment {attachment_id} not for account {account_id}")
 
 
+class AttachmentUploadError(Exception):
+    def __init__(self, filename: typing.Text, exception: Exception) -> None:
+        super().__init__(
+            f"Failed to upload attachment {filename}: {exception}",
+        )
+
+
 class StartSubscriptionError(Exception):
     def __init__(self, account_id: typing.Text, exception: Exception) -> None:
         super().__init__(

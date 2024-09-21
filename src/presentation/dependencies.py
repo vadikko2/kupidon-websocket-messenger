@@ -9,8 +9,10 @@ from cqrs.events import bootstrap as event_bootstrap
 from cqrs.requests import bootstrap as request_bootstrap
 from fastapi import status
 
+from domain import attachments
 from infrastructure import dependencies
 from infrastructure.brokers import messages_broker, redis
+from infrastructure.helpers.attachments import preprocessors
 from infrastructure.settings import redis_settings
 from infrastructure.storages import attachment_storage, s3
 from presentation.api.schema import validators
@@ -76,7 +78,21 @@ async def upload_attachment_service_factory(
     ),
     uow: unit_of_work.UoW = fastapi.Depends(uow_factory),
 ) -> upload_attachment_service.UploadAttachmentService:
-    return upload_attachment_service.UploadAttachmentService(storage=storage, uow=uow)
+    return upload_attachment_service.UploadAttachmentService(
+        storage=storage,
+        uow=uow,
+        preprocessor_chains=[
+            upload_attachment_service.PreprocessingChain(
+                content_type=attachments.AttachmentType.IMAGE,
+                chain_name="image",
+                preprocessors=[
+                    preprocessors.JpegTranscodeAttachmentPreprocessor(),
+                    preprocessors.JPEGPreview200x200AttachmentPreprocessor(),
+                    preprocessors.JPEGPreview100x100AttachmentPreprocessor(),
+                ],
+            ),
+        ],
+    )
 
 
 async def get_account_id(
