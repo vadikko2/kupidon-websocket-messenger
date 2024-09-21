@@ -26,7 +26,7 @@ class JpegTranscodeAttachmentPreprocessor:
         jpeg_image_bytes.seek(0)
         return io.BytesIO(jpeg_image_bytes.getvalue())
 
-    def update_file_name(self, file_name: typing.Text) -> typing.Text:
+    def new_filename(self, file_name: typing.Text) -> typing.Text:
         return update_filename_jpeg(file_name)
 
 
@@ -45,7 +45,7 @@ class JPEGPreview100x100AttachmentPreprocessor:
         img_bytes.seek(0)  # Вернуться в начало потока
         return io.BytesIO(img_bytes.getvalue())
 
-    def update_file_name(self, file_name: typing.Text) -> typing.Text:
+    def new_filename(self, file_name: typing.Text) -> typing.Text:
         return f"{self.name}/{update_filename_jpeg(file_name)}"
 
 

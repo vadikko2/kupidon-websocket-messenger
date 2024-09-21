@@ -11,7 +11,7 @@ class AttachmentPreprocessor(typing.Protocol):
     def __call__(self, file_object: typing.BinaryIO) -> typing.BinaryIO:
         raise NotImplementedError
 
-    def update_file_name(self, file_name: typing.Text) -> typing.Text:
+    def new_filename(self, file_name: typing.Text) -> typing.Text:
         raise NotImplementedError
 
 
@@ -46,7 +46,7 @@ class PreprocessingChain:
         result = target_processor(file_object=self._context)
         result_data = result.read()
         self._context = io.BytesIO(result_data)
-        return target_processor.update_file_name(self._file_name), io.BytesIO(
+        return target_processor.new_filename(self._file_name), io.BytesIO(
             result_data,
         )
 
