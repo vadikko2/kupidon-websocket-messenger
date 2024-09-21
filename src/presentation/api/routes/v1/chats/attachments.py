@@ -54,7 +54,7 @@ async def upload_attachment(
     result = await upload_attachment_handler.handle(
         chat_id=chat_id,
         uploader=account_id,
-        file_object=attachment.file,
+        content=attachment.file.read(),
         filename=attachment.filename,
         content_type=content_type,
     )

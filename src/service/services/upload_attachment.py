@@ -1,4 +1,3 @@
-import asyncio
 import datetime
 import io
 import logging
@@ -8,6 +7,7 @@ import uuid
 import cqrs
 
 from domain import attachments, events
+from infrastructure.helpers.attachments.processors import chain
 from infrastructure.storages import attachment_storage
 from service import exceptions, unit_of_work
 from service.requests import upload_attachment
@@ -15,48 +15,12 @@ from service.requests import upload_attachment
 logger = logging.getLogger(__name__)
 
 
-class AttachmentPreprocessor(typing.Protocol):
-    name: typing.Text
-    content_type: attachments.AttachmentType
-
-    def __call__(self, file_object: typing.BinaryIO) -> typing.BinaryIO:
-        raise NotImplementedError
-
-    def update_file_name(self, file_name: typing.Text) -> typing.Text:
-        raise NotImplementedError
-
-
-class PreprocessingChain:
-    name: typing.Text
-
-    def __init__(
-        self,
-        chain_name: typing.Text,
-        content_type: attachments.AttachmentType,
-        preprocessors: typing.List[AttachmentPreprocessor],
-    ):
-        if any(filter(lambda p: p.content_type != content_type, preprocessors)):  # type: ignore
-            raise ValueError(
-                f"All preprocessors should have the same "
-                f"content type {content_type}: ({', '.join(map(lambda p: p.content_type, preprocessors))})",
-            )
-        self.name = chain_name
-        self.preprocessors = preprocessors
-
-    def __next__(self) -> AttachmentPreprocessor:
-        return next(self._iterator)
-
-    def __iter__(self):
-        self._iterator = iter(self.preprocessors)
-        return self
-
-
 class UploadAttachmentService:
     def __init__(
         self,
         storage: attachment_storage.AttachmentStorage,
         uow: unit_of_work.UoW,
-        preprocessor_chains: typing.List[PreprocessingChain] | None = None,
+        preprocessor_chains: typing.List[chain.PreprocessingChain] | None = None,
     ):
         self.storage = storage
         self.uow = uow
@@ -77,37 +41,11 @@ class UploadAttachmentService:
         logger.info(f"Uploaded attachment: {url}")
         return url
 
-    async def _process_files(
-        self,
-        file_object: bytes,
-        file_name: typing.Text,
-        content_type: attachments.AttachmentType,
-    ) -> typing.Dict[typing.Text, typing.BinaryIO]:
-        """Applies preprocessing chains"""
-
-        preprocessing_results: typing.Dict[typing.Text, typing.BinaryIO] = {}
-        # preprocess
-        for chain in self.preprocessors_chains:
-            for preprocessor in chain:
-                if not preprocessor.content_type == content_type:
-                    continue
-
-                new_filename = preprocessor.update_file_name(file_name)
-                processing_result = await asyncio.to_thread(
-                    preprocessor,
-                    io.BytesIO(file_object),
-                )
-
-                file_object = result_content = processing_result.read()
-                preprocessing_results[new_filename] = io.BytesIO(result_content)
-
-        return preprocessing_results
-
     async def handle(
         self,
         chat_id: uuid.UUID,
         uploader: typing.Text,
-        file_object: typing.BinaryIO,
+        content: bytes,
         content_type: attachments.AttachmentType,
         filename: typing.Text,
     ) -> upload_attachment.AttachmentUploaded:
@@ -128,14 +66,6 @@ class UploadAttachmentService:
 
             urls = []
 
-            content = file_object.read()
-            # preprocess
-            procession_results = await self._process_files(
-                content,
-                uploading_file_name,
-                content_type,
-            )
-
             # upload original
             urls.append(
                 await self._upload_file_to_storage(
@@ -143,14 +73,22 @@ class UploadAttachmentService:
                     f"{uploading_path}/{uploading_file_name}",
                 ),
             )
-            # upload preprocessed
-            for new_file_name, result in procession_results.items():
-                urls.append(
-                    await self._upload_file_to_storage(
-                        result,
-                        f"{uploading_path}/{new_file_name}",
-                    ),
-                )
+
+            # preprocess
+            for processing_chain in self.preprocessors_chains:
+                if not processing_chain.content_type == content_type:
+                    continue
+
+                for processed_filename, processed_content in processing_chain.iterator(
+                    io.BytesIO(content),
+                    uploading_file_name,
+                ):
+                    urls.append(
+                        await self._upload_file_to_storage(
+                            processed_content,
+                            f"{uploading_path}/{processed_filename}",
+                        ),
+                    )
 
             # save
             new_attachment = attachments.Attachment(

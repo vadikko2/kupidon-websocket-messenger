@@ -1,10 +1,13 @@
 import io
+import logging
 import pathlib
 import typing
 
 import PIL.Image
 
 from domain import attachments
+
+logging.getLogger("PIL").setLevel(logging.ERROR)
 
 
 def update_filename_jpeg(file_name: typing.Text) -> typing.Text:
