@@ -7,7 +7,7 @@ import uuid
 import cqrs
 
 from domain import attachments, events
-from infrastructure.helpers.attachments.processors import chain
+from infrastructure.helpers.attachments.preprocessors import chain
 from infrastructure.storages import attachment_storage
 from service import exceptions, unit_of_work
 from service.requests import upload_attachment

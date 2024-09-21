@@ -12,7 +12,7 @@ from fastapi import status
 from domain import attachments
 from infrastructure import dependencies
 from infrastructure.brokers import messages_broker, redis
-from infrastructure.helpers.attachments.processors import chain, jpeg_processors
+from infrastructure.helpers.attachments.preprocessors import chain, jpeg_preprocessors
 from infrastructure.settings import redis_settings
 from infrastructure.storages import attachment_storage, s3
 from presentation.api.schema import validators
@@ -86,9 +86,9 @@ async def upload_attachment_service_factory(
                 content_type=attachments.AttachmentType.IMAGE,
                 chain_name="image",
                 preprocessors=[
-                    jpeg_processors.JpegTranscodeAttachmentPreprocessor(),
-                    jpeg_processors.JPEGPreview200x200AttachmentPreprocessor(),
-                    jpeg_processors.JPEGPreview100x100AttachmentPreprocessor(),
+                    jpeg_preprocessors.JpegTranscodeAttachmentPreprocessor(),
+                    jpeg_preprocessors.JPEGPreview200x200AttachmentPreprocessor(),
+                    jpeg_preprocessors.JPEGPreview100x100AttachmentPreprocessor(),
                 ],
             ),
         ],
