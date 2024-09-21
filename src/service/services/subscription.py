@@ -2,7 +2,7 @@ import contextlib
 import logging
 import typing
 
-from infrastructure.brokers import protocol as broker_protocol
+from infrastructure.brokers import messages_broker
 from service import exceptions
 
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ class SubscriptionService:
 
     def __init__(
         self,
-        broker: broker_protocol.MessageBroker,
+        broker: messages_broker.MessageBroker,
     ) -> None:
         self.broker = broker
         self.subscription_started = False

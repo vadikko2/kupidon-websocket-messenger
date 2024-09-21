@@ -44,6 +44,13 @@ async def upload_attachment(
     """
     # Uploads attachment to chat
     """
+    if not attachment.filename:
+        raise fastapi.exceptions.HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Filename is required",
+        )
+
+    logger.debug(f"Uploading attachment: {attachment.filename}")
     result = await upload_attachment_handler.handle(
         chat_id=chat_id,
         uploader=account_id,

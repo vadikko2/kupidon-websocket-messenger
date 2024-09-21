@@ -1,3 +1,4 @@
+import datetime
 import logging
 import typing
 import uuid
@@ -28,18 +29,22 @@ class UploadAttachmentService:
         uploader: typing.Text,
         file_object: typing.BinaryIO,
         content_type: attachments.AttachmentType,
-        filename: typing.Optional[typing.Text] = None,
+        filename: typing.Text,
     ) -> upload_attachment.AttachmentUploaded:
-        url = await self.storage.upload(file_object, filename)
+        new_attachment_id = uuid.uuid4()
+        uploading_dt = datetime.datetime.now()
+        new_attachment_name = f"{uploader}/{uploading_dt.year}/{uploading_dt.month}/{new_attachment_id}_{filename}"
+        url = await self.storage.upload(file_object, new_attachment_name)
         logger.info(f"Uploaded attachment: {url}")
 
         new_attachment = attachments.Attachment(
-            attachment_id=uuid.uuid4(),
+            attachment_id=new_attachment_id,
             chat_id=chat_id,
             uploader=uploader,
-            filename=filename,
+            filename=new_attachment_name,
             url=url,  # type: ignore
             content_type=content_type,
+            uploaded=uploading_dt,
         )
 
         async with self.uow:
