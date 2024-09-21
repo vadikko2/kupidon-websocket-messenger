@@ -5,12 +5,12 @@ import pydantic
 import redis.asyncio as redis
 from redis.asyncio import client
 
-from infrastructure.brokers import protocol
+from infrastructure.brokers import messages_broker
 
 logger = logging.getLogger(__name__)
 
 
-class RedisMessageBroker(protocol.MessageBroker):
+class RedisMessageBroker(messages_broker.MessageBroker):
     def __init__(self, url: typing.Text, timeout_ms: pydantic.PositiveInt = 500):
         self.connect = redis.Redis.from_url(url)
 

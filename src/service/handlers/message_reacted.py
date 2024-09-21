@@ -2,12 +2,12 @@ import cqrs
 import orjson
 
 from domain import events, messages
-from infrastructure.brokers import protocol as broker_protocol
+from infrastructure.brokers import messages_broker
 from service import events as notification_events, exceptions, unit_of_work
 
 
 class MessageReactedHandler(cqrs.EventHandler[events.MessageReacted]):
-    def __init__(self, uow: unit_of_work.UoW, broker: broker_protocol.MessageBroker):
+    def __init__(self, uow: unit_of_work.UoW, broker: messages_broker.MessageBroker):
         self.uow = uow
         self.broker = broker
 

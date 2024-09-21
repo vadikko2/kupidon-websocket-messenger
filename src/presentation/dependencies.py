@@ -10,9 +10,9 @@ from cqrs.requests import bootstrap as request_bootstrap
 from fastapi import status
 
 from infrastructure import dependencies
-from infrastructure.brokers import protocol as broker_protocol, redis
+from infrastructure.brokers import messages_broker, redis
 from infrastructure.settings import redis_settings
-from infrastructure.storages import attachment_storage, mock
+from infrastructure.storages import attachment_storage, s3
 from presentation.api.schema import validators
 from service import mapping, unit_of_work
 from service.services import (
@@ -50,29 +50,33 @@ def event_emitter_factory() -> cqrs.EventEmitter:
     )
 
 
-def subscription_broker_factory() -> broker_protocol.MessageBroker:
+def subscription_broker_factory() -> messages_broker.MessageBroker:
     return redis.RedisMessageBroker(redis_settings.dsn())
 
 
 def attachment_storage_factory() -> attachment_storage.AttachmentStorage:
-    return mock.MockAttachmentStorage()
+    return s3.S3AttachmentStorage()
+
+
+def uow_factory() -> unit_of_work.UoW:
+    return unit_of_work.MockMessageUoW()
 
 
 async def subscription_service_factory(
-    broker: broker_protocol.MessageBroker = fastapi.Depends(
+    broker: messages_broker.MessageBroker = fastapi.Depends(
         subscription_broker_factory,
     ),
 ) -> subscription_service.SubscriptionService:
     return subscription_service.SubscriptionService(broker=broker)
 
 
-async def upload_attachment_service_factory() -> (
-    upload_attachment_service.UploadAttachmentService
-):
-    return upload_attachment_service.UploadAttachmentService(
-        storage=mock.MockAttachmentStorage(),
-        uow=unit_of_work.MockMessageUoW(),
-    )
+async def upload_attachment_service_factory(
+    storage: attachment_storage.AttachmentStorage = fastapi.Depends(
+        attachment_storage_factory,
+    ),
+    uow: unit_of_work.UoW = fastapi.Depends(uow_factory),
+) -> upload_attachment_service.UploadAttachmentService:
+    return upload_attachment_service.UploadAttachmentService(storage=storage, uow=uow)
 
 
 async def get_account_id(

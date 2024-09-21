@@ -3,7 +3,7 @@ import functools
 import di
 from di import dependent
 
-from infrastructure.brokers import protocol as broker_protocol, redis
+from infrastructure.brokers import messages_broker, redis
 from infrastructure.settings import redis_settings
 from service import unit_of_work
 
@@ -18,7 +18,7 @@ BrokerBind = di.bind_by_type(
         functools.partial(redis.RedisMessageBroker, redis_settings.dsn()),
         scope="request",
     ),
-    broker_protocol.MessageBroker,
+    messages_broker.MessageBroker,
 )
 
 container.bind(UoWBind)
