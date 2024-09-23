@@ -8,7 +8,7 @@ from domain import messages
 
 
 class MessageRepository(abc.ABC):
-    _seen_messages: typing.Set[messages.Message]
+    _seen: typing.Set[messages.Message]
 
     @abc.abstractmethod
     async def add(self, message: messages.Message) -> None:
@@ -32,17 +32,6 @@ class MessageRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def events(self) -> typing.List[cqrs.DomainEvent]:
-        """
-        Returns domain events
-        """
-        events = []
-        for message in self._seen_messages:
-            events += message.get_events()
-
-        return events
-
-    @abc.abstractmethod
     async def commit(self):
         """
         Commits changes
@@ -55,3 +44,13 @@ class MessageRepository(abc.ABC):
         Rollbacks changes
         """
         raise NotImplementedError
+
+    def events(self) -> typing.List[cqrs.DomainEvent]:
+        """
+        Returns new domain events
+        """
+        new_events = []
+        for message in self._seen:
+            while message.event_list:
+                new_events.append(message.event_list.pop())
+        return new_events

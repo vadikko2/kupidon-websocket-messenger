@@ -17,4 +17,4 @@ class UploadAttachment(cqrs.Request):
 
 class AttachmentUploaded(cqrs.Response):
     attachment_id: uuid.UUID
-    urls: typing.List[pydantic.AnyHttpUrl] = pydantic.Field(min_length=1)
+    urls: typing.List[typing.Text] = pydantic.Field(min_length=1)

@@ -2,10 +2,14 @@ import abc
 import typing
 import uuid
 
+import cqrs
+
 from domain import attachments
 
 
 class AttachmentRepository(abc.ABC):
+    _seen: typing.Set[attachments.Attachment]
+
     @abc.abstractmethod
     async def add(self, attachment: attachments.Attachment) -> None:
         """Adds new attachment"""
@@ -33,3 +37,23 @@ class AttachmentRepository(abc.ABC):
     ) -> typing.List[attachments.Attachment]:
         """Returns all attachments for specified chat"""
         raise NotImplementedError
+
+    @abc.abstractmethod
+    async def commit(self):
+        """Commits changes"""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    async def rollback(self):
+        """Rollbacks changes"""
+        raise NotImplementedError
+
+    def events(self) -> typing.List[cqrs.DomainEvent]:
+        """
+        Returns new domain events
+        """
+        new_events = []
+        for attachment in self._seen:
+            while attachment.event_list:
+                new_events.append(attachment.event_list.pop())
+        return new_events

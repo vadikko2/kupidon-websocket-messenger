@@ -1,7 +1,7 @@
+import datetime
 import typing
 import uuid
 
-import cqrs
 import pydantic
 
 from domain import attachments, chats, messages
@@ -18,7 +18,7 @@ _GLOBAL_ATTACHMENT_STORAGE: typing.Dict[uuid.UUID, attachments.Attachment] = dic
 class MockMessageRepository(message_repository.MessageRepository):
     def __init__(self):
         self.committed = False
-        self._seen_messages = set()
+        self._seen = set()
 
     async def add(self, message: messages.Message) -> None:
         self.committed = False
@@ -27,11 +27,11 @@ class MockMessageRepository(message_repository.MessageRepository):
         for chat in _GLOBAL_CHATS_STORAGE.values():
             for message in chat.history:
                 if message.message_id == message_id:
-                    self._seen_messages.add(message)
+                    self._seen.add(message)
                     return message
 
     async def update(self, message: messages.Message) -> None:
-        self._seen_messages.add(message)
+        self._seen.add(message)
         for i, exist_message in enumerate(
             _GLOBAL_CHATS_STORAGE[message.chat_id].history,
         ):
@@ -46,27 +46,21 @@ class MockMessageRepository(message_repository.MessageRepository):
     async def rollback(self):
         pass
 
-    def events(self) -> typing.List[cqrs.DomainEvent]:
-        events = []
-        for message in self._seen_messages:
-            events += message.get_events()
-        return events
-
 
 class MockChatRepository(chat_repository.ChatRepository):
     def __init__(self):
         self.committed = False
-        self._seen_chats = set()
+        self._seen = set()
 
     async def add(self, chat: chats.Chat) -> None:
         _GLOBAL_CHATS_STORAGE[chat.chat_id] = chat
-        self._seen_chats.add(chat)
+        self._seen.add(chat)
         self.committed = False
 
     async def get(self, chat_id: uuid.UUID) -> chats.Chat | None:
         chat = _GLOBAL_CHATS_STORAGE.get(chat_id)
         if chat:
-            self._seen_chats.add(chat)
+            self._seen.add(chat)
         return _GLOBAL_CHATS_STORAGE.get(chat_id)
 
     async def get_chat_history(
@@ -91,7 +85,7 @@ class MockChatRepository(chat_repository.ChatRepository):
             latest_message_position : latest_message_position + messages_limit
         ]
         new_chat = chats.Chat.model_validate(chat_dict)
-        self._seen_chats.add(new_chat)
+        self._seen.add(new_chat)
         return new_chat
 
     async def get_all(self, participant: typing.Text) -> typing.List[chats.Chat]:
@@ -99,7 +93,7 @@ class MockChatRepository(chat_repository.ChatRepository):
         for chat in _GLOBAL_CHATS_STORAGE.values():
             if participant in chat.participants:
                 chats_list.append(chat)
-                self._seen_chats.add(chat)
+                self._seen.add(chat)
         return chats_list
 
     async def commit(self):
@@ -108,29 +102,34 @@ class MockChatRepository(chat_repository.ChatRepository):
     async def rollback(self):
         pass
 
-    def events(self) -> typing.List[cqrs.DomainEvent]:
-        events = []
-        for message in self._seen_chats:
-            events += message.get_events()
-        return events
-
 
 class MockAttachmentRepository(attachment_repository.AttachmentRepository):
+    def __init__(self):
+        self.committed = False
+        self._seen = set()
+
     async def add(self, attachment: attachments.Attachment) -> None:
         _GLOBAL_ATTACHMENT_STORAGE[attachment.attachment_id] = attachment
+        self._seen.add(attachment)
+        self.committed = False
 
     async def get(self, attachment_id: uuid.UUID) -> attachments.Attachment | None:
-        return _GLOBAL_ATTACHMENT_STORAGE.get(attachment_id)
+        result = _GLOBAL_ATTACHMENT_STORAGE.get(attachment_id)
+        if result:
+            self._seen.add(result)
+        return result
 
     async def get_many(
         self,
         *attachment_ids: uuid.UUID,
     ) -> typing.List[attachments.Attachment]:
-        return [
+        result = [
             _GLOBAL_ATTACHMENT_STORAGE[attachment_id]
             for attachment_id in attachment_ids
             if attachment_id in _GLOBAL_ATTACHMENT_STORAGE
         ]
+        self._seen.update(result)
+        return result
 
     async def get_all(
         self,
@@ -141,12 +140,24 @@ class MockAttachmentRepository(attachment_repository.AttachmentRepository):
         attachments_in_chat = [
             attachment
             for attachment in _GLOBAL_ATTACHMENT_STORAGE.values()
-            if attachment.chat_id == chat_id
+            if attachment.chat_id == chat_id and attachment.uploaded is not None
         ]
-        return list(
+        result = list(
             sorted(
                 attachments_in_chat,
-                key=lambda attachment: attachment.uploaded,
+                key=lambda attachment: typing.cast(
+                    datetime.datetime,
+                    attachment.uploaded,
+                ),
                 reverse=True,
             ),
         )[offset : offset + limit]
+
+        self._seen.update(result)
+        return result
+
+    async def commit(self):
+        self.committed = True
+
+    async def rollback(self):
+        pass

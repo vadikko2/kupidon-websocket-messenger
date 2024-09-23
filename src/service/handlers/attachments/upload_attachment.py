@@ -7,7 +7,7 @@ import uuid
 import cqrs
 from cqrs import events as cqrs_events
 
-from domain import attachments, events
+from domain import attachments
 from infrastructure.helpers.attachments.preprocessors import chain
 from infrastructure.storages import attachment_storage
 from service import exceptions, unit_of_work
@@ -65,9 +65,16 @@ class UploadAttachmentHandler(
                     chat_id=request.chat_id,
                 )
 
-            new_attachment_id = uuid.uuid4()
+            new_attachment = attachments.Attachment(
+                attachment_id=uuid.uuid4(),
+                chat_id=request.chat_id,
+                uploader=request.uploader,
+                filename=request.filename,
+                content_type=request.content_type,
+            )
+
             uploading_dt = datetime.datetime.now()
-            uploading_file_name = f"{new_attachment_id}_{request.filename}"
+            uploading_file_name = f"{new_attachment.attachment_id}_{request.filename}"
             uploading_path = (
                 f"{request.uploader}/{uploading_dt.year}/{uploading_dt.month}"
             )
@@ -101,29 +108,16 @@ class UploadAttachmentHandler(
                         ),
                     )
 
-            # save
-            new_attachment = attachments.Attachment(
-                attachment_id=new_attachment_id,
-                chat_id=request.chat_id,
-                uploader=request.uploader,
-                filename=request.filename,
-                urls=urls,  # type: ignore
-                content_type=request.content_type,
-                uploaded=uploading_dt,
-            )
+            # mark as uploaded
+            new_attachment.upload(urls=urls, uploaded_dt=uploading_dt)
 
+            # save
             await self.uow.attachment_repository.add(new_attachment)
             await self.uow.commit()
 
-        self._events.append(
-            events.NewAttachmentUploaded(
-                attachment_id=new_attachment.attachment_id,
-                urls=urls,  # type: ignore
-            ),
-        )
         self._events += self.uow.get_events()
 
         return upload_attachment.AttachmentUploaded(
             attachment_id=new_attachment.attachment_id,
-            urls=urls,  # type: ignore
+            urls=urls,
         )

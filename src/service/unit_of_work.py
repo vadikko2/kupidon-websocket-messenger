@@ -23,13 +23,19 @@ class UoW(abc.ABC):
     async def commit(self):
         await self.message_repository.commit()
         await self.chat_repository.commit()
+        await self.attachment_repository.commit()
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.message_repository.rollback()
         await self.chat_repository.rollback()
+        await self.attachment_repository.rollback()
 
     def get_events(self) -> typing.List[cqrs.DomainEvent]:
-        return self.message_repository.events() + self.chat_repository.events()
+        return (
+            self.message_repository.events()
+            + self.chat_repository.events()
+            + self.attachment_repository.events()
+        )
 
 
 class MockMessageUoW(UoW):

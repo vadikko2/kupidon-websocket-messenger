@@ -9,6 +9,8 @@ from domain import chats
 
 
 class ChatRepository(abc.ABC):
+    _seen: typing.Set[chats.Chat]
+
     @abc.abstractmethod
     async def add(self, chat: chats.Chat) -> None:
         """
@@ -43,13 +45,6 @@ class ChatRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def events(self) -> typing.List[cqrs.DomainEvent]:
-        """
-        Returns domain events
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
     async def commit(self):
         """
         Commits changes
@@ -62,3 +57,13 @@ class ChatRepository(abc.ABC):
         Rollbacks changes
         """
         raise NotImplementedError
+
+    def events(self) -> typing.List[cqrs.DomainEvent]:
+        """
+        Returns new domain events
+        """
+        new_events = []
+        for attachment in self._seen:
+            while attachment.event_list:
+                new_events.append(attachment.event_list.pop())
+        return new_events
