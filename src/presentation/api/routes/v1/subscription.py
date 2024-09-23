@@ -6,7 +6,7 @@ import fastapi
 from fastapi import status
 
 from presentation import dependencies
-from service.services import subscription as subscription_service
+from service.handlers.subscriptions import subscription as subscription_service
 
 router = fastapi.APIRouter(
     prefix="/subscriptions",

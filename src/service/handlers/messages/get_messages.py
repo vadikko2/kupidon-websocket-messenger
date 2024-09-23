@@ -3,7 +3,7 @@ from cqrs.events import event
 
 from domain import messages as messages_entity
 from service import exceptions, unit_of_work
-from service.requests import get_messages
+from service.requests.messages import get_messages
 
 
 class GetMessagesHandler(

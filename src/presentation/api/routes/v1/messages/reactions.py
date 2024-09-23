@@ -10,7 +10,7 @@ from domain import exceptions as domain_exceptions
 from presentation import dependencies
 from presentation.api.schema import requests
 from service import exceptions as service_exceptions
-from service.requests import react_message, unreact_message
+from service.requests.reactions import react_message, unreact_message
 
 router = fastapi.APIRouter(prefix="/reactions")
 

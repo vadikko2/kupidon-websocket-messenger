@@ -2,7 +2,7 @@ import cqrs
 from cqrs.events import event
 
 from service import unit_of_work
-from service.requests import get_chats
+from service.requests.chats import get_chats
 
 
 class GetChatsHandler(cqrs.RequestHandler[get_chats.GetChats, get_chats.Chats]):

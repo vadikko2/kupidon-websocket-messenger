@@ -15,10 +15,7 @@ from infrastructure.settings import redis_settings
 from infrastructure.storages import attachment_storage, s3
 from presentation.api.schema import validators
 from service import mapping, unit_of_work
-from service.services import (
-    subscription as subscription_service,
-    upload_attachment as upload_attachment_service,
-)
+from service.handlers.subscriptions import subscription as subscription_service
 
 logger = logging.getLogger(__name__)
 
@@ -68,15 +65,6 @@ async def subscription_service_factory(
     ),
 ) -> subscription_service.SubscriptionService:
     return subscription_service.SubscriptionService(broker=broker)
-
-
-async def upload_attachment_service_factory(
-    storage: attachment_storage.AttachmentStorage = fastapi.Depends(
-        attachment_storage_factory,
-    ),
-    uow: unit_of_work.UoW = fastapi.Depends(uow_factory),
-) -> upload_attachment_service.UploadAttachmentService:
-    return upload_attachment_service.UploadAttachmentService(storage=storage, uow=uow)
 
 
 async def get_account_id(

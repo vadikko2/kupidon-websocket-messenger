@@ -35,7 +35,7 @@ class MessageDeleted(cqrs.DomainEvent, frozen=True):
 
 class NewAttachmentUploaded(cqrs.DomainEvent, frozen=True):
     attachment_id: uuid.UUID
-    url: pydantic.AnyHttpUrl
+    urls: typing.List[pydantic.AnyHttpUrl]
 
 
 class MessageReacted(cqrs.DomainEvent, frozen=True):

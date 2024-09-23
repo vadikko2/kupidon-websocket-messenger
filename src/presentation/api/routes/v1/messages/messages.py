@@ -10,7 +10,7 @@ from fastapi_app.exception_handlers import registry
 from domain import messages
 from presentation import dependencies
 from service import exceptions
-from service.requests import (
+from service.requests.messages import (
     delete_message as delete_message_request,
     apply_message as apply_message_request,
 )

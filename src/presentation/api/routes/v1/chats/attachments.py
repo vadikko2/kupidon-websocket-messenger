@@ -13,11 +13,10 @@ from domain import attachments as attachment_entities
 from presentation import dependencies
 from presentation.api.schema import responses
 from service import exceptions
-from service.requests import (
+from service.requests.attachments import (
     get_attachments as get_attachments_request,
     upload_attachment as upload_attachment_request,
 )
-from service.services import upload_attachment as upload_attachment_service
 
 router = fastapi.APIRouter(prefix="/{chat_id}/attachments")
 
@@ -34,11 +33,8 @@ async def upload_attachment(
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     attachment: fastapi.UploadFile = fastapi.File(...),
     content_type: attachment_entities.AttachmentType = fastapi.Body(...),
-    upload_attachment_handler: upload_attachment_service.UploadAttachmentService = fastapi.Depends(
-        dependency=dependencies.upload_attachment_service_factory,
-    ),
-    emitter: cqrs.EventEmitter = fastapi.Depends(
-        dependency=dependencies.event_emitter_factory,
+    request_mediator: cqrs.RequestMediator = fastapi.Depends(
+        dependencies.request_mediator_factory,
     ),
 ) -> response.Response[upload_attachment_request.AttachmentUploaded]:
     """
@@ -50,19 +46,15 @@ async def upload_attachment(
             detail="Filename is required",
         )
 
-    logger.debug(f"Uploading attachment: {attachment.filename}")
-    result = await upload_attachment_handler.handle(
-        chat_id=chat_id,
-        uploader=account_id,
-        file_object=attachment.file,
-        filename=attachment.filename,
-        content_type=content_type,
+    result: upload_attachment_request.AttachmentUploaded = await request_mediator.send(
+        upload_attachment_request.UploadAttachment(
+            chat_id=chat_id,
+            uploader=account_id,
+            filename=attachment.filename,
+            content_type=content_type,
+            content=attachment.file.read(),
+        ),
     )
-    for event in upload_attachment_handler.events():
-        try:
-            await emitter.emit(event)
-        except Exception as emit_error:
-            logger.error(f"Failed to emit event {event}: {emit_error}")
     return response.Response(result=result)
 
 

@@ -12,7 +12,7 @@ from domain import exceptions as domain_exceptions
 from presentation import dependencies
 from presentation.api.schema import responses, validators
 from service import exceptions
-from service.requests import (
+from service.requests.messages import (
     get_messages as get_messages_request,
     send_message as send_message_request,
 )
