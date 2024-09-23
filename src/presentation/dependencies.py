@@ -9,18 +9,13 @@ from cqrs.events import bootstrap as event_bootstrap
 from cqrs.requests import bootstrap as request_bootstrap
 from fastapi import status
 
-from domain import attachments
 from infrastructure import dependencies
 from infrastructure.brokers import messages_broker, redis
-from infrastructure.helpers.attachments.preprocessors import chain, jpeg_preprocessors
 from infrastructure.settings import redis_settings
 from infrastructure.storages import attachment_storage, s3
 from presentation.api.schema import validators
 from service import mapping, unit_of_work
-from service.services import (
-    subscription as subscription_service,
-    upload_attachment as upload_attachment_service,
-)
+from service.handlers.subscriptions import subscription as subscription_service
 
 logger = logging.getLogger(__name__)
 
@@ -70,29 +65,6 @@ async def subscription_service_factory(
     ),
 ) -> subscription_service.SubscriptionService:
     return subscription_service.SubscriptionService(broker=broker)
-
-
-async def upload_attachment_service_factory(
-    storage: attachment_storage.AttachmentStorage = fastapi.Depends(
-        attachment_storage_factory,
-    ),
-    uow: unit_of_work.UoW = fastapi.Depends(uow_factory),
-) -> upload_attachment_service.UploadAttachmentService:
-    return upload_attachment_service.UploadAttachmentService(
-        storage=storage,
-        uow=uow,
-        preprocessing_chains=[
-            chain.PreprocessingChain(
-                content_type=attachments.AttachmentType.IMAGE,
-                chain_name="image",
-                preprocessors=[
-                    jpeg_preprocessors.JpegTranscodeAttachmentPreprocessor(),
-                    jpeg_preprocessors.JPEGPreview200x200AttachmentPreprocessor(),
-                    jpeg_preprocessors.JPEGPreview100x100AttachmentPreprocessor(),
-                ],
-            ),
-        ],
-    )
 
 
 async def get_account_id(

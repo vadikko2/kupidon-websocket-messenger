@@ -6,7 +6,7 @@ from cqrs.events import event
 
 from domain import messages
 from service import exceptions, unit_of_work
-from service.requests import send_message
+from service.requests.messages import send_message
 
 logger = logging.getLogger(__name__)
 

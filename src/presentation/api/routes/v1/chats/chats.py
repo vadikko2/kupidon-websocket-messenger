@@ -9,7 +9,7 @@ from fastapi_app import response
 
 from presentation import dependencies
 from presentation.api.schema import responses
-from service.requests import (
+from service.requests.chats import (
     get_chats as get_chats_request,
     open_chat as open_chat_request,
 )

@@ -5,7 +5,7 @@ import uuid
 import pydantic
 
 from domain import messages as messages_entity
-from service.requests import get_attachments
+from service.requests.attachments import get_attachments
 
 
 class MessageSent(pydantic.BaseModel):

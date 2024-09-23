@@ -5,7 +5,7 @@ from cqrs.events import event
 
 from domain import chats
 from service import unit_of_work
-from service.requests import open_chat
+from service.requests.chats import open_chat
 
 
 class OpenChatHandler(cqrs.RequestHandler[open_chat.OpenChat, open_chat.ChatOpened]):

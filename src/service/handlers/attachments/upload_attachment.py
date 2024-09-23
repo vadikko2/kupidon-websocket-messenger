@@ -5,27 +5,37 @@ import typing
 import uuid
 
 import cqrs
+from cqrs import events as cqrs_events
 
 from domain import attachments, events
 from infrastructure.helpers.attachments.preprocessors import chain
 from infrastructure.storages import attachment_storage
 from service import exceptions, unit_of_work
-from service.requests import upload_attachment
+from service.requests.attachments import upload_attachment
 
 logger = logging.getLogger(__name__)
 
 
-class UploadAttachmentService:
+class UploadAttachmentHandler(
+    cqrs.RequestHandler[
+        upload_attachment.UploadAttachment,
+        upload_attachment.AttachmentUploaded,
+    ],
+):
     def __init__(
         self,
         storage: attachment_storage.AttachmentStorage,
         uow: unit_of_work.UoW,
-        preprocessing_chains: typing.List[chain.PreprocessingChain] | None = None,
+        preprocessing_chains: typing.List[chain.PreprocessingChain],
     ):
         self.storage = storage
         self.uow = uow
         self._events = []
-        self.preprocessing_chains = preprocessing_chains or []
+        self.preprocessing_chains = preprocessing_chains
+
+    @property
+    def events(self) -> typing.List[cqrs_events.Event]:
+        return self._events
 
     async def _upload_file_to_storage(
         self,
@@ -43,47 +53,45 @@ class UploadAttachmentService:
 
     async def handle(
         self,
-        chat_id: uuid.UUID,
-        uploader: typing.Text,
-        content: bytes,
-        content_type: attachments.AttachmentType,
-        filename: typing.Text,
+        request: upload_attachment.UploadAttachment,
     ) -> upload_attachment.AttachmentUploaded:
         async with self.uow:
-            chat = await self.uow.chat_repository.get(chat_id)
+            chat = await self.uow.chat_repository.get(request.chat_id)
             if chat is None:
-                raise exceptions.ChatNotFound(chat_id=chat_id)
-            if not chat.is_participant(uploader):
+                raise exceptions.ChatNotFound(chat_id=request.chat_id)
+            if not chat.is_participant(request.uploader):
                 raise exceptions.ParticipantNotInChat(
-                    account_id=uploader,
-                    chat_id=chat_id,
+                    account_id=request.uploader,
+                    chat_id=request.chat_id,
                 )
 
             new_attachment_id = uuid.uuid4()
             uploading_dt = datetime.datetime.now()
-            uploading_file_name = f"{new_attachment_id}_{filename}"
-            uploading_path = f"{uploader}/{uploading_dt.year}/{uploading_dt.month}"
+            uploading_file_name = f"{new_attachment_id}_{request.filename}"
+            uploading_path = (
+                f"{request.uploader}/{uploading_dt.year}/{uploading_dt.month}"
+            )
 
-            urls = []
+            urls: typing.List[typing.Text] = []
 
             # upload original
             urls.append(
                 await self._upload_file_to_storage(
-                    io.BytesIO(content),
+                    io.BytesIO(request.content),
                     f"{uploading_path}/{uploading_file_name}",
                 ),
             )
 
             # preprocess
             for preprocessing_chain in self.preprocessing_chains:
-                if not preprocessing_chain.content_type == content_type:
+                if not preprocessing_chain.content_type == request.content_type:
                     continue
 
                 for (
                     processed_filename,
                     processed_content,
                 ) in preprocessing_chain.iterator(
-                    io.BytesIO(content),
+                    io.BytesIO(request.content),
                     uploading_file_name,
                 ):
                     urls.append(
@@ -96,11 +104,11 @@ class UploadAttachmentService:
             # save
             new_attachment = attachments.Attachment(
                 attachment_id=new_attachment_id,
-                chat_id=chat_id,
-                uploader=uploader,
-                filename=filename,
+                chat_id=request.chat_id,
+                uploader=request.uploader,
+                filename=request.filename,
                 urls=urls,  # type: ignore
-                content_type=content_type,
+                content_type=request.content_type,
                 uploaded=uploading_dt,
             )
 
@@ -109,15 +117,13 @@ class UploadAttachmentService:
 
         self._events.append(
             events.NewAttachmentUploaded(
-                attachment_id=uuid.uuid4(),
+                attachment_id=new_attachment.attachment_id,
                 urls=urls,  # type: ignore
             ),
         )
+        self._events += self.uow.get_events()
 
         return upload_attachment.AttachmentUploaded(
             attachment_id=new_attachment.attachment_id,
-            urls=urls,
+            urls=urls,  # type: ignore
         )
-
-    def events(self) -> typing.List[cqrs.DomainEvent]:
-        return self.uow.get_events() + self._events

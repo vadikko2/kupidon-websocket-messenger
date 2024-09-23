@@ -4,7 +4,7 @@ import cqrs
 from cqrs.events import event
 
 from service import exceptions, unit_of_work
-from service.requests import get_attachments
+from service.requests.attachments import get_attachments
 
 
 class GetAttachmentsHandler(
@@ -42,7 +42,7 @@ class GetAttachmentsHandler(
             attachments=[
                 get_attachments.Attachment(
                     attachment_id=attachment.attachment_id,
-                    url=attachment.url,
+                    urls=attachment.urls,
                     uploaded=attachment.uploaded,
                     content_type=attachment.content_type,
                 )
