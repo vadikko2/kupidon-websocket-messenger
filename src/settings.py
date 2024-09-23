@@ -6,7 +6,7 @@ import pydantic_settings
 
 dotenv.load_dotenv()
 
-VERSION = "0.0.6"
+VERSION = "0.0.7"
 
 
 class Logging(pydantic_settings.BaseSettings, case_sensitive=True):
