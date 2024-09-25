@@ -145,10 +145,9 @@ class MockAttachmentRepository(attachment_repository.AttachmentRepository):
         result = list(
             sorted(
                 attachments_in_chat,
-                key=lambda attachment: typing.cast(
-                    datetime.datetime,
-                    attachment.uploaded,
-                ),
+                key=lambda attachment: attachment.uploaded
+                if attachment.uploaded
+                else datetime.datetime.min,
                 reverse=True,
             ),
         )[offset : offset + limit]
