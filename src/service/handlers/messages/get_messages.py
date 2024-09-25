@@ -1,5 +1,4 @@
 import cqrs
-from cqrs.events import event
 
 from domain import messages as messages_entity
 from service import exceptions, unit_of_work
@@ -11,11 +10,10 @@ class GetMessagesHandler(
 ):
     def __init__(self, uow: unit_of_work.UoW):
         self.uow = uow
-        self._events = []
 
     @property
-    def events(self) -> list[event.Event]:
-        return self._events
+    def events(self):
+        return self.uow.get_events()
 
     async def handle(self, request: get_messages.GetMessages) -> get_messages.Messages:
         async with self.uow:
@@ -41,5 +39,4 @@ class GetMessagesHandler(
                     continue
                 messages.append(message)
 
-        self._events += self.uow.get_events()
         return get_messages.Messages(messages=messages)

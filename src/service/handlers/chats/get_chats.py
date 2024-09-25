@@ -1,5 +1,4 @@
 import cqrs
-from cqrs.events import event
 
 from service import unit_of_work
 from service.requests.chats import get_chats
@@ -8,11 +7,10 @@ from service.requests.chats import get_chats
 class GetChatsHandler(cqrs.RequestHandler[get_chats.GetChats, get_chats.Chats]):
     def __init__(self, uow: unit_of_work.UoW):
         self.uow = uow
-        self._events = []
 
     @property
-    def events(self) -> list[event.Event]:
-        return self._events
+    def events(self):
+        return self.uow.get_events()
 
     async def handle(self, request: get_chats.GetChats) -> get_chats.Chats:
         async with self.uow:

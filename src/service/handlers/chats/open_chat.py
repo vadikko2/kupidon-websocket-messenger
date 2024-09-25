@@ -1,7 +1,4 @@
-import typing
-
 import cqrs
-from cqrs.events import event
 
 from domain import chats
 from service import unit_of_work
@@ -11,18 +8,21 @@ from service.requests.chats import open_chat
 class OpenChatHandler(cqrs.RequestHandler[open_chat.OpenChat, open_chat.ChatOpened]):
     def __init__(self, uow: unit_of_work.UoW):
         self.uow = uow
-        self._events = []
 
     @property
-    def events(self) -> typing.List[event.Event]:
-        return self._events
+    def events(self):
+        return self.uow.get_events()
 
     async def handle(self, request: open_chat.OpenChat) -> open_chat.ChatOpened:
         new_chat = chats.Chat(
             initiator=request.initiator,
-            participants=[request.initiator] + request.participants,
             name=request.name,
         )
+
+        new_chat.add_participant(request.initiator, request.initiator)
+        for participant in request.participants:
+            new_chat.add_participant(participant, request.initiator)
+
         async with self.uow:
             await self.uow.chat_repository.add(new_chat)
             await self.uow.commit()

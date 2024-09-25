@@ -1,8 +1,6 @@
 import logging
-import typing
 
 import cqrs
-from cqrs.events import event
 
 from domain import messages
 from service import exceptions, unit_of_work
@@ -16,11 +14,10 @@ class SendMessageHandler(
 ):
     def __init__(self, uow: unit_of_work.UoW):
         self.uow = uow
-        self._events = []
 
     @property
-    def events(self) -> typing.List[event.Event]:
-        return self._events
+    def events(self):
+        return self.uow.get_events()
 
     async def handle(
         self,
@@ -76,8 +73,6 @@ class SendMessageHandler(
 
             await self.uow.message_repository.add(new_message)
             await self.uow.commit()
-
-        self._events += self.uow.get_events()
 
         return send_message.MessageSent(
             message_id=new_message.message_id,

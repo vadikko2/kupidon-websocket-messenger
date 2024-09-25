@@ -5,7 +5,6 @@ import typing
 import uuid
 
 import cqrs
-from cqrs import events as cqrs_events
 
 from domain import attachments
 from infrastructure.helpers.attachments.preprocessors import chain
@@ -30,12 +29,11 @@ class UploadAttachmentHandler(
     ):
         self.storage = storage
         self.uow = uow
-        self._events = []
         self.preprocessing_chains = preprocessing_chains
 
     @property
-    def events(self) -> typing.List[cqrs_events.Event]:
-        return self._events
+    def events(self):
+        return self.uow.get_events()
 
     async def _upload_file_to_storage(
         self,
@@ -101,6 +99,7 @@ class UploadAttachmentHandler(
                     io.BytesIO(request.content),
                     uploading_file_name,
                 ):
+                    # upload preprocessed
                     urls.append(
                         await self._upload_file_to_storage(
                             processed_content,
@@ -115,9 +114,7 @@ class UploadAttachmentHandler(
             await self.uow.attachment_repository.add(new_attachment)
             await self.uow.commit()
 
-        self._events += self.uow.get_events()
-
         return upload_attachment.AttachmentUploaded(
             attachment_id=new_attachment.attachment_id,
-            urls=urls,
+            urls=urls,  # type: ignore
         )

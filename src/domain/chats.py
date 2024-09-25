@@ -64,7 +64,11 @@ class Chat(pydantic.BaseModel):
             ),
         )
 
-    def add_participant(self, account_id: typing.Text) -> None:
+    def add_participant(
+        self,
+        account_id: typing.Text,
+        initiated_by: typing.Text,
+    ) -> None:
         """
         Adds new participant to chat
         """
@@ -73,12 +77,15 @@ class Chat(pydantic.BaseModel):
 
         self.participants.append(account_id)
 
-        logger.debug(f"Account {account_id} added to chat {self.chat_id}")
+        logger.debug(
+            f"Account {account_id} added to chat {self.chat_id} by {initiated_by}",
+        )
 
         self.event_list.append(
             events.NewParticipantAdded(
                 chat_id=self.chat_id,
                 account_id=account_id,
+                invited_by=initiated_by,
             ),
         )
 

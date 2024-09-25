@@ -13,6 +13,7 @@ class NewMessageAdded(cqrs.DomainEvent, frozen=True):
 class NewParticipantAdded(cqrs.DomainEvent, frozen=True):
     chat_id: uuid.UUID
     account_id: typing.Text
+    invited_by: typing.Text
 
 
 class MessageRead(cqrs.DomainEvent, frozen=True):

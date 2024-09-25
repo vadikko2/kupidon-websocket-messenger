@@ -1,5 +1,6 @@
 import datetime
 import enum
+import logging
 import typing
 import uuid
 
@@ -7,6 +8,8 @@ import cqrs
 import pydantic
 
 from domain import events
+
+logger = logging.getLogger(__name__)
 
 
 class AttachmentType(enum.StrEnum):
@@ -58,6 +61,7 @@ class Attachment(pydantic.BaseModel):
                 urls=self.urls,  # type: ignore
             ),
         )
+        logger.info(f"Attachment marks as uploaded: {self.attachment_id}")
 
     def get_events(self) -> typing.List[cqrs.DomainEvent]:
         """

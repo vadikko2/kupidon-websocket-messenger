@@ -12,11 +12,10 @@ logger = logging.getLogger(__name__)
 class DeleteMessageHandler(cqrs.RequestHandler[delete_message.DeleteMessage, None]):
     def __init__(self, uow: unit_of_work.UoW):
         self.uow = uow
-        self._events = []
 
     @property
     def events(self):
-        return self._events
+        return self.uow.get_events()
 
     async def handle(self, request: delete_message.DeleteMessage) -> None:
         async with self.uow:
@@ -37,5 +36,3 @@ class DeleteMessageHandler(cqrs.RequestHandler[delete_message.DeleteMessage, Non
 
             await self.uow.message_repository.update(message)
             await self.uow.commit()
-
-        self._events += self.uow.get_events()

@@ -10,11 +10,10 @@ class ApplyMessageHandler(
 ):
     def __init__(self, uow: unit_of_work.UoW):
         self.uow = uow
-        self._events = []
 
     @property
     def events(self):
-        return self._events
+        return self.uow.get_events()
 
     async def handle(self, request: apply_message.ApplyMessage) -> None:
         async with self.uow:
@@ -42,5 +41,3 @@ class ApplyMessageHandler(
 
             await self.uow.message_repository.update(message)
             await self.uow.commit()
-
-        self._events += self.uow.get_events()
