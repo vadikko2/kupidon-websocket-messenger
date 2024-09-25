@@ -22,7 +22,7 @@ class MessageDeletedHandler(cqrs.EventHandler[events.MessageDeleted]):
             await self.broker.send_message(
                 event.message_sender,
                 orjson.dumps(
-                    message_deleted.MessageDeletedECST(
+                    cqrs.ECSTEvent(
                         event_name="MessageDeleted",
                         payload=message_deleted.MessageDeletedPayload(
                             chat_id=event.chat_id,

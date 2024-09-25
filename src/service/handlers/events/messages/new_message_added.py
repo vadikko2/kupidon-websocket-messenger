@@ -43,7 +43,7 @@ class NewMessageAddedHandler(cqrs.EventHandler[domain_events.NewMessageAdded]):
                 raise exceptions.ChatNotFound(event.chat_id)
 
             message_bytes = orjson.dumps(
-                message_added.NewMessageAddedECST(
+                cqrs.ECSTEvent(
                     event_name="NewMessageAdded",
                     payload=message_added.MessageAddedPayload(
                         chat_id=message.chat_id,

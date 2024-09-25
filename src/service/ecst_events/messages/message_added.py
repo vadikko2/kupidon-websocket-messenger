@@ -2,7 +2,6 @@ import datetime
 import typing
 import uuid
 
-import cqrs
 import pydantic
 
 
@@ -15,7 +14,3 @@ class MessageAddedPayload(pydantic.BaseModel):
     reply_to: typing.Optional[uuid.UUID]
 
     created: datetime.datetime
-
-
-class NewMessageAddedECST(cqrs.ECSTEvent[MessageAddedPayload], frozen=True):
-    pass
