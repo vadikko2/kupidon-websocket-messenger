@@ -7,7 +7,8 @@ import orjson
 
 from domain import events as domain_events, messages
 from infrastructure.brokers import messages_broker
-from service import events as notification_events, exceptions, unit_of_work
+from service import exceptions, unit_of_work
+from service.ecst_events.messages import message_added
 
 logger = logging.getLogger(__name__)
 
@@ -42,9 +43,9 @@ class NewMessageAddedHandler(cqrs.EventHandler[domain_events.NewMessageAdded]):
                 raise exceptions.ChatNotFound(event.chat_id)
 
             message_bytes = orjson.dumps(
-                notification_events.NewMessageAddedECST(
+                message_added.NewMessageAddedECST(
                     event_name="NewMessageAdded",
-                    payload=notification_events.MessageAddedPayload(
+                    payload=message_added.MessageAddedPayload(
                         chat_id=message.chat_id,
                         message_id=message.message_id,
                         sender=message.sender,

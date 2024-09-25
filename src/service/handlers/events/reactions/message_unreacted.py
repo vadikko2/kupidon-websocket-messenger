@@ -3,7 +3,8 @@ import orjson
 
 from domain import events, messages
 from infrastructure.brokers import messages_broker
-from service import events as notification_events, exceptions, unit_of_work
+from service import exceptions, unit_of_work
+from service.ecst_events.reactions import message_unreacted
 
 
 class MessageUnreactedHandler(cqrs.EventHandler[events.MessageUnreacted]):
@@ -21,9 +22,9 @@ class MessageUnreactedHandler(cqrs.EventHandler[events.MessageUnreacted]):
             await self.broker.send_message(
                 message.sender,
                 orjson.dumps(
-                    notification_events.MessageUnreactedECST(
+                    message_unreacted.MessageUnreactedECST(
                         event_name="MessageUnreacted",
-                        payload=notification_events.MessageUnreactedPayload(
+                        payload=message_unreacted.MessageUnreactedPayload(
                             chat_id=message.chat_id,
                             message_id=message.message_id,
                             reaction_id=event.reaction_id,

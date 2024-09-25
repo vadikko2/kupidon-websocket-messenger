@@ -15,7 +15,7 @@ from infrastructure.settings import redis_settings
 from infrastructure.storages import attachment_storage, s3
 from presentation.api.schema import validators
 from service import mapping, unit_of_work
-from service.handlers.subscriptions import subscription as subscription_service
+from service.handlers.requests.subscriptions import subscription as subscription_service
 
 logger = logging.getLogger(__name__)
 

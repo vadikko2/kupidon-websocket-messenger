@@ -1,25 +1,29 @@
 from cqrs import events, requests
 
 from domain import events as domain_events
-from service.handlers.attachments import (
+from service.handlers.events.messages import (
+    message_added as message_deleted_handler,
+    new_message_added as new_message_added_handler,
+)
+from service.handlers.events.reactions import (
+    message_reacted as message_reacted_handler,
+    message_unreacted as message_unreacted_handler,
+)
+from service.handlers.requests.attachments import (
     get_attachments as get_attachments_handler,
     upload_attachment as upload_attachment_handler,
 )
-from service.handlers.chats import (
+from service.handlers.requests.chats import (
     get_chats as get_chats_handler,
     open_chat as open_chat_handler,
 )
-from service.handlers.messages import (
+from service.handlers.requests.messages import (
     apply_message as apply_message_handler,
     delete_message as delete_message_handler,
     get_messages as get_messages_handler,
-    message_deleted as message_deleted_handler,
-    new_message_added as new_message_added_handler,
     send_message as send_message_handler,
 )
-from service.handlers.reactions import (
-    message_reacted as message_reacted_handler,
-    message_unreacted as message_unreacted_handler,
+from service.handlers.requests.reactions import (
     react_message as react_message_handler,
     unreact_message as unreact_message_handler,
 )

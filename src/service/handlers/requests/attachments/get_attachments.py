@@ -42,10 +42,11 @@ class GetAttachmentsHandler(
             attachments=[
                 get_attachments.Attachment(
                     attachment_id=attachment.attachment_id,
-                    urls=attachment.urls,
+                    urls=attachment.urls,  # type: ignore
                     uploaded=attachment.uploaded,
                     content_type=attachment.content_type,
                 )
                 for attachment in attachments
+                if attachment.uploaded
             ],
         )

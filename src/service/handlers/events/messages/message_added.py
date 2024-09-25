@@ -3,7 +3,8 @@ import orjson
 
 from domain import events, messages
 from infrastructure.brokers import messages_broker
-from service import events as notification_events, exceptions, unit_of_work
+from service import exceptions, unit_of_work
+from service.ecst_events.messages import message_deleted
 
 
 class MessageDeletedHandler(cqrs.EventHandler[events.MessageDeleted]):
@@ -21,9 +22,9 @@ class MessageDeletedHandler(cqrs.EventHandler[events.MessageDeleted]):
             await self.broker.send_message(
                 event.message_sender,
                 orjson.dumps(
-                    notification_events.MessageDeletedECST(
+                    message_deleted.MessageDeletedECST(
                         event_name="MessageDeleted",
-                        payload=notification_events.MessageDeletedPayload(
+                        payload=message_deleted.MessageDeletedPayload(
                             chat_id=event.chat_id,
                             message_id=event.message_id,
                         ),

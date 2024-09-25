@@ -41,7 +41,7 @@ class SubscriptionService:
 
     async def wait_events(self) -> bytes | None:
         """
-        Returns new events from broker in real-time mode for the specified account.
+        Returns new ecst_events from broker in real-time mode for the specified account.
         """
         if not self.subscription_started or not self.target_account:
             raise exceptions.SubscriptionNotStarted()

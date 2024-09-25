@@ -47,7 +47,7 @@ class MessageRepository(abc.ABC):
 
     def events(self) -> typing.List[cqrs.DomainEvent]:
         """
-        Returns new domain events
+        Returns new domain ecst_events
         """
         new_events = []
         for message in self._seen:

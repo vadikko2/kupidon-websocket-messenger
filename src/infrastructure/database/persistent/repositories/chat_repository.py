@@ -60,7 +60,7 @@ class ChatRepository(abc.ABC):
 
     def events(self) -> typing.List[cqrs.DomainEvent]:
         """
-        Returns new domain events
+        Returns new domain ecst_events
         """
         new_events = []
         for attachment in self._seen:
