@@ -22,7 +22,7 @@ class MessageReactedHandler(cqrs.EventHandler[events.MessageReacted]):
             await self.broker.send_message(
                 message.sender,
                 orjson.dumps(
-                    cqrs.ECSTEvent(
+                    cqrs.NotificationEvent(
                         event_name="MessageReacted",
                         payload=message_reacted.MessageReactedPayload(
                             chat_id=message.chat_id,

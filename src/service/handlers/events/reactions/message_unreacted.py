@@ -22,7 +22,7 @@ class MessageUnreactedHandler(cqrs.EventHandler[events.MessageUnreacted]):
             await self.broker.send_message(
                 message.sender,
                 orjson.dumps(
-                    cqrs.ECSTEvent(
+                    cqrs.NotificationEvent(
                         event_name="MessageUnreacted",
                         payload=message_unreacted.MessageUnreactedPayload(
                             chat_id=message.chat_id,
