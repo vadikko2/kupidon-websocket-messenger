@@ -2,7 +2,6 @@
 FROM python:3.12.2-slim
 LABEL maintainer="Vadim Kozyrevskiy" \
       email="vadikko2@mail.ru"
-ENV TZ='Europe/Moscow'
 
 # hadolint ignore=DL3008
 RUN apt-get update && \
