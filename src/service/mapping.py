@@ -26,6 +26,7 @@ from service.handlers.requests.messages import (
 from service.handlers.requests.reactions import (
     react_message as react_message_handler,
     unreact_message as unreact_message_handler,
+    get_reactors as get_reactors_handler,
 )
 from service.requests.attachments import (
     get_attachments as get_attachments_request,
@@ -44,6 +45,7 @@ from service.requests.messages import (
 from service.requests.reactions import (
     react_message as react_message_request,
     unreact_message as unreact_message_request,
+    get_reactors as get_reactors_request,
 )
 
 
@@ -85,6 +87,10 @@ def init_requests(mapper: requests.RequestMap) -> None:
     mapper.bind(
         unreact_message_request.UnreactMessage,
         unreact_message_handler.UnreactMessageHandler,
+    )
+    mapper.bind(
+        get_reactors_request.GetReactors,
+        get_reactors_handler.GetReactorsHandler,
     )
 
 

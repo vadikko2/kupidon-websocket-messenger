@@ -3,7 +3,7 @@ from fastapi_app.exception_handlers import bind_exception, models
 from starlette import requests
 
 from domain import exceptions as domain_exceptions
-from presentation.api.schema.requests import EmojiValidationError
+from presentation.api.schema.validators import EmojiValidationError
 from service import exceptions as service_exceptions
 
 

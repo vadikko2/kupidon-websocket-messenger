@@ -87,7 +87,7 @@ async def get_attachments(
     )
     return response.Response(
         result=pagination.Pagination[get_attachments_request.AttachmentInfo](
-            url=f"/chats/{chat_id}/attachments/?",
+            url=f"/v1/chats/{chat_id}/attachments/?",
             base_items=result.attachments,
             limit=limit,
             offset=offset,

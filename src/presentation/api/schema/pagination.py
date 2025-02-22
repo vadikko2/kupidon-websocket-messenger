@@ -2,7 +2,7 @@ import typing
 
 import pydantic
 
-Item = typing.TypeVar("Item", bound=pydantic.BaseModel)
+Item = typing.TypeVar("Item")
 
 
 def slice_items(

@@ -3,14 +3,20 @@ import uuid
 
 import cqrs
 import fastapi
+import pydantic
 from fastapi import status
+from fastapi_app import response
 from fastapi_app.exception_handlers import registry
 
 from domain import exceptions as domain_exceptions
 from presentation import dependencies
-from presentation.api.schema import requests
+from presentation.api.schema import pagination, requests, validators
 from service import exceptions as service_exceptions
-from service.requests.reactions import react_message, unreact_message
+from service.requests.reactions import (
+    get_reactors as get_reactors_request,
+    react_message,
+    unreact_message,
+)
 
 router = fastapi.APIRouter(prefix="/reactions", tags=["Reactions"])
 
@@ -19,7 +25,7 @@ router = fastapi.APIRouter(prefix="/reactions", tags=["Reactions"])
     "",
     status_code=status.HTTP_204_NO_CONTENT,
     responses=registry.get_exception_responses(
-        requests.EmojiValidationError,
+        validators.EmojiValidationError,
         domain_exceptions.TooManyReactions,
         service_exceptions.MessageNotFound,
     ),
@@ -77,18 +83,32 @@ async def unreact(
 @router.get(
     "",
     status_code=status.HTTP_200_OK,
-    responses=registry.get_exception_responses(service_exceptions.MessageNotFound),
+    responses=registry.get_exception_responses(
+        service_exceptions.MessageNotFound,
+        validators.EmojiValidationError,
+        service_exceptions.MessageNotFound,
+    ),
 )
-async def get_reactions(
+async def get_reactors(
     message_id: uuid.UUID,
+    reaction: typing.Text = fastapi.Depends(validators.emoji_validator),
+    limit: pydantic.NonNegativeInt = fastapi.Query(default=10),
+    offset: pydantic.NonNegativeInt = fastapi.Query(default=0),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
     ),
-) -> fastapi.Response:
+) -> response.Response[pagination.Pagination[typing.Text]]:
     """
-    # Returns reactions for message
+    # Returns reactors for message reaction
     """
-    # reactions: list[requests.Reaction] = await mediator.send(
-    #     requests.GetReactions(message_id=message_id),
-    # )
-    return fastapi.Response(content=[])
+    reactors: get_reactors_request.Reactors = await mediator.send(
+        get_reactors_request.GetReactors(message_id=message_id, emoji=reaction),
+    )
+    return response.Response(
+        result=pagination.Pagination[typing.Text](
+            url=f"/v1/messages/{message_id}/reactions/?reaction={reaction}",
+            base_items=reactors.reactors,
+            limit=limit,
+            offset=offset,
+        ),
+    )
