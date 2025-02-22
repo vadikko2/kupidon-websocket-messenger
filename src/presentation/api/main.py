@@ -21,6 +21,7 @@ config.dictConfig(log_config)
 logging.getLogger("asyncio").setLevel(logging.ERROR)
 logging.getLogger("urllib3").setLevel(logging.ERROR)
 logging.getLogger("multipart").setLevel(logging.ERROR)
+logging.getLogger("cqrs").setLevel(logging.ERROR)
 
 app = fastapi_app.create(
     debug=app_settings.DEBUG,
@@ -30,7 +31,7 @@ app = fastapi_app.create(
     env_title=app_settings.ENV,
     query_routers=[
         routes.v1_router,
-        routes.service.router,
+        routes.healthcheck.router,
     ],
     exception_handlers=[
         errors.handlers.change_status_access_donated_handler,

@@ -113,10 +113,32 @@ class Message(pydantic.BaseModel):
             [reaction for reaction in self.reactions if reaction.reactor == reactor],
         )
 
+    def _already_reacted_by_reactor(
+        self,
+        emoji: typing.Text,
+        reactor: typing.Text,
+    ) -> bool:
+        """
+        Returns True if reactor already reacted with emoji
+        """
+        return bool(
+            [
+                reaction
+                for reaction in self.reactions
+                if reaction.reactor == reactor and reaction.emoji == emoji
+            ],
+        )
+
     def react(self, reaction: reaction_entities.Reaction) -> None:
         """
         Reacts to message
         """
+        if self._already_reacted_by_reactor(reaction.emoji, reaction.reactor):
+            logger.debug(
+                f"Message {self.message_id} already reacted by {reaction.reactor} with {reaction.emoji}",
+            )
+            return
+
         if len(self.reactions) == TOTAL_EMOJI_NUMBER:
             raise exceptions.TooManyReactions(
                 reactor=reaction.reactor,
@@ -148,7 +170,12 @@ class Message(pydantic.BaseModel):
         """
         Unreacts from message
         """
+        len_before_remove = len(self.reactions)
         self.reactions.remove(reaction)
+
+        if len(self.reactions) == len_before_remove:
+            return
+
         logger.debug(
             f"Message {self.message_id} unreacted by {reaction.reactor} with {reaction.emoji}",
         )

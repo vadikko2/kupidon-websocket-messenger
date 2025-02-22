@@ -17,7 +17,7 @@ from service.requests.messages import (
     send_message as send_message_request,
 )
 
-router = fastapi.APIRouter(prefix="/{chat_id}/messages")
+router = fastapi.APIRouter(prefix="/{chat_id}/messages", tags=["Messages"])
 
 
 @router.post(

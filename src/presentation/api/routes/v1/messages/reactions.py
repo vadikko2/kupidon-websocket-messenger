@@ -12,7 +12,7 @@ from presentation.api.schema import requests
 from service import exceptions as service_exceptions
 from service.requests.reactions import react_message, unreact_message
 
-router = fastapi.APIRouter(prefix="/reactions")
+router = fastapi.APIRouter(prefix="/reactions", tags=["Reactions"])
 
 
 @router.post(

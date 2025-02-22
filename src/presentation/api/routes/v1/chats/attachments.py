@@ -18,7 +18,7 @@ from service.requests.attachments import (
     upload_attachment as upload_attachment_request,
 )
 
-router = fastapi.APIRouter(prefix="/{chat_id}/attachments")
+router = fastapi.APIRouter(prefix="/{chat_id}/attachments", tags=["Attachments"])
 
 logger = logging.getLogger(__name__)
 

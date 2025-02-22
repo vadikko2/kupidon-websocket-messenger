@@ -48,7 +48,7 @@ class AttachmentRepository(abc.ABC):
         """Rollbacks changes"""
         raise NotImplementedError
 
-    def events(self) -> typing.List[cqrs.DomainEvent]:
+    def events(self) -> typing.List[cqrs.Event]:
         """
         Returns new domain ecst_events
         """

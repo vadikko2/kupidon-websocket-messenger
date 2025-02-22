@@ -5,14 +5,16 @@ import uuid
 import cqrs
 import fastapi
 from fastapi import status
+from fastapi_app import response
 from fastapi_app.exception_handlers import registry
 
 from domain import messages
 from presentation import dependencies
 from service import exceptions
 from service.requests.messages import (
-    delete_message as delete_message_request,
     apply_message as apply_message_request,
+    delete_message as delete_message_request,
+    get_messages as get_messages_request,
 )
 
 router = fastapi.APIRouter(prefix="", tags=["Messages"])
@@ -104,3 +106,29 @@ async def delete_message(
         ),
     )
     return fastapi.Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get(
+    "/preview",
+    status_code=status.HTTP_200_OK,
+    responses=registry.get_exception_responses(
+        exceptions.MessageNotFound,
+    ),
+)
+async def get_message_preview(
+    message_id: uuid.UUID,
+    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    mediator: cqrs.RequestMediator = fastapi.Depends(
+        dependency=dependencies.request_mediator_factory,
+    ),
+) -> response.Response[get_messages_request.MessagePreview]:
+    """
+    # Returns message preview by message id
+    """
+    message: get_messages_request.MessagePreview = await mediator.send(
+        get_messages_request.GetMessagePreview(
+            message_id=message_id,
+            account=account_id,
+        ),
+    )
+    return response.Response(result=message)

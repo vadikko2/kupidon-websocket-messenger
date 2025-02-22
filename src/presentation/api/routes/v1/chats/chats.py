@@ -19,7 +19,11 @@ router = fastapi.APIRouter(prefix="")
 logger = logging.getLogger(__name__)
 
 
-@router.post("", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    tags=["Chats"],
+    status_code=status.HTTP_201_CREATED,
+)
 async def open_chat(
     participants: typing.List[typing.Text] = fastapi.Body(
         ...,
@@ -44,7 +48,11 @@ async def open_chat(
     return response.Response(result=responses.ChatCreated(chat_id=result.chat_id))
 
 
-@router.get("", status_code=status.HTTP_201_CREATED)
+@router.get(
+    "",
+    tags=["Chats"],
+    status_code=status.HTTP_201_CREATED,
+)
 async def get_chats(
     limit: pydantic.NonNegativeInt = fastapi.Query(default=10),
     offset: pydantic.NonNegativeInt = fastapi.Query(default=0),

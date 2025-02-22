@@ -17,7 +17,7 @@ class GetAttachments(cqrs.Request):
 
 class Attachment(pydantic.BaseModel):
     attachment_id: uuid.UUID
-    urls: typing.List[pydantic.AnyHttpUrl]
+    urls: typing.Sequence[pydantic.AnyHttpUrl]
     uploaded: datetime.datetime
     content_type: attachments.AttachmentType
 

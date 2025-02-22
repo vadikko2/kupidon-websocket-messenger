@@ -4,8 +4,8 @@ import uuid
 
 import pydantic
 
-from domain import messages as messages_entity
 from service.requests.attachments import get_attachments
+from service.requests.messages import get_messages
 
 
 class MessageSent(pydantic.BaseModel):
@@ -52,7 +52,7 @@ class MessagesPage(pydantic.BaseModel):
     )
 
     chat_id: uuid.UUID
-    messages: typing.List[messages_entity.Message] = pydantic.Field(
+    messages: typing.List[get_messages.MessageInfo] = pydantic.Field(
         default_factory=list,
     )
 

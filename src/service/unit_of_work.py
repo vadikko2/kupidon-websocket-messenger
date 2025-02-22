@@ -30,7 +30,7 @@ class UoW(abc.ABC):
         await self.chat_repository.rollback()
         await self.attachment_repository.rollback()
 
-    def get_events(self) -> typing.List[cqrs.DomainEvent]:
+    def get_events(self) -> typing.List[cqrs.Event]:
         return (
             self.message_repository.events()
             + self.chat_repository.events()
