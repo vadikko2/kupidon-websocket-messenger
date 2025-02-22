@@ -28,7 +28,7 @@ class UnreactMessageHandler(cqrs.RequestHandler[unreact_message.UnreactMessage, 
                 None,
             )
             if reaction is None:
-                raise exceptions.ReactionNotFound(request.reaction)
+                return
 
             message.unreact(reaction)
 

@@ -56,7 +56,6 @@ async def react(
     status_code=status.HTTP_204_NO_CONTENT,
     responses=registry.get_exception_responses(
         service_exceptions.MessageNotFound,
-        service_exceptions.ReactionNotFound,
     ),
 )
 async def unreact(

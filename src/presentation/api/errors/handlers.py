@@ -24,14 +24,6 @@ def message_not_found_handler(
 
 
 @bind_exception(status.HTTP_404_NOT_FOUND)
-def reaction_not_found_handler(
-    _: requests.Request,
-    error: service_exceptions.ReactionNotFound,
-) -> models.ErrorResponse:
-    return models.ErrorResponse(message=str(error))
-
-
-@bind_exception(status.HTTP_404_NOT_FOUND)
 def chat_not_found_handler(
     _: requests.Request,
     error: service_exceptions.ChatNotFound,
