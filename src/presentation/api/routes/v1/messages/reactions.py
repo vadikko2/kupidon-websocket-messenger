@@ -23,7 +23,7 @@ router = fastapi.APIRouter(prefix="/reactions", tags=["Reactions"])
 
 @router.post(
     "",
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_201_CREATED,
     responses=registry.get_exception_responses(
         validators.EmojiValidationError,
         domain_exceptions.TooManyReactions,
@@ -48,11 +48,11 @@ async def react(
             emoji=reaction.emoji,
         ),
     )
-    return fastapi.Response(status_code=status.HTTP_204_NO_CONTENT)
+    return fastapi.Response(status_code=status.HTTP_201_CREATED)
 
 
 @router.delete(
-    "/{reaction_id}",
+    "",
     status_code=status.HTTP_204_NO_CONTENT,
     responses=registry.get_exception_responses(
         service_exceptions.MessageNotFound,
@@ -61,7 +61,7 @@ async def react(
 )
 async def unreact(
     message_id: uuid.UUID,
-    reaction_id: uuid.UUID,
+    reaction: requests.Reaction = fastapi.Body(...),
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
@@ -74,7 +74,7 @@ async def unreact(
         unreact_message.UnreactMessage(
             message_id=message_id,
             unreactor=account_id,
-            reaction_id=reaction_id,
+            reaction=reaction.emoji,
         ),
     )
     return fastapi.Response(status_code=status.HTTP_204_NO_CONTENT)

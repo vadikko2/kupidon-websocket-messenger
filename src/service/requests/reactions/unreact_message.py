@@ -6,5 +6,5 @@ import cqrs
 
 class UnreactMessage(cqrs.Request):
     unreactor: typing.Text
-    reaction_id: uuid.UUID
+    reaction: typing.Text
     message_id: uuid.UUID

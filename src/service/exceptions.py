@@ -68,8 +68,8 @@ class SubscriptionNotStarted(Exception):
 
 
 class ReactionNotFound(Exception):
-    def __init__(self, reaction_id: uuid.UUID) -> None:
-        super().__init__(f"Reaction {reaction_id} not found")
+    def __init__(self, reaction: typing.Text) -> None:
+        super().__init__(f"Reaction {reaction} not found")
 
 
 class MessageNotDeleted(Exception):

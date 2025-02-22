@@ -22,13 +22,13 @@ class UnreactMessageHandler(cqrs.RequestHandler[unreact_message.UnreactMessage, 
 
             reaction = next(
                 filter(
-                    lambda r: r.reaction_id == request.reaction_id,
+                    lambda r: r.emoji == request.reaction,
                     message.reactions,
                 ),
                 None,
             )
             if reaction is None:
-                raise exceptions.ReactionNotFound(request.reaction_id)
+                raise exceptions.ReactionNotFound(request.reaction)
 
             message.unreact(reaction)
 
