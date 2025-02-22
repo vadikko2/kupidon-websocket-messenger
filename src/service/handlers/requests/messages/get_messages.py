@@ -80,3 +80,47 @@ class GetMessagesHandler(
                 )
 
         return get_messages.Messages(messages=messages)
+
+
+class GetMessagePreviewHandler(
+    cqrs.RequestHandler[get_messages.GetMessagePreview, get_messages.MessagePreview],
+):
+    def __init__(self, uow: unit_of_work.UoW):
+        self.uow = uow
+
+    @property
+    def events(self):
+        return []
+
+    async def handle(
+        self,
+        request: get_messages.GetMessagePreview,
+    ) -> get_messages.MessagePreview:
+        async with self.uow:
+            message = await self.uow.message_repository.get(
+                message_id=request.message_id,
+            )
+            if not message:
+                raise exceptions.MessageNotFound(request.message_id)
+
+            chat = await self.uow.chat_repository.get(
+                chat_id=message.chat_id,
+            )
+
+            if not chat:
+                raise exceptions.ChatNotFound(message.chat_id)
+
+            if request.account not in chat.participants:
+                raise exceptions.ParticipantNotInChat(
+                    request.account,
+                    chat.chat_id,
+                )
+
+            return get_messages.MessagePreview(
+                message_id=message.message_id,
+                chat_id=message.chat_id,
+                sender=message.sender,
+                content=message.content,
+                status=message.status,
+                created=message.created,
+            )

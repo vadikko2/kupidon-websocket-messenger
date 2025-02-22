@@ -67,6 +67,10 @@ def init_requests(mapper: requests.RequestMap) -> None:
         get_messages_handler.GetMessagesHandler,
     )
     mapper.bind(
+        get_messages_request.GetMessagePreview,
+        get_messages_handler.GetMessagePreviewHandler,
+    )
+    mapper.bind(
         get_attachments_request.GetAttachments,
         get_attachments_handler.GetAttachmentsHandler,
     )

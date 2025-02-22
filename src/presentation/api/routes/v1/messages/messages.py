@@ -113,6 +113,8 @@ async def delete_message(
     status_code=status.HTTP_200_OK,
     responses=registry.get_exception_responses(
         exceptions.MessageNotFound,
+        exceptions.ParticipantNotInChat,
+        exceptions.ChatNotFound,
     ),
 )
 async def get_message_preview(

@@ -20,15 +20,15 @@ TOTAL_EMOJI_NUMBER = 12
 EMOJI_PER_REACTOR = 3
 
 
-class MessageStatus(enum.IntEnum):
+class MessageStatus(enum.StrEnum):
     """
     Message statuses
     """
 
-    SENT = 1
-    RECEIVED = 2
-    READ = 4
-    DELETED = 5
+    SENT = "sent"
+    RECEIVED = "received"
+    READ = "read"
+    DELETED = "deleted"
 
 
 class Message(pydantic.BaseModel):

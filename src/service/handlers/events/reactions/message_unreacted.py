@@ -4,7 +4,7 @@ import orjson
 from domain import events, messages
 from infrastructure.brokers import messages_broker
 from service import exceptions, unit_of_work
-from service.ecst_events.reactions import message_unreacted
+from service.requests.ecst_events.reactions import message_unreacted
 
 
 class MessageUnreactedHandler(cqrs.EventHandler[events.MessageUnreacted]):

@@ -8,7 +8,7 @@ import orjson
 from domain import events as domain_events, messages
 from infrastructure.brokers import messages_broker
 from service import exceptions, unit_of_work
-from service.ecst_events.messages import message_added
+from service.requests.ecst_events.messages import message_added
 
 logger = logging.getLogger(__name__)
 
