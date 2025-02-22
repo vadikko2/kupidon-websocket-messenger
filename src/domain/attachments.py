@@ -37,10 +37,7 @@ class Attachment(pydantic.BaseModel):
         default_factory=datetime.datetime.now,
         frozen=True,
     )
-    uploaded: datetime.datetime = pydantic.Field(
-        default_factory=datetime.datetime.now,
-        frozen=True,
-    )
+    uploaded: datetime.datetime | None = pydantic.Field(default=None)
 
     urls: typing.Sequence[pydantic.AnyHttpUrl] = pydantic.Field(default_factory=list)
     filename: typing.Optional[typing.Text] = pydantic.Field(
