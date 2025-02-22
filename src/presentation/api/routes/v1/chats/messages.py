@@ -10,7 +10,7 @@ from fastapi_app.exception_handlers import registry
 
 from domain import exceptions as domain_exceptions
 from presentation import dependencies
-from presentation.api.schema import responses, validators
+from presentation.api.schema import pagination, responses, validators
 from service import exceptions
 from service.requests.messages import (
     get_messages as get_messages_request,
@@ -84,7 +84,7 @@ async def get_messages(
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
     ),
-) -> response.Response[responses.MessagesPage]:
+) -> response.Response[pagination.Pagination[get_messages_request.MessageInfo]]:
     """
     # Returns chat messages
     """
@@ -97,10 +97,9 @@ async def get_messages(
         ),
     )
     return response.Response(
-        result=responses.MessagesPage(
-            chat_id=chat_id,
-            messages=result.messages,
+        result=pagination.Pagination[get_messages_request.MessageInfo](
+            url=f"/chats/{chat_id}/messages/?latest_id={result.messages[-1].message_id if result.messages else None}",
+            base_items=result.messages,
             limit=limit,
-            latest_id=result.messages[-1].message_id if result.messages else None,
         ),
     )

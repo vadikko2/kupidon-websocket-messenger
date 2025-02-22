@@ -23,5 +23,13 @@ class GetChatsHandler(cqrs.RequestHandler[get_chats.GetChats, get_chats.Chats]):
                 reverse=True,
             )
             return get_chats.Chats(
-                chats=sorted_chats[request.offset : request.offset + request.limit],
+                chats=[
+                    get_chats.ChatInfo(
+                        chat_id=chat.chat_id,
+                        name=chat.name,
+                        last_activity_timestamp=chat.last_activity_timestamp,
+                        last_message_id=chat.last_message,
+                    )
+                    for chat in sorted_chats
+                ],
             )

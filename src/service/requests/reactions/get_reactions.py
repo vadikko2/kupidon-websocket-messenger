@@ -10,4 +10,5 @@ class GetReactors(cqrs.Request):
 
 
 class Reactors(cqrs.Response):
-    pass
+    emoji: typing.Text
+    reactors: list[typing.Text]

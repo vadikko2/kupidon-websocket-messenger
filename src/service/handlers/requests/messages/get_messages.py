@@ -57,8 +57,9 @@ class GetMessagesHandler(
                     )
                 for attach in message.attachments:
                     message_attachments.append(
-                        get_attachments.Attachment(
+                        get_attachments.AttachmentInfo(
                             attachment_id=attach.attachment_id,
+                            chat_id=attach.chat_id,
                             urls=attach.urls,
                             uploaded=attach.uploaded,
                             content_type=attach.content_type,

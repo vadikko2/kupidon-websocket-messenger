@@ -11,7 +11,7 @@ from starlette import status
 
 from domain import attachments as attachment_entities
 from presentation import dependencies
-from presentation.api.schema import responses
+from presentation.api.schema import pagination
 from service import exceptions
 from service.requests.attachments import (
     get_attachments as get_attachments_request,
@@ -73,7 +73,7 @@ async def get_attachments(
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
     ),
-) -> response.Response[responses.AttachmentsPage]:
+) -> response.Response[pagination.Pagination[get_attachments_request.AttachmentInfo]]:
     """
     # Returns all attachments in chat
     """
@@ -86,9 +86,9 @@ async def get_attachments(
         ),
     )
     return response.Response(
-        result=responses.AttachmentsPage(
-            chat_id=result.chat_id,
-            attachments=result.attachments,
+        result=pagination.Pagination[get_attachments_request.AttachmentInfo](
+            url=f"/chats/{chat_id}/attachments/?",
+            base_items=result.attachments,
             limit=limit,
             offset=offset,
         ),

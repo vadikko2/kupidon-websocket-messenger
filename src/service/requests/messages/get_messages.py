@@ -27,7 +27,7 @@ class MessageInfo(cqrs.Request):
     message_id: uuid.UUID
     sender: typing.Text
     content: typing.Text
-    attachments: typing.List[get_attachments.Attachment]
+    attachments: typing.List[get_attachments.AttachmentInfo]
     reactions: typing.List[ReactionsUnderMessage]
     status: messages_entity.MessageStatus
     created: datetime.datetime

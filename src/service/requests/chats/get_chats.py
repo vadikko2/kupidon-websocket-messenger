@@ -1,16 +1,20 @@
+import datetime
 import typing
+import uuid
 
 import cqrs
-import pydantic
-
-from domain import chats
 
 
 class GetChats(cqrs.Request):
     participant: typing.Text
-    limit: pydantic.NonNegativeInt
-    offset: pydantic.NonNegativeInt
+
+
+class ChatInfo(cqrs.Response):
+    chat_id: uuid.UUID
+    name: typing.Text | None
+    last_activity_timestamp: typing.Optional[datetime.datetime]
+    last_message_id: uuid.UUID | None
 
 
 class Chats(cqrs.Response):
-    chats: typing.List[chats.Chat]
+    chats: typing.Sequence[ChatInfo]

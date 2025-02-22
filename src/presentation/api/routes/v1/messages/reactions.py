@@ -72,3 +72,23 @@ async def unreact(
         ),
     )
     return fastapi.Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get(
+    "",
+    status_code=status.HTTP_200_OK,
+    responses=registry.get_exception_responses(service_exceptions.MessageNotFound),
+)
+async def get_reactions(
+    message_id: uuid.UUID,
+    mediator: cqrs.RequestMediator = fastapi.Depends(
+        dependency=dependencies.request_mediator_factory,
+    ),
+) -> fastapi.Response:
+    """
+    # Returns reactions for message
+    """
+    # reactions: list[requests.Reaction] = await mediator.send(
+    #     requests.GetReactions(message_id=message_id),
+    # )
+    return fastapi.Response(content=[])

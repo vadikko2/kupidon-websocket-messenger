@@ -8,7 +8,7 @@ from fastapi import status
 from fastapi_app import response
 
 from presentation import dependencies
-from presentation.api.schema import responses
+from presentation.api.schema import pagination, responses
 from service.requests.chats import (
     get_chats as get_chats_request,
     open_chat as open_chat_request,
@@ -60,28 +60,17 @@ async def get_chats(
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
     ),
-) -> response.Response[responses.ChatList]:
+) -> response.Response[pagination.Pagination[get_chats_request.ChatInfo]]:
     """
     # Returns chat with specified participant
     """
     result: get_chats_request.Chats = await mediator.send(
-        get_chats_request.GetChats(
-            participant=account_id,
-            limit=limit,
-            offset=offset,
-        ),
+        get_chats_request.GetChats(participant=account_id),
     )
     return response.Response(
-        result=responses.ChatList(
-            chats=[
-                responses.ChatInfo(
-                    chat_id=chat.chat_id,
-                    name=chat.name,
-                    last_activity_timestamp=chat.last_activity_timestamp,
-                    last_message_id=chat.last_message,
-                )
-                for chat in result.chats
-            ],
+        result=pagination.Pagination[get_chats_request.ChatInfo](
+            url="/chats/?",
+            base_items=result.chats,
             limit=limit,
             offset=offset,
         ),

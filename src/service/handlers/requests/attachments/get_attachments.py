@@ -38,9 +38,9 @@ class GetAttachmentsHandler(
             )
 
         return get_attachments.Attachments(
-            chat_id=chat.chat_id,
             attachments=[
-                get_attachments.Attachment(
+                get_attachments.AttachmentInfo(
+                    chat_id=chat.chat_id,
                     attachment_id=attachment.attachment_id,
                     urls=attachment.urls,  # type: ignore
                     uploaded=attachment.uploaded,

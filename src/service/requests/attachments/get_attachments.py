@@ -15,13 +15,13 @@ class GetAttachments(cqrs.Request):
     offset: pydantic.NonNegativeInt
 
 
-class Attachment(pydantic.BaseModel):
+class AttachmentInfo(pydantic.BaseModel):
     attachment_id: uuid.UUID
+    chat_id: uuid.UUID
     urls: typing.Sequence[pydantic.AnyHttpUrl]
     uploaded: datetime.datetime
     content_type: attachments.AttachmentType
 
 
 class Attachments(cqrs.Response):
-    chat_id: uuid.UUID
-    attachments: typing.List[Attachment]
+    attachments: typing.List[AttachmentInfo]
