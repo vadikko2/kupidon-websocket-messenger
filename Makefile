@@ -1,17 +1,6 @@
 all: run
 
 install:
-	@echo "Copying requirements.txt to requirements.tmp.txt"
-	@if [ -f ./requirements.txt ]; then \
-	cp requirements.txt requirements.tmp.txt; \
-	else \
-	@echo "requirements.txt not found!"; \
-	exit 1; \
-	fi
-
-	@echo "Replacing GitHub URL with token"
-	@sed -i '' "s|https://github.com/vadikko2|https://$(GITHUB_TOKEN)@github.com/vadikko2|g" requirements.tmp.txt
-
 	@echo "Installing requirements"
 	@bash -c "source ./venv/bin/activate; pip install --no-cache-dir -r requirements.tmp.txt --root-user-action=ignore"
 
@@ -19,27 +8,6 @@ install:
 	@rm -f requirements.tmp.txt
 
 dev:
-	@echo "Copying requirements.txt to requirements.tmp.txt"
-	@if [ -f ./requirements.txt ]; then \
-	cp requirements.txt requirements.tmp.txt; \
-	else \
-	@echo "requirements.txt not found!"; \
-	exit 1; \
-	fi
-
-	@echo "Copying requirements-dev.txt to requirements-dev.tmp.txt"
-	@if [ -f ./requirements-dev.txt ]; then \
-	cp requirements-dev.txt requirements-dev.tmp.txt; \
-	else \
-	@echo "requirements-dev.txt not found!"; \
-	exit 1; \
-	fi
-
-	@echo "Replacing GitHub URL with token"
-	@sed -i '' "s|https://github.com/vadikko2|https://$(GITHUB_TOKEN)@github.com/vadikko2|g" requirements.tmp.txt
-	@echo "Replacing requirements file path with token"
-	@sed -i '' "s|requirements.txt|requirements.tmp.txt|g" requirements-dev.tmp.txt
-
 	@echo "Installing requirements-dev"
 	@bash -c "source ./venv/bin/activate; pip install --no-cache-dir -r requirements-dev.tmp.txt --root-user-action=ignore"
 
