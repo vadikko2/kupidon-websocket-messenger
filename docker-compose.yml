@@ -5,8 +5,6 @@ services:
     hostname: redis-dev
     ports:
       - 6379:6379
-    #    environment:
-    #      REDIS_ARGS: --requirepass configurations
     healthcheck:
       test: [ CMD, redis-cli, ping ]
       interval: 5s
