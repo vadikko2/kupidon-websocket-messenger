@@ -80,7 +80,7 @@ async def unreact(
 
 
 @router.get(
-    "",
+    "/reactors",
     status_code=status.HTTP_200_OK,
     responses=registry.get_exception_responses(
         service_exceptions.MessageNotFound,
