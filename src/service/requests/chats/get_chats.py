@@ -3,6 +3,7 @@ import typing
 import uuid
 
 import cqrs
+import pydantic
 
 
 class GetChats(cqrs.Request):
@@ -12,8 +13,13 @@ class GetChats(cqrs.Request):
 class ChatInfo(cqrs.Response):
     chat_id: uuid.UUID
     name: typing.Text | None
+    participants_count: pydantic.NonNegativeInt
     last_activity_timestamp: typing.Optional[datetime.datetime]
     last_message_id: uuid.UUID | None
+    not_read_messages_count: pydantic.NonNegativeInt = pydantic.Field(
+        description="Count of not read messages",
+        default=0,
+    )
 
 
 class Chats(cqrs.Response):

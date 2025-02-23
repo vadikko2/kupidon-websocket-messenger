@@ -34,14 +34,21 @@ class Chat(pydantic.BaseModel):
     )
 
     history: typing.List[messages.Message] = pydantic.Field(default_factory=list)
+    not_read_messages: typing.List[uuid.UUID] = pydantic.Field(default_factory=list)
 
     deleted: bool = False
 
     event_list: typing.List[cqrs.DomainEvent] = pydantic.Field(default_factory=list)
 
     @pydantic.computed_field()
+    @property
     def participants_count(self) -> pydantic.NonNegativeInt:
         return len(self.participants)
+
+    @pydantic.computed_field()
+    @property
+    def not_read_messages_count(self) -> pydantic.NonNegativeInt:
+        return len(self.not_read_messages)
 
     def add_message(self, message: messages.Message) -> None:
         """
@@ -51,6 +58,7 @@ class Chat(pydantic.BaseModel):
             raise exceptions.DuplicateMessage(message.message_id, self.chat_id)
 
         self.history.append(message)
+        self.not_read_messages.append(message.message_id)
 
         self.last_message = message.message_id
         self.last_activity_timestamp = message.created
@@ -63,6 +71,9 @@ class Chat(pydantic.BaseModel):
                 message_id=message.message_id,
             ),
         )
+
+    def read_message(self, message_id: uuid.UUID) -> None:
+        self.not_read_messages.remove(message_id)
 
     def add_participant(
         self,

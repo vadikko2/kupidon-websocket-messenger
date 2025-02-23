@@ -26,6 +26,13 @@ class ChatRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
+    async def update(self, chat: chats.Chat) -> None:
+        """
+        Updates chat
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
     async def get_chat_history(
         self,
         chat_id: uuid.UUID,

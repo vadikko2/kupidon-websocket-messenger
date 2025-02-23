@@ -38,6 +38,8 @@ class ApplyMessageHandler(
 
             elif request.status == messages.MessageStatus.READ:
                 message.read(request.applier)
+                chat.read_message(message.message_id)
+                await self.uow.chat_repository.update(chat)
 
             await self.uow.message_repository.update(message)
             await self.uow.commit()
