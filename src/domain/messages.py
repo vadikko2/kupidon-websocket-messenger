@@ -197,3 +197,8 @@ class Message(pydantic.BaseModel):
 
     def __hash__(self):
         return hash(self.message_id)
+
+    def __eq__(self, other):
+        if not isinstance(other, Message):
+            return False
+        return self.message_id == other.message_id

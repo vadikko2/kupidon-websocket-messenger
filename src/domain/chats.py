@@ -6,7 +6,7 @@ import uuid
 import cqrs
 import pydantic
 
-from domain import events, exceptions, messages
+from domain import events, messages
 
 logger = logging.getLogger(__name__)
 
@@ -26,14 +26,14 @@ class Chat(pydantic.BaseModel):
         description="Initiator account ID",
         frozen=True,
     )
-    participants: typing.List[typing.Text] = pydantic.Field(default_factory=list)
+    participants: typing.Set[typing.Text] = pydantic.Field(default_factory=set)
 
     last_message: typing.Optional[uuid.UUID] = None
     last_activity_timestamp: datetime.datetime = pydantic.Field(
         default_factory=datetime.datetime.now,
     )
 
-    history: typing.List[messages.Message] = pydantic.Field(default_factory=list)
+    history: typing.Set[messages.Message] = pydantic.Field(default_factory=set)
     not_read_messages: typing.List[uuid.UUID] = pydantic.Field(default_factory=list)
 
     deleted: bool = False
@@ -55,9 +55,9 @@ class Chat(pydantic.BaseModel):
         Registers new message
         """
         if message in self.history:
-            raise exceptions.DuplicateMessage(message.message_id, self.chat_id)
+            return
 
-        self.history.append(message)
+        self.history.add(message)
         self.not_read_messages.append(message.message_id)
 
         self.last_message = message.message_id
@@ -84,10 +84,9 @@ class Chat(pydantic.BaseModel):
         Adds new participant to chat
         """
         if account_id in self.participants:
-            raise exceptions.AlreadyChatParticipant(account_id, self.chat_id)
+            return
 
-        self.participants.append(account_id)
-
+        self.participants.add(account_id)
         logger.debug(
             f"Account {account_id} added to chat {self.chat_id} by {initiated_by}",
         )

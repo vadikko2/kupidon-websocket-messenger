@@ -5,7 +5,7 @@ import typing
 import fastapi
 from fastapi import status
 
-from presentation import dependencies
+from presentation.api import dependencies
 from service.handlers.requests.subscriptions import subscription as subscription_service
 
 router = fastapi.APIRouter(

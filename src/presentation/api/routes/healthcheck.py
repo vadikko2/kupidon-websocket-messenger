@@ -5,7 +5,7 @@ import fastapi
 from fastapi import responses
 
 from infrastructure.brokers import redis
-from presentation import dependencies
+from presentation.api import dependencies
 from presentation.api.schema import heathcheck as healthcheck_response
 
 logger = logging.getLogger(__name__)

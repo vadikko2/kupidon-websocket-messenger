@@ -8,8 +8,7 @@ from fastapi import status
 from fastapi_app import response
 from fastapi_app.exception_handlers import registry
 
-from domain import exceptions as domain_exceptions
-from presentation import dependencies
+from presentation.api import dependencies
 from presentation.api.schema import pagination, responses, validators
 from service import exceptions
 from service.requests.messages import (
@@ -24,7 +23,6 @@ router = fastapi.APIRouter(prefix="/{chat_id}/messages", tags=["Messages"])
     "",
     status_code=status.HTTP_201_CREATED,
     responses=registry.get_exception_responses(
-        domain_exceptions.DuplicateMessage,
         exceptions.ChatNotFound,
         exceptions.AttachmentNotFound,
         exceptions.AttachmentNotForChat,

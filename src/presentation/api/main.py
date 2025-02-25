@@ -43,8 +43,6 @@ app = fastapi_app.create(
         errors.handlers.not_participant_in_chat_handler,
         errors.handlers.start_subscription_error_handler,
         errors.handlers.subscription_not_started_handler,
-        errors.handlers.already_chat_participant_handler,
-        errors.handlers.duplicate_message_handler,
         errors.handlers.too_many_reactions_handler,
         errors.handlers.emoji_validation_error_handler,
     ],

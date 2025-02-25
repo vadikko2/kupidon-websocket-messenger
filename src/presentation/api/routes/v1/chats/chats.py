@@ -7,7 +7,7 @@ import pydantic
 from fastapi import status
 from fastapi_app import response
 
-from presentation import dependencies
+from presentation.api import dependencies
 from presentation.api.schema import pagination, responses
 from service.requests.chats import (
     get_chats as get_chats_request,

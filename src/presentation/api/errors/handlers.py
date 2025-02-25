@@ -79,22 +79,6 @@ def subscription_not_started_handler(
     return models.ErrorResponse(message=str(error))
 
 
-@bind_exception(status.HTTP_409_CONFLICT)
-def already_chat_participant_handler(
-    _: requests.Request,
-    error: domain_exceptions.AlreadyChatParticipant,
-) -> models.ErrorResponse:
-    return models.ErrorResponse(message=str(error))
-
-
-@bind_exception(status.HTTP_409_CONFLICT)
-def duplicate_message_handler(
-    _: requests.Request,
-    error: domain_exceptions.DuplicateMessage,
-) -> models.ErrorResponse:
-    return models.ErrorResponse(message=str(error))
-
-
 @bind_exception(status.HTTP_400_BAD_REQUEST)
 def too_many_reactions_handler(
     _: requests.Request,

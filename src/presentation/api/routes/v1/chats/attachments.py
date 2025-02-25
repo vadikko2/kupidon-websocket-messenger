@@ -10,7 +10,7 @@ from fastapi_app.exception_handlers import registry
 from starlette import status
 
 from domain import attachments as attachment_entities
-from presentation import dependencies
+from presentation.api import dependencies
 from presentation.api.schema import pagination
 from service import exceptions
 from service.requests.attachments import (

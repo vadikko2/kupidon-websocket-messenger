@@ -9,7 +9,7 @@ from fastapi_app import response
 from fastapi_app.exception_handlers import registry
 
 from domain import messages
-from presentation import dependencies
+from presentation.api import dependencies
 from service import exceptions
 from service.requests.messages import (
     apply_message as apply_message_request,
