@@ -17,6 +17,7 @@ class OpenChatHandler(cqrs.RequestHandler[open_chat.OpenChat, open_chat.ChatOpen
         new_chat = chats.Chat(
             initiator=request.initiator,
             name=request.name,
+            avatar=request.avatar,
         )
 
         new_chat.add_participant(request.initiator, request.initiator)

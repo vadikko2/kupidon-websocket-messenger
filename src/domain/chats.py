@@ -17,7 +17,8 @@ class Chat(pydantic.BaseModel):
     """
 
     chat_id: uuid.UUID = pydantic.Field(default_factory=uuid.uuid4, frozen=True)
-    name: typing.Text | None = pydantic.Field(default=None, max_length=100)
+    name: typing.Text = pydantic.Field(min_length=1, max_length=100)
+    avatar: pydantic.AnyHttpUrl | None = pydantic.Field(default=None)
 
     created: datetime.datetime = pydantic.Field(default_factory=datetime.datetime.now)
     updated: datetime.datetime = pydantic.Field(default_factory=datetime.datetime.now)

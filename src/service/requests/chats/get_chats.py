@@ -12,7 +12,8 @@ class GetChats(cqrs.Request):
 
 class ChatInfo(cqrs.Response):
     chat_id: uuid.UUID
-    name: typing.Text | None
+    name: typing.Text
+    avatar: pydantic.AnyHttpUrl | None = pydantic.Field(default=None)
     participants_count: pydantic.NonNegativeInt
     last_activity_timestamp: typing.Optional[datetime.datetime]
     last_message_id: uuid.UUID | None
