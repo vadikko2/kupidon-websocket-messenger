@@ -38,33 +38,32 @@ class GetMessagesHandler(
 
             messages: typing.List[get_messages.MessageInfo] = []
 
-            for message in chat_history.history:
+            for message in sorted(chat_history.history, key=lambda m: m.created):
                 if message.status == messages_entity.MessageStatus.DELETED:
                     continue
-                message_reactions = []
-                message_attachments = []
 
-                for emoji, group in itertools.groupby(
-                    message.reactions,
-                    key=lambda r: r.emoji,
-                ):
-                    message_reactions.append(
-                        get_messages.ReactionsUnderMessage(
-                            message_id=message.message_id,
-                            emoji=emoji,
-                            count=len(list(group)),
-                        ),
+                message_reactions = [
+                    get_messages.ReactionsUnderMessage(
+                        message_id=message.message_id,
+                        emoji=emoji,
+                        count=len(list(group)),
                     )
-                for attach in message.attachments:
-                    message_attachments.append(
-                        get_attachments.AttachmentInfo(
-                            attachment_id=attach.attachment_id,
-                            chat_id=attach.chat_id,
-                            urls=attach.urls,
-                            uploaded=attach.uploaded,
-                            content_type=attach.content_type,
-                        ),
+                    for emoji, group in itertools.groupby(
+                        message.reactions,
+                        key=lambda r: r.emoji,
                     )
+                ]
+
+                message_attachments = [
+                    get_attachments.AttachmentInfo(
+                        attachment_id=attach.attachment_id,
+                        chat_id=attach.chat_id,
+                        urls=attach.urls,
+                        uploaded=attach.uploaded,
+                        content_type=attach.content_type,
+                    )
+                    for attach in message.attachments
+                ]
 
                 messages.append(
                     get_messages.MessageInfo(

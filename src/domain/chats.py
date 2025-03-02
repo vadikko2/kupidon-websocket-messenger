@@ -37,8 +37,6 @@ class Chat(pydantic.BaseModel):
     history: typing.Set[messages.Message] = pydantic.Field(default_factory=set)
     not_read_messages: typing.List[uuid.UUID] = pydantic.Field(default_factory=list)
 
-    deleted: bool = False
-
     event_list: typing.List[cqrs.DomainEvent] = pydantic.Field(default_factory=list)
 
     @pydantic.computed_field()
@@ -84,7 +82,7 @@ class Chat(pydantic.BaseModel):
         """
         Adds new participant to chat
         """
-        if account_id in self.participants:
+        if self.is_participant(account_id):
             return
 
         self.participants.add(account_id)
@@ -99,6 +97,17 @@ class Chat(pydantic.BaseModel):
                 invited_by=initiated_by,
             ),
         )
+
+    def delete_for(self, account_id: typing.Text) -> None:
+        """
+        Deletes chat for specified account
+        """
+        if not self.is_participant(account_id):
+            return
+
+        self.participants.remove(account_id)
+
+        logger.debug(f"Chat {self.chat_id} deleted for {account_id}")
 
     def is_participant(self, account_id: typing.Text) -> bool:
         """

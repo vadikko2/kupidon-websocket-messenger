@@ -14,6 +14,7 @@ from service.handlers.requests.attachments import (
     upload_attachment as upload_attachment_handler,
 )
 from service.handlers.requests.chats import (
+    delete_chat as delete_chat_handler,
     get_chats as get_chats_handler,
     open_chat as open_chat_handler,
 )
@@ -24,15 +25,16 @@ from service.handlers.requests.messages import (
     send_message as send_message_handler,
 )
 from service.handlers.requests.reactions import (
+    get_reactors as get_reactors_handler,
     react_message as react_message_handler,
     unreact_message as unreact_message_handler,
-    get_reactors as get_reactors_handler,
 )
 from service.requests.attachments import (
     get_attachments as get_attachments_request,
     upload_attachment as upload_attachment_request,
 )
 from service.requests.chats import (
+    delete_chat as delete_chat_request,
     get_chats as get_chats_request,
     open_chat as open_chat_request,
 )
@@ -43,9 +45,9 @@ from service.requests.messages import (
     send_message as send_message_request,
 )
 from service.requests.reactions import (
+    get_reactors as get_reactors_request,
     react_message as react_message_request,
     unreact_message as unreact_message_request,
-    get_reactors as get_reactors_request,
 )
 
 
@@ -59,6 +61,7 @@ def init_requests(mapper: requests.RequestMap) -> None:
         delete_message_handler.DeleteMessageHandler,
     )
     mapper.bind(open_chat_request.OpenChat, open_chat_handler.OpenChatHandler)
+    mapper.bind(delete_chat_request.DeleteChat, delete_chat_handler.DeleteChatHandler)
     mapper.bind(
         send_message_request.SendMessage,
         send_message_handler.SendMessageHandler,

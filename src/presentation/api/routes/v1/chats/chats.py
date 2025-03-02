@@ -1,17 +1,21 @@
 import logging
 import typing
+import uuid
 
 import cqrs
 import fastapi
 import pydantic
 from fastapi import status
 from fastapi_app import response
+from fastapi_app.exception_handlers import registry
 
 from presentation.api import dependencies
 from presentation.api.schema import pagination, requests, responses
+from service import exceptions
 from service.requests.chats import (
     get_chats as get_chats_request,
     open_chat as open_chat_request,
+    delete_chat as delete_chat_request,
 )
 
 router = fastapi.APIRouter(prefix="")
@@ -70,5 +74,32 @@ async def get_chats(
             base_items=result.chats,
             limit=limit,
             offset=offset,
+        ),
+    )
+
+
+@router.delete(
+    "/{chat_id}",
+    tags=["Chats"],
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses=registry.get_exception_responses(
+        exceptions.ChatNotFound,
+        exceptions.ParticipantNotInChat,
+    ),
+)
+async def delete_chat(
+    chat_id: uuid.UUID,
+    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    mediator: cqrs.RequestMediator = fastapi.Depends(
+        dependency=dependencies.request_mediator_factory,
+    ),
+) -> None:
+    """
+    # Deletes chat for specified account
+    """
+    await mediator.send(
+        delete_chat_request.DeleteChat(
+            chat_id=chat_id,
+            actor=account_id,
         ),
     )
