@@ -38,7 +38,11 @@ class GetMessagesHandler(
 
             messages: typing.List[get_messages.MessageInfo] = []
 
-            for message in sorted(chat_history.history, key=lambda m: m.created):
+            for message in sorted(
+                chat_history.history,
+                key=lambda m: m.created,
+                reverse=True,
+            ):
                 if message.status == messages_entity.MessageStatus.DELETED:
                     continue
 
