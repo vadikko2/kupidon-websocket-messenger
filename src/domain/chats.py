@@ -34,7 +34,7 @@ class Chat(pydantic.BaseModel):
         default_factory=datetime.datetime.now,
     )
 
-    history: typing.Set[messages.Message] = pydantic.Field(default_factory=set)
+    history: typing.List[messages.Message] = pydantic.Field(default_factory=set)
     not_read_messages: typing.List[uuid.UUID] = pydantic.Field(default_factory=list)
 
     event_list: typing.List[cqrs.DomainEvent] = pydantic.Field(default_factory=list)
@@ -56,7 +56,7 @@ class Chat(pydantic.BaseModel):
         if message in self.history:
             return
 
-        self.history.add(message)
+        self.history.append(message)
         self.not_read_messages.append(message.message_id)
 
         self.last_message = message.message_id
