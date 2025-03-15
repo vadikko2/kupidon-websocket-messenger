@@ -33,6 +33,7 @@ class ChatRepository(typing.Protocol):
         chat_id: uuid.UUID,
         messages_limit: pydantic.NonNegativeInt,
         latest_message_id: typing.Optional[uuid.UUID] = None,
+        reverse: bool = False,
     ) -> chats.Chat | None:
         """
         Returns chat history

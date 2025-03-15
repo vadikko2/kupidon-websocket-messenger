@@ -14,6 +14,7 @@ class GetMessages(cqrs.Request):
     account: typing.Text
     messages_limit: pydantic.NonNegativeInt
     latest_message_id: typing.Optional[uuid.UUID] = None
+    reverse: pydantic.StrictBool = False
 
 
 class ReactionsUnderMessage(cqrs.Request):

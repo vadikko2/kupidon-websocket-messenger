@@ -104,6 +104,7 @@ class MockChatRepository:
         chat_id: uuid.UUID,
         messages_limit: pydantic.NonNegativeInt,
         latest_message_id: typing.Optional[uuid.UUID] = None,
+        reverse: bool = False,
     ) -> chats.Chat | None:
         chat_bytes_coroutine = await self._redis_pipeline.get(
             CHATS_PREFIX.format(chat_id),
@@ -114,7 +115,8 @@ class MockChatRepository:
             return
         chat = chats.Chat.model_validate(orjson.loads(chat_bytes))
 
-        all_chat_messages_bytes_coroutine = await self._redis_pipeline.lrange(  # pyright: ignore[reportGeneralTypeIssues]
+        all_chat_messages_bytes_coroutine = await self._redis_pipeline.lrange(
+            # pyright: ignore[reportGeneralTypeIssues]
             CHAT_HISTORY_PREFIX.format(chat_id),
             0,
             -1,
@@ -135,10 +137,18 @@ class MockChatRepository:
 
         messages_list_bytes = (await messages_list_bytes_coroutine.execute())[0]  # pyright: ignore[reportAttributeAccessIssue]
 
+        sorted_messages = sorted(
+            [
+                messages.Message.model_validate(orjson.loads(mb))
+                for mb in messages_list_bytes
+            ],
+            key=lambda msg: msg.created,
+            reverse=not reverse,
+        )
+
         add_to_history = latest_message_id is None
 
-        for mb in messages_list_bytes:
-            msg = messages.Message.model_validate(orjson.loads(mb))
+        for msg in sorted_messages:
             if msg.message_id == latest_message_id:
                 add_to_history = True
             if add_to_history:
@@ -148,7 +158,8 @@ class MockChatRepository:
         return chat
 
     async def get_all(self, participant: typing.Text) -> typing.List[chats.Chat]:
-        participant_chats_bytes_coroutine = await self._redis_pipeline.lrange(  # pyright: ignore[reportGeneralTypeIssues]
+        participant_chats_bytes_coroutine = await self._redis_pipeline.lrange(
+            # pyright: ignore[reportGeneralTypeIssues]
             PARTICIPANT_CHATS_PREFIX.format(participant),
             0,
             -1,
@@ -248,7 +259,8 @@ class MockAttachmentRepository:
         limit: int,
         offset: int,
     ) -> typing.List[attachments.Attachment]:
-        attachments_in_chat_bytes_coroutine = await self._redis_pipeline.lrange(  # pyright: ignore[reportGeneralTypeIssues]
+        attachments_in_chat_bytes_coroutine = await self._redis_pipeline.lrange(
+            # pyright: ignore[reportGeneralTypeIssues]
             CHAT_ATTACHMENTS_PREFIX.format(chat_id),
             0,
             -1,

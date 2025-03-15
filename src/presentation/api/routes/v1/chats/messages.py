@@ -78,6 +78,7 @@ async def get_messages(
     chat_id: uuid.UUID,
     limit: pydantic.NonNegativeInt = fastapi.Query(default=10),
     latest_message_id: uuid.UUID | None = fastapi.Query(default=None),
+    reverse: bool = fastapi.Query(default=False),
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
@@ -92,6 +93,7 @@ async def get_messages(
             account=account_id,
             messages_limit=limit,
             latest_message_id=latest_message_id,
+            reverse=reverse,
         ),
     )
     return response.Response(
