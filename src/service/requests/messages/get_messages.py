@@ -31,6 +31,7 @@ class MessageInfo(cqrs.Request):
     attachments: typing.List[get_attachments.AttachmentInfo]
     reactions: typing.List[ReactionsUnderMessage]
     status: messages_entity.MessageStatus
+    reply_to: typing.Optional[uuid.UUID]
     created: datetime.datetime
     updated: datetime.datetime
 

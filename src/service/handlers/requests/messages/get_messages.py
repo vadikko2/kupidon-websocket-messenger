@@ -81,6 +81,7 @@ class GetMessagesHandler(
                         status=message.status,
                         created=message.created,
                         updated=message.updated,
+                        reply_to=message.reply_to,
                     ),
                 )
 
