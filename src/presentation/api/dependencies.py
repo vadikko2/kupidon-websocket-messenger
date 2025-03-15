@@ -9,11 +9,11 @@ from cqrs.events import bootstrap as event_bootstrap
 from cqrs.requests import bootstrap as request_bootstrap
 from fastapi import status
 
-from infrastructure.brokers import messages_broker, redis
 from adapters.redis import connections
+from infrastructure.brokers import messages_broker, redis
 from infrastructure.storages import attachment_storage, s3
 from presentation.api.schema import validators
-from service import dependencies, mapping, unit_of_work
+from service import dependencies, mapping
 from service.handlers.requests.subscriptions import subscription as subscription_service
 
 logger = logging.getLogger(__name__)
@@ -52,10 +52,6 @@ def subscription_broker_factory() -> messages_broker.MessageBroker:
 
 def attachment_storage_factory() -> attachment_storage.AttachmentStorage:
     return s3.S3AttachmentStorage()
-
-
-def uow_factory() -> unit_of_work.UoW:
-    return unit_of_work.MockMessageUoW()
 
 
 async def subscription_service_factory(
