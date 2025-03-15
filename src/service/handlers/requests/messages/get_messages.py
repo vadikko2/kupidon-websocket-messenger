@@ -120,6 +120,9 @@ class GetMessagePreviewHandler(
                     chat.chat_id,
                 )
 
+            if message.status == messages_entity.MessageStatus.DELETED:
+                raise exceptions.MessageNotFound(request.message_id)
+
             return get_messages.MessagePreview(
                 message_id=message.message_id,
                 chat_id=message.chat_id,
