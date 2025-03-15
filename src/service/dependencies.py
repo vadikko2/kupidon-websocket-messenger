@@ -2,12 +2,13 @@ import functools
 import typing
 
 import di
+import redis.asyncio as redis
 from di import dependent
 
+from adapters.redis import connections as redis_connections
 from domain import attachments
-from infrastructure.brokers import messages_broker, redis
+from infrastructure.brokers import messages_broker, redis as redis_broker
 from infrastructure.helpers.attachments.preprocessors import chain, jpeg_preprocessors
-from infrastructure.settings import redis_settings
 from infrastructure.storages import attachment_storage, s3
 from service import unit_of_work
 
@@ -19,12 +20,15 @@ UoWBind = di.bind_by_type(
 )
 BrokerBind = di.bind_by_type(
     dependent.Dependent(
-        functools.partial(redis.RedisMessageBroker, redis_settings.dsn()),
+        redis_broker.RedisMessageBroker,
         scope="request",
     ),
     messages_broker.MessageBroker,
 )
-
+RedisBind = di.bind_by_type(
+    dependent.Dependent(redis_connections.RedisConnectionFactory, scope="request"),
+    typing.Callable[[], redis.Redis],  # pyright: ignore[reportArgumentType]
+)
 Chains: typing.TypeAlias = typing.List[chain.PreprocessingChain]
 
 PreprocessingChainBind = di.bind_by_type(
@@ -53,5 +57,6 @@ AttachmentStorageBind = di.bind_by_type(
 
 container.bind(UoWBind)
 container.bind(BrokerBind)
+container.bind(RedisBind)
 container.bind(PreprocessingChainBind)
 container.bind(AttachmentStorageBind)
