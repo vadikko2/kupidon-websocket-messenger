@@ -2,12 +2,13 @@ import abc
 import typing
 
 import cqrs
+import redis.asyncio as redis
 
-from infrastructure.database.persistent.repositories import (
+from infrastructure.database.persistent import mock
+from service.repositories import (
     attachment_repository,
     chat_repository,
     message_repository,
-    mock,
 )
 
 
@@ -21,14 +22,13 @@ class UoW(abc.ABC):
         raise NotImplementedError
 
     async def commit(self):
-        await self.message_repository.commit()
-        await self.chat_repository.commit()
-        await self.attachment_repository.commit()
+        raise NotImplementedError
+
+    async def rollback(self):
+        raise NotImplementedError
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        await self.message_repository.rollback()
-        await self.chat_repository.rollback()
-        await self.attachment_repository.rollback()
+        await self.rollback()
 
     def get_events(self) -> typing.List[cqrs.Event]:
         return (
@@ -39,8 +39,27 @@ class UoW(abc.ABC):
 
 
 class MockMessageUoW(UoW):
+    def __init__(self, redis_factory: typing.Callable[[], redis.Redis]):
+        self._redis_factory = redis_factory
+
     async def __aenter__(self):
-        self.message_repository = mock.MockMessageRepository()
-        self.chat_repository = mock.MockChatRepository()
-        self.attachment_repository = mock.MockAttachmentRepository()
+        self._redis_pipeline = self._redis_factory().pipeline(transaction=True)
+        self.message_repository = mock.MockMessageRepository(
+            redis_pipeline=self._redis_pipeline,
+        )
+        self.chat_repository = mock.MockChatRepository(
+            redis_pipeline=self._redis_pipeline,
+        )
+        self.attachment_repository = mock.MockAttachmentRepository(
+            redis_pipeline=self._redis_pipeline,
+        )
         return self
+
+    async def commit(self):
+        await self._redis_pipeline.execute()
+
+    async def rollback(self):
+        try:
+            await self._redis_pipeline.discard()
+        finally:
+            del self._redis_pipeline
