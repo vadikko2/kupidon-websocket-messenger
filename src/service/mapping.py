@@ -1,7 +1,11 @@
 from cqrs import events, requests
 
 from domain import events as domain_events
-from service.handlers.events.chats import tapping as tapping_handler
+from service.handlers.events.chats import (
+    new_chat as new_chat_handler,
+    participants as participants_handler,
+    tapping as tapping_handler,
+)
 from service.handlers.events.messages import (
     message_deleted as message_deleted_handler,
     new_message_added as new_message_added_handler,
@@ -118,4 +122,12 @@ def init_events(mapper: events.EventMap) -> None:
     mapper.bind(
         domain_events.TappingInChat,
         tapping_handler.TappingInChatHandler,
+    )
+    mapper.bind(
+        domain_events.NewParticipantAdded,
+        participants_handler.NewParticipantAddedHandler,
+    )
+    mapper.bind(
+        domain_events.NewParticipantAdded,
+        new_chat_handler.AddedIntoNewChatHandler,
     )

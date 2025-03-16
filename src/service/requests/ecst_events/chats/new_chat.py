@@ -4,6 +4,7 @@ import uuid
 import pydantic
 
 
-class TappingInChatPayload(pydantic.BaseModel):
+class AddedIntoChatPayload(pydantic.BaseModel, frozen=True):
     chat_id: uuid.UUID
     account_id: typing.Text
+    invited_by: typing.Text

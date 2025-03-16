@@ -1,4 +1,3 @@
-import asyncio
 import typing
 
 import cqrs
@@ -7,14 +6,15 @@ import orjson
 from domain import events
 from infrastructure.brokers import messages_broker
 from service import exceptions, unit_of_work
+from service.requests.ecst_events.chats import new_chat
 
 
-class TappingInChatHandler(cqrs.EventHandler[events.TappingInChat]):
+class AddedIntoNewChatHandler(cqrs.EventHandler[events.NewParticipantAdded]):
     def __init__(self, uow: unit_of_work.UoW, broker: messages_broker.MessageBroker):
         self.uow = uow
         self.broker = broker
 
-    async def handle(self, event: events.TappingInChat) -> None:
+    async def handle(self, event: events.NewParticipantAdded) -> None:
         async with self.uow:
             chat = await self.uow.chat_repository.get(event.chat_id)
 
@@ -26,16 +26,17 @@ class TappingInChatHandler(cqrs.EventHandler[events.TappingInChat]):
                     event.account_id,
                     event.chat_id,
                 )
-
-            message_bytes: typing.ByteString = orjson.dumps(
-                cqrs.NotificationEvent[events.TappingInChat](
-                    event_name="TappingInChat",
-                    payload=event,
+            chat_added_event: typing.ByteString = orjson.dumps(
+                cqrs.NotificationEvent[new_chat.AddedIntoChatPayload](
+                    event_name="AddedIntoChat",
+                    payload=new_chat.AddedIntoChatPayload(
+                        chat_id=event.chat_id,
+                        account_id=event.account_id,
+                        invited_by=event.invited_by,
+                    ),
                 ).model_dump(mode="json"),
             )
-            await asyncio.gather(
-                *[
-                    self.broker.send_message(receiver, message_bytes)
-                    for receiver in chat.participants
-                ],
+            await self.broker.send_message(
+                event.account_id,
+                chat_added_event,
             )
