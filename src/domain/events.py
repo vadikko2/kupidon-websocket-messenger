@@ -49,3 +49,8 @@ class MessageReacted(cqrs.DomainEvent, frozen=True):
 class MessageUnreacted(cqrs.DomainEvent, frozen=True):
     reaction_id: uuid.UUID
     message_id: uuid.UUID
+
+
+class TappingInChat(cqrs.DomainEvent, frozen=True):
+    chat_id: uuid.UUID
+    account_id: typing.Text
