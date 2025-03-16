@@ -10,7 +10,7 @@ from cqrs.requests import bootstrap as request_bootstrap
 from fastapi import status
 
 from adapters.redis import connections
-from infrastructure.brokers import messages_broker, redis
+from infrastructure.brokers import messages_broker, redis as redis_broker
 from infrastructure.storages import attachment_storage, s3
 from presentation.api.schema import validators
 from service import dependencies, mapping
@@ -47,7 +47,7 @@ def event_emitter_factory() -> cqrs.EventEmitter:
 
 
 def subscription_broker_factory() -> messages_broker.MessageBroker:
-    return redis.RedisMessageBroker(connections.RedisConnectionFactory())
+    return redis_broker.RedisMessageBroker(connections.RedisConnectionFactory())
 
 
 def attachment_storage_factory() -> attachment_storage.AttachmentStorage:

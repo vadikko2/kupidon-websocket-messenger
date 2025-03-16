@@ -6,7 +6,7 @@ import pydantic_settings
 
 dotenv.load_dotenv()
 
-VERSION = "0.0.7"
+VERSION = "0.0.8"
 
 
 class Logging(pydantic_settings.BaseSettings, case_sensitive=True):
@@ -23,3 +23,5 @@ class App(pydantic_settings.BaseSettings, case_sensitive=True):
     DEBUG: bool = pydantic.Field(default=False)
     NAME: typing.Text = pydantic.Field(default="messanger-api")
     ENV: typing.Text = pydantic.Field(default="local")
+
+    model_config = pydantic_settings.SettingsConfigDict(env_prefix="APP_")

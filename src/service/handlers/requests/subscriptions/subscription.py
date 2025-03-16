@@ -22,7 +22,10 @@ class SubscriptionService:
         self.target_account: typing.Text | None = None
 
     @contextlib.asynccontextmanager
-    async def start_subscription(self, target_account: typing.Text):
+    async def start_subscription(
+        self,
+        target_account: typing.Text,
+    ) -> typing.AsyncGenerator[typing.Self, typing.Any]:
         """
         Opens subscription to broker for the specified account.
         """
@@ -31,7 +34,7 @@ class SubscriptionService:
             await self.broker.start()
             await self.broker.subscribe(target_account)
             self.subscription_started = True
-            yield
+            yield self
         except Exception as e:
             raise exceptions.StartSubscriptionError(target_account, e)
         finally:
