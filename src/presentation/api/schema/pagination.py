@@ -45,17 +45,20 @@ class Pagination(pydantic.BaseModel, typing.Generic[Item]):
         )
 
     @pydantic.computed_field()
+    @property
     def next(self) -> typing.Text | None:
         if len(self.items) < self.limit:
             return None
 
         return self._combine_url(
             limit=self.limit,
-            offset=self.offset + self.count,
+            offset=self.offset + self.limit,
         )
 
+    @pydantic.computed_field()
+    @property
     def previous(self) -> typing.Text | None:
-        if self.offset == 0:
+        if self.offset - self.limit < 0:
             return None
 
         return self._combine_url(

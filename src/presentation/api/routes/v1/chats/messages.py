@@ -98,7 +98,7 @@ async def get_messages(
     return response.Response(
         result=pagination.Pagination[get_messages_request.MessageInfo](
             url=f"/v1/chats/{chat_id}/messages/?"
-            f"latest_id={result.messages[-1].message_id if result.messages else None}",
+            f"latest_id={result.messages[-1].message_id if result.messages else None}&reverse={reverse}",
             base_items=result.messages,
             limit=limit,
         ),
