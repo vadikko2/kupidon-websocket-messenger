@@ -164,7 +164,7 @@ class MockChatRepository:
             latest_message_id=message_id,
             reverse=True,
         )
-        return len(history.history) if history else 0
+        return max(0, len(history.history) - 1) if history else 0
 
     async def count_after_many(
         self,
