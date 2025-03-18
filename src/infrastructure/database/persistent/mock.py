@@ -124,9 +124,7 @@ class MockChatRepository:
             self._seen.add(chat)
             return chat
 
-        messages_in_chat = [
-            uuid.UUID(message_bytes) for message_bytes in all_chat_messages_bytes
-        ]
+        messages_in_chat = [uuid.UUID(message_bytes) for message_bytes in all_chat_messages_bytes]
 
         messages_list_bytes_coroutine = self._redis_pipeline.mget(
             *[MESSAGES_PREFIX.format(message_id) for message_id in messages_in_chat],
@@ -135,10 +133,7 @@ class MockChatRepository:
         messages_list_bytes = (await messages_list_bytes_coroutine.execute())[0]  # pyright: ignore[reportAttributeAccessIssue]
 
         sorted_messages = sorted(
-            [
-                messages.Message.model_validate(orjson.loads(mb))
-                for mb in messages_list_bytes
-            ],
+            [messages.Message.model_validate(orjson.loads(mb)) for mb in messages_list_bytes],
             key=lambda msg: msg.created,
             reverse=not reverse,
         )
@@ -153,6 +148,59 @@ class MockChatRepository:
                 if messages_limit and len(chat.history) == messages_limit:
                     break
         return chat
+
+    async def get_all_messages_in_chat(self, chat_id: uuid.UUID) -> typing.List[messages.Message]:
+        all_chat_messages_bytes_coroutine = await self._redis_pipeline.lrange(
+            # pyright: ignore[reportGeneralTypeIssues]
+            CHAT_HISTORY_PREFIX.format(chat_id),
+            0,
+            -1,
+        )
+
+        all_chat_messages_bytes = (await all_chat_messages_bytes_coroutine.execute())[0]  # pyright: ignore[reportAttributeAccessIssue]
+
+        all_messages = []
+        for message in all_chat_messages_bytes:
+            message_id = uuid.UUID(message)
+            message_bytes_coroutine = await self._redis_pipeline.get(
+                MESSAGES_PREFIX.format(message_id),
+            )
+            message_bytes = (await message_bytes_coroutine.execute())[0]
+            if not message_bytes:
+                continue
+
+            all_messages.append(messages.Message.model_validate(orjson.loads(message_bytes)))
+
+        return all_messages
+
+    async def get_next_message_id(
+        self,
+        chat_id: uuid.UUID,
+        target_message_id: uuid.UUID,
+    ) -> messages.Message | None:
+        all_messages = sorted(await self.get_all_messages_in_chat(chat_id), key=lambda msg: msg.created)
+
+        for position, message in enumerate(all_messages):
+            if message.message_id == target_message_id:
+                if position < len(all_messages) - 1:
+                    return all_messages[position + 1]
+                return
+
+        return
+
+    async def get_previous_message_id(
+        self,
+        chat_id: uuid.UUID,
+        target_message_id: uuid.UUID,
+    ) -> messages.Message | None:
+        all_messages = sorted(await self.get_all_messages_in_chat(chat_id), key=lambda msg: msg.created)
+
+        for position, message in enumerate(all_messages):
+            if message.message_id == target_message_id:
+                if position > 0:
+                    return all_messages[position - 1]
+                return
+        return
 
     async def count_after(
         self,
@@ -189,9 +237,7 @@ class MockChatRepository:
         if not participant_chats_bytes:
             return []
 
-        chat_ides = [
-            uuid.UUID(chat_id_bytes) for chat_id_bytes in participant_chats_bytes
-        ]
+        chat_ides = [uuid.UUID(chat_id_bytes) for chat_id_bytes in participant_chats_bytes]
         chats_bytes_coroutine = await self._redis_pipeline.mget(
             *[CHATS_PREFIX.format(chat_id) for chat_id in chat_ides],
         )
@@ -200,11 +246,7 @@ class MockChatRepository:
             return []
 
         result = sorted(
-            [
-                chats.Chat.model_validate(orjson.loads(chat_bytes))
-                for chat_bytes in chats_bytes
-                if chat_bytes
-            ],
+            [chats.Chat.model_validate(orjson.loads(chat_bytes)) for chat_bytes in chats_bytes if chat_bytes],
             key=lambda chat: chat.last_activity_timestamp,
             reverse=True,
         )
@@ -257,10 +299,7 @@ class MockAttachmentRepository:
             return []
 
         attachments_bytes_coroutine = await self._redis_pipeline.mget(
-            *[
-                ATTACHMENTS_PREFIX.format(attachment_id)
-                for attachment_id in attachment_ids
-            ],
+            *[ATTACHMENTS_PREFIX.format(attachment_id) for attachment_id in attachment_ids],
         )
         attachments_bytes = (await attachments_bytes_coroutine.execute())[0]
         if not attachments_bytes:
@@ -286,17 +325,12 @@ class MockAttachmentRepository:
             0,
             -1,
         )
-        attachments_in_chat_bytes = (
-            await attachments_in_chat_bytes_coroutine.execute()  # pyright: ignore[reportAttributeAccessIssue]
-        )[0]  # pyright: ignore[reportAttributeAccessIssue]
+        attachments_in_chat_bytes = (await attachments_in_chat_bytes_coroutine.execute())[0]  # pyright: ignore[reportAttributeAccessIssue]
         if not attachments_in_chat_bytes:
             return []
 
         attachments_bytes_coroutine = await self._redis_pipeline.mget(
-            *[
-                ATTACHMENTS_PREFIX.format(attachment_id)
-                for attachment_id in attachments_in_chat_bytes
-            ],
+            *[ATTACHMENTS_PREFIX.format(attachment_id) for attachment_id in attachments_in_chat_bytes],
         )
         attachments_bytes = (await attachments_bytes_coroutine.execute())[0]
         if not attachments_bytes:

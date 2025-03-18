@@ -82,7 +82,7 @@ async def get_messages(
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
     ),
-) -> response.Response[pagination.Pagination[get_messages_request.MessageInfo]]:
+) -> response.Response[pagination.MessagesPaginator[get_messages_request.MessageInfo]]:
     """
     # Returns chat messages
     """
@@ -96,10 +96,12 @@ async def get_messages(
         ),
     )
     return response.Response(
-        result=pagination.Pagination[get_messages_request.MessageInfo](
-            url=f"/v1/chats/{chat_id}/messages/?"
-            f"latest_id={result.messages[-1].message_id if result.messages else None}&reverse={reverse}",
+        result=pagination.MessagesPaginator[get_messages_request.MessageInfo](
+            url=f"/v1/chats/{chat_id}/messages/",
             base_items=result.messages,
             limit=limit,
+            next_id=result.next_message_id,
+            previous_id=result.prev_message_id,
+            reverse=reverse,
         ),
     )

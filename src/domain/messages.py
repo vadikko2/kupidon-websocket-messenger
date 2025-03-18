@@ -87,11 +87,7 @@ class Message(pydantic.BaseModel):
         Returns True if reactor already reacted with emoji
         """
         return bool(
-            [
-                reaction
-                for reaction in self.reactions
-                if reaction.reactor == reactor and reaction.emoji == emoji
-            ],
+            [reaction for reaction in self.reactions if reaction.reactor == reactor and reaction.emoji == emoji],
         )
 
     def react(self, reaction: reaction_entities.Reaction) -> None:
@@ -167,6 +163,9 @@ class Message(pydantic.BaseModel):
         if not isinstance(other, Message):
             return False
         return self.message_id == other.message_id
+
+    def __repr__(self):
+        return f"Message({self.message_id}, {self.chat_id}, {self.content}, {self.created})"
 
 
 class ReedMessage(pydantic.BaseModel):

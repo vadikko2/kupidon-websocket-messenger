@@ -46,10 +46,7 @@ class GetMessagesHandler(
                 if message.deleted:
                     continue
 
-                is_message_read = (
-                    bool(last_read_message)
-                    and message.created <= last_read_message.created
-                )
+                is_message_read = bool(last_read_message) and message.created <= last_read_message.created
 
                 message_reactions = [
                     get_messages.ReactionsUnderMessage(
@@ -89,7 +86,43 @@ class GetMessagesHandler(
                     ),
                 )
 
-        return get_messages.Messages(messages=messages)
+            if not request.reverse:
+                next_message = await self.uow.chat_repository.get_previous_message_id(
+                    chat_id=request.chat_id,
+                    target_message_id=messages[0].message_id,
+                )
+                prev_message = (
+                    await self.uow.chat_repository.get_next_message_id(
+                        chat_id=request.chat_id,
+                        target_message_id=(
+                            request.latest_message_id if request.latest_message_id else messages[-1].message_id
+                        ),
+                    )
+                    if messages
+                    else None
+                )
+
+            else:
+                next_message = (
+                    await self.uow.chat_repository.get_next_message_id(
+                        chat_id=request.chat_id,
+                        target_message_id=messages[-1].message_id,
+                    )
+                    if messages
+                    else None
+                )
+                prev_message = await self.uow.chat_repository.get_previous_message_id(
+                    chat_id=request.chat_id,
+                    target_message_id=(
+                        request.latest_message_id if request.latest_message_id else messages[0].message_id
+                    ),
+                )
+
+        return get_messages.Messages(
+            messages=messages,
+            next_message_id=next_message.message_id if next_message else None,
+            prev_message_id=prev_message.message_id if prev_message else None,
+        )
 
 
 class GetMessagePreviewHandler(

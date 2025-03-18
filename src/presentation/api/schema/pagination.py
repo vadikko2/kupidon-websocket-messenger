@@ -1,4 +1,5 @@
 import typing
+import uuid
 
 import pydantic
 
@@ -24,6 +25,7 @@ class Pagination(pydantic.BaseModel, typing.Generic[Item]):
     )
     limit: pydantic.NonNegativeInt = pydantic.Field(default=10, frozen=True)
     offset: pydantic.NonNegativeInt = pydantic.Field(default=0, frozen=True)
+    count: pydantic.NonNegativeInt = pydantic.Field(default=0, frozen=True)
 
     def _combine_url(
         self,
@@ -66,7 +68,25 @@ class Pagination(pydantic.BaseModel, typing.Generic[Item]):
             offset=self.offset - self.limit,
         )
 
+
+class MessagesPaginator(Pagination, typing.Generic[Item]):
+    limit: pydantic.NonNegativeInt = pydantic.Field(default=0, exclude=True)
+    offset: pydantic.NonNegativeInt = pydantic.Field(default=0, exclude=True)
+
+    next_id: typing.Optional[uuid.UUID]
+    previous_id: typing.Optional[uuid.UUID] = None
+    reverse: pydantic.StrictBool = pydantic.Field(default=False, exclude=False)
+
     @pydantic.computed_field()
     @property
-    def count(self) -> pydantic.NonNegativeInt:
-        return len(self.base_items)
+    def next(self) -> typing.Text | None:
+        if self.next_id is None:
+            return None
+        return self.url + f"?latest_id={self.next_id}&reverse={self.reverse}"
+
+    @pydantic.computed_field()
+    @property
+    def previous(self) -> typing.Text | None:
+        if self.previous_id is None:
+            return None
+        return self.url + f"?latest_id={self.previous_id}&reverse={self.reverse}"

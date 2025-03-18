@@ -3,7 +3,7 @@ import uuid
 
 import cqrs
 
-from domain import chats
+from domain import chats, messages
 
 
 class ChatRepository(typing.Protocol):
@@ -36,6 +36,26 @@ class ChatRepository(typing.Protocol):
     ) -> chats.Chat | None:
         """
         Returns chat history
+        """
+        raise NotImplementedError
+
+    async def get_next_message_id(
+        self,
+        chat_id: uuid.UUID,
+        target_message_id: uuid.UUID,
+    ) -> messages.Message | None:
+        """
+        Returns next message
+        """
+        raise NotImplementedError
+
+    async def get_previous_message_id(
+        self,
+        chat_id: uuid.UUID,
+        target_message_id: uuid.UUID,
+    ) -> messages.Message | None:
+        """
+        Returns previous message
         """
         raise NotImplementedError
 

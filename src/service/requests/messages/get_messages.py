@@ -36,9 +36,9 @@ class MessageInfo(cqrs.Request):
 
 
 class Messages(cqrs.Response):
-    messages: typing.List[MessageInfo] = pydantic.Field(
-        default_factory=list,
-    )
+    messages: typing.List[MessageInfo] = pydantic.Field(default_factory=list)
+    next_message_id: typing.Optional[uuid.UUID]
+    prev_message_id: typing.Optional[uuid.UUID]
 
 
 class GetMessagePreview(cqrs.Request):
