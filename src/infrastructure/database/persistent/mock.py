@@ -67,7 +67,7 @@ class MockChatRepository:
     async def add(self, chat: chats.Chat) -> None:
         for participant in chat.participants:
             await self._redis_pipeline.lpush(  # pyright: ignore[reportGeneralTypeIssues]
-                PARTICIPANT_CHATS_PREFIX.format(participant),
+                PARTICIPANT_CHATS_PREFIX.format(participant.account_id),
                 str(chat.chat_id),
             )
         await self._redis_pipeline.set(
