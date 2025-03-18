@@ -153,7 +153,7 @@ class GetMessagePreviewHandler(
             if not chat:
                 raise exceptions.ChatNotFound(message.chat_id)
 
-            if request.account not in chat.participants:
+            if not chat.is_participant(request.account):
                 raise exceptions.ParticipantNotInChat(
                     request.account,
                     chat.chat_id,
