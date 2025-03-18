@@ -1,20 +1,6 @@
 import typing
 import uuid
 
-from domain import messages
-
-
-class ChangeStatusAccessDonated(Exception):
-    def __init__(
-        self,
-        actor: typing.Text,
-        message_id: uuid.UUID,
-        new_status: messages.MessageStatus,
-    ) -> None:
-        super().__init__(
-            f"Failed to change status to {new_status} for message {message_id}: {actor}",
-        )
-
 
 class ParticipantNotInChat(Exception):
     def __init__(self, account_id: typing.Text, chat_id: uuid.UUID) -> None:

@@ -46,7 +46,10 @@ class Attachment(pydantic.BaseModel):
     )
     content_type: AttachmentType = pydantic.Field(frozen=True)
 
-    event_list: typing.List[cqrs.DomainEvent] = pydantic.Field(default_factory=list)
+    event_list: typing.List[cqrs.DomainEvent] = pydantic.Field(
+        default_factory=list,
+        exclude=True,
+    )
 
     def upload(
         self,
@@ -67,7 +70,7 @@ class Attachment(pydantic.BaseModel):
 
     def get_events(self) -> typing.List[cqrs.DomainEvent]:
         """
-        Returns new domain ecst_events
+        Returns new domain events
         """
         new_events = []
         while self.event_list:

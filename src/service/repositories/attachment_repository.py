@@ -35,6 +35,6 @@ class AttachmentRepository(typing.Protocol):
 
     def events(self) -> typing.List[cqrs.Event]:
         """
-        Returns new domain ecst_events
+        Returns new domain events
         """
         raise NotImplementedError

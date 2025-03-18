@@ -3,7 +3,6 @@ import uuid
 
 import cqrs
 import orjson
-import pydantic
 from redis.asyncio import client
 
 from domain import attachments, chats, messages
@@ -14,6 +13,7 @@ MESSAGES_PREFIX = "message_{}"
 PARTICIPANT_CHATS_PREFIX = "participant_chats_{}"
 ATTACHMENTS_PREFIX = "attachment_{}"
 CHAT_ATTACHMENTS_PREFIX = "chat_attachments_{}"
+READ_MESSAGES_PREFIX = "read_messages_{chat_id}_{participant_id}"
 
 
 class MockMessageRepository:
@@ -52,9 +52,6 @@ class MockMessageRepository:
         self._seen.add(message)
 
     def events(self) -> typing.List[cqrs.Event]:
-        """
-        Returns new domain ecst_events
-        """
         new_events = []
         for message in self._seen:
             while message.event_list:
@@ -102,7 +99,7 @@ class MockChatRepository:
     async def get_chat_history(
         self,
         chat_id: uuid.UUID,
-        messages_limit: pydantic.NonNegativeInt,
+        messages_limit: int | None = None,
         latest_message_id: typing.Optional[uuid.UUID] = None,
         reverse: bool = False,
     ) -> chats.Chat | None:
@@ -153,9 +150,33 @@ class MockChatRepository:
                 add_to_history = True
             if add_to_history:
                 chat.history.append(msg)
-                if len(chat.history) == messages_limit:
+                if messages_limit and len(chat.history) == messages_limit:
                     break
         return chat
+
+    async def count_after(
+        self,
+        chat_id: uuid.UUID,
+        message_id: uuid.UUID | None,
+    ) -> int:
+        history = await self.get_chat_history(
+            chat_id,
+            latest_message_id=message_id,
+            reverse=True,
+        )
+        return len(history.history) if history else 0
+
+    async def count_after_many(
+        self,
+        *message: typing.Tuple[uuid.UUID, uuid.UUID | None],
+    ) -> typing.List[int]:
+        """
+        Returns count of messages after specified messages
+        """
+        result = []
+        for chat_id, msg_id in message:
+            result.append(await self.count_after(chat_id, msg_id))
+        return result
 
     async def get_all(self, participant: typing.Text) -> typing.List[chats.Chat]:
         participant_chats_bytes_coroutine = await self._redis_pipeline.lrange(
@@ -299,3 +320,57 @@ class MockAttachmentRepository:
             while attachment.event_list:
                 new_events.append(attachment.event_list.pop())
         return new_events
+
+
+class MockReadMessageRepository:
+    def __init__(self, redis_pipeline: client.Pipeline):
+        self._redis_pipeline = redis_pipeline
+        self._seen = set()
+
+    async def last_read(
+        self,
+        account_id: typing.Text,
+        chat_id: uuid.UUID,
+    ) -> messages.ReedMessage | None:
+        seen_messages_bytes_coroutine = await self._redis_pipeline.lrange(  # pyright: ignore[reportGeneralTypeIssues]
+            READ_MESSAGES_PREFIX.format(
+                chat_id=chat_id,
+                participant_id=account_id,
+            ),
+            0,
+            -1,
+        )
+        if not seen_messages_bytes_coroutine:
+            return None
+
+        seen_messages_bytes = (await seen_messages_bytes_coroutine.execute())[0]  # pyright: ignore[reportAttributeAccessIssue]
+        if not seen_messages_bytes:
+            return None
+
+        seen_message = map(
+            lambda x: messages.ReedMessage.model_validate(orjson.loads(x)),
+            seen_messages_bytes,
+        )
+        last_message = max(seen_message, key=lambda x: x.timestamp)
+        self._seen.add(last_message)
+        return last_message
+
+    async def last_read_many(
+        self,
+        account_id: typing.Text,
+        chat_ids: typing.List[uuid.UUID],
+    ) -> typing.List[messages.ReedMessage | None]:
+        result = []
+        for chat_id in chat_ids:
+            result.append(await self.last_read(account_id, chat_id))
+
+        return result
+
+    async def register(self, message: messages.ReedMessage) -> None:
+        await self._redis_pipeline.lpush(  # pyright: ignore[reportGeneralTypeIssues]
+            READ_MESSAGES_PREFIX.format(
+                chat_id=message.message.chat_id,
+                participant_id=message.actor,
+            ),
+            orjson.dumps(message.model_dump(mode="json")),
+        )

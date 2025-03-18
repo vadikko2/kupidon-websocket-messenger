@@ -5,7 +5,6 @@ import uuid
 import cqrs
 import pydantic
 
-from domain import messages as messages_entity
 from service.requests.attachments import get_attachments
 
 
@@ -30,8 +29,8 @@ class MessageInfo(cqrs.Request):
     content: typing.Text
     attachments: typing.List[get_attachments.AttachmentInfo]
     reactions: typing.List[ReactionsUnderMessage]
-    status: messages_entity.MessageStatus
     reply_to: typing.Optional[uuid.UUID]
+    read: pydantic.StrictBool
     created: datetime.datetime
     updated: datetime.datetime
 
@@ -53,4 +52,3 @@ class MessagePreview(cqrs.Response):
     sender: typing.Text
     content: typing.Text
     created: datetime.datetime
-    status: messages_entity.MessageStatus

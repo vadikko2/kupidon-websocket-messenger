@@ -71,7 +71,6 @@ async def send_message(
     responses=registry.get_exception_responses(
         exceptions.ChatNotFound,
         exceptions.ParticipantNotInChat,
-        exceptions.ChangeStatusAccessDonated,
     ),
 )
 async def get_messages(

@@ -35,7 +35,7 @@ class TappingInChatHandler(cqrs.EventHandler[events.TappingInChat]):
             )
             await asyncio.gather(
                 *[
-                    self.broker.send_message(receiver, message_bytes)
+                    self.broker.send_message(receiver.account_id, message_bytes)
                     for receiver in chat.participants
                 ],
             )

@@ -29,6 +29,36 @@ class MessageRepository(typing.Protocol):
 
     def events(self) -> typing.List[cqrs.Event]:
         """
-        Returns new domain ecst_events
+        Returns new domain events
+        """
+        raise NotImplementedError
+
+
+class ReadMessageRepository(typing.Protocol):
+    _seen: typing.Set[messages.ReedMessage]
+
+    async def last_read(
+        self,
+        account_id: typing.Text,
+        chat_id: uuid.UUID,
+    ) -> messages.ReedMessage | None:
+        """
+        Returns last read message by account in specified chat
+        """
+        raise NotImplementedError
+
+    async def last_read_many(
+        self,
+        account_id: typing.Text,
+        chat_ids: typing.List[uuid.UUID],
+    ) -> typing.List[messages.ReedMessage | None]:
+        """
+        Returns last read messages by account in specified chats
+        """
+        raise NotImplementedError
+
+    async def register(self, message: messages.ReedMessage) -> None:
+        """
+        Registers message as seen by
         """
         raise NotImplementedError

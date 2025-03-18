@@ -1,4 +1,5 @@
 import abc
+import itertools
 import typing
 
 import cqrs
@@ -8,13 +9,14 @@ from infrastructure.database.persistent import mock
 from service.repositories import (
     attachment_repository,
     chat_repository,
-    message_repository,
+    message_repository as msg_repository,
 )
 
 
 class UoW(abc.ABC):
     chat_repository: chat_repository.ChatRepository
-    message_repository: message_repository.MessageRepository
+    message_repository: msg_repository.MessageRepository
+    read_message_repository: msg_repository.ReadMessageRepository
     attachment_repository: attachment_repository.AttachmentRepository
 
     @abc.abstractmethod
@@ -30,11 +32,11 @@ class UoW(abc.ABC):
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.rollback()
 
-    def get_events(self) -> typing.List[cqrs.Event]:
-        return (
-            self.message_repository.events()
-            + self.chat_repository.events()
-            + self.attachment_repository.events()
+    def get_events(self) -> typing.Iterable[cqrs.Event]:
+        return itertools.chain(
+            self.message_repository.events(),
+            self.chat_repository.events(),
+            self.attachment_repository.events(),
         )
 
 
@@ -51,6 +53,9 @@ class MockMessageUoW(UoW):
             redis_pipeline=self._redis_pipeline,
         )
         self.attachment_repository = mock.MockAttachmentRepository(
+            redis_pipeline=self._redis_pipeline,
+        )
+        self.read_message_repository = mock.MockReadMessageRepository(
             redis_pipeline=self._redis_pipeline,
         )
         return self

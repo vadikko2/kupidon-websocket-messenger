@@ -8,7 +8,6 @@ from fastapi import status
 from fastapi_app import response
 from fastapi_app.exception_handlers import registry
 
-from domain import messages
 from presentation.api import dependencies
 from service import exceptions
 from service.requests.messages import (
@@ -23,41 +22,11 @@ logger = logging.getLogger(__name__)
 
 
 @router.put(
-    "/receive",
-    status_code=status.HTTP_204_NO_CONTENT,
-    responses=registry.get_exception_responses(
-        exceptions.ChatNotFound,
-        exceptions.MessageNotFound,
-        exceptions.ChangeStatusAccessDonated,
-    ),
-)
-async def apply_message_receive(
-    message_id: uuid.UUID,
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
-    mediator: cqrs.RequestMediator = fastapi.Depends(
-        dependency=dependencies.request_mediator_factory,
-    ),
-) -> fastapi.Response:
-    """
-    # Apply message as received
-    """
-    await mediator.send(
-        apply_message_request.ApplyMessage(
-            applier=account_id,
-            message_id=message_id,
-            status=messages.MessageStatus.RECEIVED,
-        ),
-    )
-    return fastapi.Response(status_code=status.HTTP_204_NO_CONTENT)
-
-
-@router.put(
     "/read",
     status_code=status.HTTP_204_NO_CONTENT,
     responses=registry.get_exception_responses(
         exceptions.ChatNotFound,
         exceptions.MessageNotFound,
-        exceptions.ChangeStatusAccessDonated,
     ),
 )
 async def apply_message_read(
@@ -74,7 +43,6 @@ async def apply_message_read(
         apply_message_request.ApplyMessage(
             applier=account_id,
             message_id=message_id,
-            status=messages.MessageStatus.READ,
         ),
     )
     return fastapi.Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -86,7 +54,7 @@ async def apply_message_read(
     responses=registry.get_exception_responses(
         exceptions.ChatNotFound,
         exceptions.MessageNotFound,
-        exceptions.ChangeStatusAccessDonated,
+        exceptions.ParticipantNotInChat,
     ),
 )
 async def delete_message(

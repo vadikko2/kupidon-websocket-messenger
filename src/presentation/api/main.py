@@ -37,7 +37,6 @@ app = fastapi_app.create(
         routes.healthcheck.router,
     ],
     exception_handlers=[
-        errors.handlers.change_status_access_donated_handler,
         errors.handlers.message_not_found_handler,
         errors.handlers.chat_not_found_handler,
         errors.handlers.attachment_not_found_handler,

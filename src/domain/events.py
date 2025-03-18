@@ -1,3 +1,4 @@
+import datetime
 import typing
 import uuid
 
@@ -20,12 +21,7 @@ class MessageRead(cqrs.DomainEvent, frozen=True):
     chat_id: uuid.UUID
     message_id: uuid.UUID
     reader_id: typing.Text
-
-
-class MessageReceived(cqrs.DomainEvent, frozen=True):
-    chat_id: uuid.UUID
-    message_id: uuid.UUID
-    receiver_id: typing.Text
+    read_at: datetime.datetime
 
 
 class MessageDeleted(cqrs.DomainEvent, frozen=True):

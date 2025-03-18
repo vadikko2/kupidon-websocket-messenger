@@ -36,7 +36,7 @@ class NewParticipantAddedHandler(cqrs.EventHandler[events.NewParticipantAdded]):
 
             await asyncio.gather(
                 *[
-                    self.broker.send_message(receiver, new_participant_event)
+                    self.broker.send_message(receiver.account_id, new_participant_event)
                     for receiver in chat.participants
                     if receiver != event.account_id
                 ],

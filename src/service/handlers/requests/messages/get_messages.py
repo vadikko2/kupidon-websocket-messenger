@@ -3,7 +3,6 @@ import typing
 
 import cqrs
 
-from domain import messages as messages_entity
 from service import exceptions, unit_of_work
 from service.requests.attachments import get_attachments
 from service.requests.messages import get_messages
@@ -17,7 +16,7 @@ class GetMessagesHandler(
 
     @property
     def events(self):
-        return self.uow.get_events()
+        return list(self.uow.get_events())
 
     async def handle(self, request: get_messages.GetMessages) -> get_messages.Messages:
         async with self.uow:
@@ -38,14 +37,20 @@ class GetMessagesHandler(
                 )
 
             messages: typing.List[get_messages.MessageInfo] = []
+            last_read_message = chat_history.last_read_by(request.account)
 
             for message in sorted(
                 chat_history.history,
                 key=lambda m: m.created,
-                reverse=True,
+                reverse=request.reverse,
             ):
-                if message.status == messages_entity.MessageStatus.DELETED:
+                if message.deleted:
                     continue
+
+                is_message_read = (
+                    bool(last_read_message)
+                    and message.created <= last_read_message.created
+                )
 
                 message_reactions = [
                     get_messages.ReactionsUnderMessage(
@@ -78,7 +83,7 @@ class GetMessagesHandler(
                         content=message.content,
                         attachments=message_attachments,
                         reactions=message_reactions,
-                        status=message.status,
+                        read=is_message_read,
                         created=message.created,
                         updated=message.updated,
                         reply_to=message.reply_to,
@@ -122,7 +127,7 @@ class GetMessagePreviewHandler(
                     chat.chat_id,
                 )
 
-            if message.status == messages_entity.MessageStatus.DELETED:
+            if message.deleted:
                 raise exceptions.MessageNotFound(request.message_id)
 
             return get_messages.MessagePreview(
@@ -130,6 +135,5 @@ class GetMessagePreviewHandler(
                 chat_id=message.chat_id,
                 sender=message.sender,
                 content=message.content,
-                status=message.status,
                 created=message.created,
             )

@@ -17,7 +17,7 @@ class SendMessageHandler(
 
     @property
     def events(self):
-        return self.uow.get_events()
+        return list(self.uow.get_events())
 
     async def handle(
         self,
@@ -72,6 +72,7 @@ class SendMessageHandler(
             chat.add_message(new_message)
 
             await self.uow.message_repository.add(new_message)
+            await self.uow.chat_repository.update(chat)
             await self.uow.commit()
 
         return send_message.MessageSent(

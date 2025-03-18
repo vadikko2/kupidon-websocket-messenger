@@ -7,14 +7,6 @@ from presentation.api.schema.validators import EmojiValidationError
 from service import exceptions as service_exceptions
 
 
-@bind_exception(status.HTTP_403_FORBIDDEN)
-def change_status_access_donated_handler(
-    _: requests.Request,
-    error: service_exceptions.ChangeStatusAccessDonated,
-) -> models.ErrorResponse:
-    return models.ErrorResponse(message=str(error))
-
-
 @bind_exception(status.HTTP_404_NOT_FOUND)
 def message_not_found_handler(
     _: requests.Request,

@@ -2,7 +2,6 @@ import typing
 import uuid
 
 import cqrs
-import pydantic
 
 from domain import chats
 
@@ -31,12 +30,31 @@ class ChatRepository(typing.Protocol):
     async def get_chat_history(
         self,
         chat_id: uuid.UUID,
-        messages_limit: pydantic.NonNegativeInt,
+        messages_limit: int | None = None,
         latest_message_id: typing.Optional[uuid.UUID] = None,
         reverse: bool = False,
     ) -> chats.Chat | None:
         """
         Returns chat history
+        """
+        raise NotImplementedError
+
+    async def count_after(
+        self,
+        chat_id: uuid.UUID,
+        message_id: uuid.UUID | None,
+    ) -> int:
+        """
+        Returns count of messages after specified message
+        """
+        raise NotImplementedError
+
+    async def count_after_many(
+        self,
+        *message: typing.Tuple[uuid.UUID, uuid.UUID | None],
+    ) -> typing.List[int]:
+        """
+        Returns count of messages after specified messages
         """
         raise NotImplementedError
 
@@ -48,6 +66,6 @@ class ChatRepository(typing.Protocol):
 
     def events(self) -> typing.List[cqrs.Event]:
         """
-        Returns new domain ecst_events
+        Returns new domain events
         """
         raise NotImplementedError

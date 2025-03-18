@@ -2,7 +2,6 @@ import logging
 
 import cqrs
 
-from domain import messages
 from service import exceptions, unit_of_work
 from service.requests.messages import delete_message
 
@@ -15,20 +14,16 @@ class DeleteMessageHandler(cqrs.RequestHandler[delete_message.DeleteMessage, Non
 
     @property
     def events(self):
-        return self.uow.get_events()
+        return list(self.uow.get_events())
 
     async def handle(self, request: delete_message.DeleteMessage) -> None:
         async with self.uow:
             message = await self.uow.message_repository.get(request.message_id)
-            if message is None or message.status == messages.MessageStatus.DELETED:
+            if message is None or message.deleted:
                 raise exceptions.MessageNotFound(request.message_id)
 
             if request.deleter != message.sender:
-                raise exceptions.ChangeStatusAccessDonated(
-                    request.deleter,
-                    request.message_id,
-                    messages.MessageStatus.DELETED,
-                )
+                raise exceptions.ParticipantNotInChat(request.deleter, message.chat_id)
 
             message.delete()
 

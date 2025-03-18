@@ -25,7 +25,7 @@ async def websocket_endpoint(
     ),
 ):
     """
-    # Returns all ecst_events for the specified account
+    # Returns all events for the specified account
     """
     await websocket.accept()
     logger.debug(f"Websocket connected to {account_id}")

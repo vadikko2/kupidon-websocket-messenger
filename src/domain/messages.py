@@ -1,5 +1,4 @@
 import datetime
-import enum
 import logging
 import typing
 import uuid
@@ -20,17 +19,6 @@ TOTAL_EMOJI_NUMBER = 12
 EMOJI_PER_REACTOR = 3
 
 
-class MessageStatus(enum.StrEnum):
-    """
-    Message statuses
-    """
-
-    SENT = "sent"
-    RECEIVED = "received"
-    READ = "read"
-    DELETED = "deleted"
-
-
 class Message(pydantic.BaseModel):
     """
     Message entity
@@ -38,10 +26,9 @@ class Message(pydantic.BaseModel):
 
     chat_id: uuid.UUID = pydantic.Field(frozen=True)
     message_id: uuid.UUID = pydantic.Field(default_factory=uuid.uuid4, frozen=True)
-
     sender: typing.Text = pydantic.Field(frozen=True)
-
     reply_to: typing.Optional[uuid.UUID] = pydantic.Field(default=None, frozen=True)
+    deleted: bool = False
 
     content: typing.Text = pydantic.Field(frozen=True)
     attachments: typing.List[attachment_entities.Attachment] = pydantic.Field(
@@ -53,7 +40,6 @@ class Message(pydantic.BaseModel):
         default_factory=list,
         max_length=TOTAL_EMOJI_NUMBER,
     )
-    status: MessageStatus = pydantic.Field(default=MessageStatus.SENT)
 
     created: datetime.datetime = pydantic.Field(
         default_factory=datetime.datetime.now,
@@ -63,38 +49,17 @@ class Message(pydantic.BaseModel):
         default_factory=datetime.datetime.now,
     )
 
-    event_list: typing.List[cqrs.DomainEvent] = pydantic.Field(default_factory=list)
-
-    def receive(self, receiver: typing.Text) -> None:
-        self.status = MessageStatus.RECEIVED
-        self.updated = datetime.datetime.now()
-        logger.debug(f"Message {self.message_id} received by {receiver}")
-        self.event_list.append(
-            events.MessageReceived(
-                chat_id=self.chat_id,
-                message_id=self.message_id,
-                receiver_id=receiver,
-            ),
-        )
-
-    def read(self, reader: typing.Text) -> None:
-        self.status = MessageStatus.READ
-        self.updated = datetime.datetime.now()
-        logger.debug(f"Message {self.message_id} read by {reader}")
-        self.event_list.append(
-            events.MessageRead(
-                chat_id=self.chat_id,
-                message_id=self.message_id,
-                reader_id=reader,
-            ),
-        )
+    event_list: typing.List[cqrs.DomainEvent] = pydantic.Field(
+        default_factory=list,
+        exclude=True,
+    )
 
     def delete(self) -> None:
-        if self.status == MessageStatus.DELETED:
+        if self.deleted:
             logger.debug(f"Message {self.message_id} already deleted")
             return
 
-        self.status = MessageStatus.DELETED
+        self.deleted = True
         self.updated = datetime.datetime.now()
         logger.debug(f"Message {self.message_id} deleted")
         self.event_list.append(
@@ -188,7 +153,7 @@ class Message(pydantic.BaseModel):
 
     def get_events(self) -> typing.List[cqrs.DomainEvent]:
         """
-        Returns new domain ecst_events
+        Returns new domain events
         """
         new_events = []
         while self.event_list:
@@ -202,3 +167,21 @@ class Message(pydantic.BaseModel):
         if not isinstance(other, Message):
             return False
         return self.message_id == other.message_id
+
+
+class ReedMessage(pydantic.BaseModel):
+    """
+    Represents a message that has been reed by an actor
+    """
+
+    actor: typing.Text
+    message: Message
+    timestamp: datetime.datetime = pydantic.Field(default_factory=datetime.datetime.now)
+
+    def __hash__(self):
+        return hash(self.message.message_id)
+
+    def __eq__(self, other):
+        if not isinstance(other, ReedMessage):
+            return False
+        return self.message.message_id == other.message.message_id

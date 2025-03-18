@@ -1,7 +1,7 @@
 import cqrs
 import orjson
 
-from domain import events, messages
+from domain import events
 from infrastructure.brokers import messages_broker
 from service import exceptions, unit_of_work
 from service.requests.ecst_events.reactions import message_reacted
@@ -16,7 +16,7 @@ class MessageReactedHandler(cqrs.EventHandler[events.MessageReacted]):
         async with self.uow:
             message = await self.uow.message_repository.get(event.message_id)
 
-            if message is None or message.status == messages.MessageStatus.DELETED:
+            if message is None or message.deleted:
                 raise exceptions.MessageNotFound(event.message_id)
 
             await self.broker.send_message(
