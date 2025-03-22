@@ -1,20 +1,20 @@
 import datetime
 import typing
-import uuid
 
 import cqrs
+import pydantic
 
 
 class SendMessage(cqrs.Request):
-    chat_id: uuid.UUID
+    chat_id: pydantic.UUID4
     sender: typing.Text
 
-    reply_to: typing.Optional[uuid.UUID] = None
+    reply_to: typing.Optional[pydantic.UUID4] = None
 
     content: typing.Text
-    attachments: typing.List[uuid.UUID]
+    attachments: typing.List[pydantic.UUID4]
 
 
 class MessageSent(cqrs.Response):
-    message_id: uuid.UUID
+    message_id: pydantic.UUID4
     created: datetime.datetime

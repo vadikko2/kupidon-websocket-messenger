@@ -1,8 +1,6 @@
-import uuid
-
 import pydantic
 
 
 class MessageDeletedPayload(pydantic.BaseModel):
-    chat_id: uuid.UUID
-    message_id: uuid.UUID
+    chat_id: pydantic.UUID4
+    message_id: pydantic.UUID4

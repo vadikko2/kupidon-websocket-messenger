@@ -28,9 +28,9 @@ class Attachment(pydantic.BaseModel):
     Attachment entity
     """
 
-    attachment_id: uuid.UUID = pydantic.Field(default_factory=uuid.uuid4, frozen=True)
+    attachment_id: pydantic.UUID4 = pydantic.Field(default_factory=uuid.uuid4, frozen=True)
 
-    chat_id: uuid.UUID = pydantic.Field(frozen=True)
+    chat_id: pydantic.UUID4 = pydantic.Field(frozen=True)
     uploader: typing.Text = pydantic.Field(frozen=True)
 
     created: datetime.datetime = pydantic.Field(

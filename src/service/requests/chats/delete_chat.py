@@ -1,9 +1,9 @@
 import typing
-import uuid
 
 import cqrs
+import pydantic
 
 
 class DeleteChat(cqrs.Request):
     actor: typing.Text
-    chat_id: uuid.UUID
+    chat_id: pydantic.UUID4

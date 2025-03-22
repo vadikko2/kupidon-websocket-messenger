@@ -71,6 +71,18 @@ class GetMessagesHandler(
                     for attach in message.attachments
                 ]
 
+                replied_message_info: typing.Optional[get_messages.MessagePreview] = None
+                if message.reply_to:
+                    replied_message = await self.uow.message_repository.get(message.reply_to)
+                    if replied_message is not None:
+                        replied_message_info = get_messages.MessagePreview(
+                            message_id=replied_message.message_id,
+                            chat_id=replied_message.chat_id,
+                            sender=replied_message.sender,
+                            content=replied_message.content,
+                            created=replied_message.created,
+                        )
+
                 messages.append(
                     get_messages.MessageInfo(
                         chat_id=message.chat_id,
@@ -82,7 +94,7 @@ class GetMessagesHandler(
                         read=is_message_read,
                         created=message.created,
                         updated=message.updated,
-                        reply_to=message.reply_to,
+                        reply_to=replied_message_info,
                     ),
                 )
 

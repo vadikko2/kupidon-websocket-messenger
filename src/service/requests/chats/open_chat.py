@@ -1,5 +1,4 @@
 import typing
-import uuid
 
 import cqrs
 import pydantic
@@ -13,4 +12,4 @@ class OpenChat(cqrs.Request):
 
 
 class ChatOpened(cqrs.Response):
-    chat_id: uuid.UUID
+    chat_id: pydantic.UUID4

@@ -24,10 +24,10 @@ class Message(pydantic.BaseModel):
     Message entity
     """
 
-    chat_id: uuid.UUID = pydantic.Field(frozen=True)
-    message_id: uuid.UUID = pydantic.Field(default_factory=uuid.uuid4, frozen=True)
+    chat_id: pydantic.UUID4 = pydantic.Field(frozen=True)
+    message_id: pydantic.UUID4 = pydantic.Field(default_factory=uuid.uuid4, frozen=True)
     sender: typing.Text = pydantic.Field(frozen=True)
-    reply_to: typing.Optional[uuid.UUID] = pydantic.Field(default=None, frozen=True)
+    reply_to: typing.Optional[pydantic.UUID4] = pydantic.Field(default=None, frozen=True)
     deleted: bool = False
 
     content: typing.Text = pydantic.Field(frozen=True)

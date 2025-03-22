@@ -44,7 +44,7 @@ class Chat(pydantic.BaseModel):
     Chat entity
     """
 
-    chat_id: uuid.UUID = pydantic.Field(default_factory=uuid.uuid4, frozen=True)
+    chat_id: pydantic.UUID4 = pydantic.Field(default_factory=uuid.uuid4, frozen=True)
     name: typing.Text = pydantic.Field(min_length=1, max_length=100)
     avatar: pydantic.AnyHttpUrl | None = pydantic.Field(default=None)
 
@@ -95,11 +95,7 @@ class Chat(pydantic.BaseModel):
 
         self.history.append(message)
 
-        self.last_message = (
-            max((message, self.last_message), key=lambda x: x.created)
-            if self.last_message
-            else message
-        )
+        self.last_message = max((message, self.last_message), key=lambda x: x.created) if self.last_message else message
         self.last_activity_timestamp = message.created
 
         logger.debug(f"Message {message.message_id} added to chat {self.chat_id}")

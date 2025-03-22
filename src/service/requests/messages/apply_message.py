@@ -1,10 +1,10 @@
 import typing
-import uuid
 
 import cqrs
+import pydantic
 
 
 class ApplyMessage(cqrs.Request):
     applier: typing.Text
 
-    message_id: uuid.UUID
+    message_id: pydantic.UUID4

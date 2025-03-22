@@ -1,5 +1,4 @@
 import typing
-import uuid
 
 import pydantic
 
@@ -73,8 +72,8 @@ class MessagesPaginator(Pagination, typing.Generic[Item]):
     limit: pydantic.NonNegativeInt = pydantic.Field(default=0, exclude=True)
     offset: pydantic.NonNegativeInt = pydantic.Field(default=0, exclude=True)
 
-    next_id: typing.Optional[uuid.UUID]
-    previous_id: typing.Optional[uuid.UUID] = None
+    next_id: typing.Optional[pydantic.UUID4] = None
+    previous_id: typing.Optional[pydantic.UUID4] = None
     reverse: pydantic.StrictBool = pydantic.Field(default=False, exclude=False)
 
     @pydantic.computed_field()

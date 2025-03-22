@@ -1,10 +1,10 @@
 import typing
-import uuid
 
 import cqrs
+import pydantic
 
 
 class ReactMessage(cqrs.Request):
     reactor: typing.Text
-    message_id: uuid.UUID
+    message_id: pydantic.UUID4
     emoji: typing.Text
