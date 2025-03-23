@@ -7,6 +7,7 @@ from di import dependent
 
 from adapters.redis import connections as redis_connections
 from domain import attachments
+from infrastructure import unit_of_work as mock_unit_of_work
 from infrastructure.brokers import messages_broker, redis as redis_broker
 from infrastructure.helpers.attachments.preprocessors import chain, jpeg_preprocessors
 from infrastructure.storages import attachment_storage, s3
@@ -15,7 +16,7 @@ from service import unit_of_work
 container = di.Container()
 
 UoWBind = di.bind_by_type(
-    dependent.Dependent(unit_of_work.MockMessageUoW, scope="request"),
+    dependent.Dependent(mock_unit_of_work.MockMessageUoW, scope="request"),
     unit_of_work.UoW,
 )
 BrokerBind = di.bind_by_type(
