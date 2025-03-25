@@ -98,10 +98,14 @@ class GetMessagesHandler(
                     ),
                 )
 
-            if not request.reverse:
-                next_message = await self.uow.chat_repository.get_previous_message_id(
-                    chat_id=request.chat_id,
-                    target_message_id=messages[0].message_id,
+            if request.reverse:
+                next_message = (
+                    await self.uow.chat_repository.get_previous_message_id(
+                        chat_id=request.chat_id,
+                        target_message_id=messages[0].message_id,
+                    )
+                    if messages
+                    else None
                 )
                 prev_message = (
                     await self.uow.chat_repository.get_next_message_id(
@@ -123,11 +127,15 @@ class GetMessagesHandler(
                     if messages
                     else None
                 )
-                prev_message = await self.uow.chat_repository.get_previous_message_id(
-                    chat_id=request.chat_id,
-                    target_message_id=(
-                        request.latest_message_id if request.latest_message_id else messages[0].message_id
-                    ),
+                prev_message = (
+                    await self.uow.chat_repository.get_previous_message_id(
+                        chat_id=request.chat_id,
+                        target_message_id=(
+                            request.latest_message_id if request.latest_message_id else messages[0].message_id
+                        ),
+                    )
+                    if messages
+                    else None
                 )
 
         return get_messages.Messages(
