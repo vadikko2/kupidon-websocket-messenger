@@ -42,6 +42,7 @@ class GetMessagesHandler(
             for message in sorted(
                 chat_history.history,
                 key=lambda m: m.created,
+                reverse=True,
             ):
                 if message.deleted:
                     continue
