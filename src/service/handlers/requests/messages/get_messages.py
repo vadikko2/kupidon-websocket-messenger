@@ -24,7 +24,7 @@ class GetMessagesHandler(
                 chat_id=request.chat_id,
                 messages_limit=request.messages_limit,
                 latest_message_id=request.latest_message_id,
-                reverse=request.reverse,
+                reverse=not request.reverse,
             )
 
             if chat_history is None:
@@ -103,7 +103,7 @@ class GetMessagesHandler(
                 next_message = (
                     await self.uow.chat_repository.get_previous_message_id(
                         chat_id=request.chat_id,
-                        target_message_id=messages[0].message_id,
+                        target_message_id=messages[-1].message_id,
                     )
                     if messages
                     else None
@@ -112,7 +112,7 @@ class GetMessagesHandler(
                     await self.uow.chat_repository.get_next_message_id(
                         chat_id=request.chat_id,
                         target_message_id=(
-                            request.latest_message_id if request.latest_message_id else messages[-1].message_id
+                            request.latest_message_id if request.latest_message_id else messages[0].message_id
                         ),
                     )
                     if messages
@@ -123,7 +123,7 @@ class GetMessagesHandler(
                 next_message = (
                     await self.uow.chat_repository.get_next_message_id(
                         chat_id=request.chat_id,
-                        target_message_id=messages[-1].message_id,
+                        target_message_id=messages[0].message_id,
                     )
                     if messages
                     else None
@@ -132,7 +132,7 @@ class GetMessagesHandler(
                     await self.uow.chat_repository.get_previous_message_id(
                         chat_id=request.chat_id,
                         target_message_id=(
-                            request.latest_message_id if request.latest_message_id else messages[0].message_id
+                            request.latest_message_id if request.latest_message_id else messages[-1].message_id
                         ),
                     )
                     if messages
