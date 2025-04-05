@@ -24,7 +24,7 @@ class GetMessagesHandler(
                 chat_id=request.chat_id,
                 messages_limit=request.messages_limit,
                 latest_message_id=request.latest_message_id,
-                reverse=request.reverse,
+                reverse=not request.reverse,
             )
 
             if chat_history is None:
