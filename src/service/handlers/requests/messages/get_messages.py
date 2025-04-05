@@ -39,11 +39,7 @@ class GetMessagesHandler(
             messages: typing.List[get_messages.MessageInfo] = []
             last_read_message = chat_history.last_read_by(request.account)
 
-            for message in sorted(
-                chat_history.history,
-                key=lambda m: m.created,
-                reverse=False,
-            ):
+            for message in chat_history.history:
                 if message.deleted:
                     continue
 
@@ -99,8 +95,10 @@ class GetMessagesHandler(
                     ),
                 )
 
+            messages.sort(key=lambda m: m.created, reverse=True)
+
             next_message = (
-                await self.uow.chat_repository.get_previous_message_id(
+                await self.uow.chat_repository.get_next_message_id(
                     chat_id=request.chat_id,
                     target_message_id=messages[0].message_id,
                 )
@@ -108,7 +106,7 @@ class GetMessagesHandler(
                 else None
             )
             prev_message = (
-                await self.uow.chat_repository.get_next_message_id(
+                await self.uow.chat_repository.get_previous_message_id(
                     chat_id=request.chat_id,
                     target_message_id=messages[-1].message_id,
                 )

@@ -21,6 +21,7 @@ class AttachmentType(enum.StrEnum):
     VIDEO = "video"
     AUDIO = "audio"
     FILE = "file"
+    CIRCLE = "circle"
 
 
 class Attachment(pydantic.BaseModel):
