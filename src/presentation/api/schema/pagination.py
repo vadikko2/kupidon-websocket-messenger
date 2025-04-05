@@ -81,11 +81,11 @@ class MessagesPaginator(Pagination, typing.Generic[Item]):
     def next(self) -> typing.Text | None:
         if self.next_id is None:
             return None
-        return self.url + f"?latest_id={self.next_id}&reverse={self.reverse}"
+        return self.url + f"?last_message_id={self.next_id}&reverse={str(self.reverse).lower()}"
 
     @pydantic.computed_field()
     @property
     def previous(self) -> typing.Text | None:
         if self.previous_id is None:
             return None
-        return self.url + f"?latest_id={self.previous_id}&reverse={self.reverse}"
+        return self.url + f"?last_message_id={self.previous_id}&reverse={str(self.reverse).lower()}"
