@@ -10,7 +10,8 @@ from fastapi_app import response
 from fastapi_app.exception_handlers import registry
 
 from presentation.api import dependencies
-from presentation.api.schema import pagination, requests, responses
+from presentation.api.schema import pagination
+from presentation.api.schema.v1 import requests, responses
 from service import exceptions
 from service.requests.chats import (
     get_chats as get_chats_request,

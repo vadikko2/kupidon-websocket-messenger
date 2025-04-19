@@ -9,7 +9,8 @@ from fastapi_app import response
 from fastapi_app.exception_handlers import registry
 
 from presentation.api import dependencies
-from presentation.api.schema import pagination, responses, validators
+from presentation.api.schema import pagination
+from presentation.api.schema.v1 import requests, responses
 from service import exceptions
 from service.requests.messages import (
     get_messages as get_messages_request,
@@ -30,16 +31,10 @@ router = fastapi.APIRouter(prefix="/{chat_id}/messages", tags=["Messages"])
         exceptions.ParticipantNotInChat,
     ),
 )
-async def send_message(
+async def post_message(
     chat_id: uuid.UUID,
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
-    reply_to: typing.Optional[uuid.UUID] = fastapi.Body(default=None, examples=[None]),
-    content: typing.Text = validators.MessageBody(),
-    attachments: typing.List[uuid.UUID] = fastapi.Body(
-        default_factory=list,
-        max_length=5,
-        examples=[[]],
-    ),
+    message: requests.PostMessage = fastapi.Body(...),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
     ),
@@ -50,9 +45,9 @@ async def send_message(
     command = send_message_request.SendMessage(
         chat_id=chat_id,
         sender=account_id,
-        reply_to=reply_to,
-        content=content,
-        attachments=attachments,
+        reply_to=message.reply_to,
+        content=message.content,
+        attachments=message.attachments,
     )
 
     result: send_message_request.MessageSent = await mediator.send(command)

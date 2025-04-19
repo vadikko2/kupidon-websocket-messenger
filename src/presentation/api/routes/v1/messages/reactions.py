@@ -10,7 +10,8 @@ from fastapi_app.exception_handlers import registry
 
 from domain import exceptions as domain_exceptions
 from presentation.api import dependencies
-from presentation.api.schema import pagination, requests, validators
+from presentation.api.schema import pagination, validators
+from presentation.api.schema.v1 import requests
 from service import exceptions as service_exceptions
 from service.requests.reactions import (
     get_reactors as get_reactors_request,

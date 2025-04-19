@@ -30,7 +30,7 @@ class Message(pydantic.BaseModel):
     reply_to: typing.Optional[pydantic.UUID4] = pydantic.Field(default=None, frozen=True)
     deleted: bool = False
 
-    content: typing.Text = pydantic.Field(frozen=True)
+    content: typing.Optional[typing.Text] = pydantic.Field(frozen=True, default=None)
     attachments: typing.List[attachment_entities.Attachment] = pydantic.Field(
         default_factory=list,
         max_length=5,

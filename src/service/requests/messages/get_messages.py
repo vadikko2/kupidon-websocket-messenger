@@ -25,7 +25,7 @@ class MessageInfo(cqrs.Request):
     chat_id: pydantic.UUID4
     message_id: pydantic.UUID4
     sender: typing.Text
-    content: typing.Text
+    content: typing.Optional[typing.Text]
     attachments: typing.List[get_attachments.AttachmentInfo]
     reactions: typing.List[ReactionsUnderMessage]
     reply_to: typing.Optional["MessagePreview"]
@@ -49,5 +49,5 @@ class MessagePreview(cqrs.Response):
     chat_id: pydantic.UUID4
     message_id: pydantic.UUID4
     sender: typing.Text
-    content: typing.Text
+    content: typing.Optional[typing.Text]
     created: datetime.datetime

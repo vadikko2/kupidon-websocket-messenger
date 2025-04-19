@@ -11,7 +11,7 @@ class SendMessage(cqrs.Request):
 
     reply_to: typing.Optional[pydantic.UUID4] = None
 
-    content: typing.Text
+    content: typing.Optional[typing.Text] = None
     attachments: typing.List[pydantic.UUID4]
 
 

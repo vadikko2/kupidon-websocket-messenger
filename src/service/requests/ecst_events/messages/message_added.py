@@ -9,7 +9,7 @@ class MessageAddedPayload(pydantic.BaseModel):
     message_id: pydantic.UUID4
 
     sender: typing.Text
-    content: typing.Text
+    content: typing.Optional[typing.Text]
     reply_to: typing.Optional[pydantic.UUID4]
 
     created: datetime.datetime
