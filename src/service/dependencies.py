@@ -5,7 +5,7 @@ import di
 import redis.asyncio as redis
 from di import dependent
 
-from adapters.redis import connections as redis_connections
+from infrastructure.database.cache.redis import connections as redis_connections
 from domain import attachments
 from infrastructure import unit_of_work as mock_unit_of_work
 from infrastructure.brokers import messages_broker, redis as redis_broker

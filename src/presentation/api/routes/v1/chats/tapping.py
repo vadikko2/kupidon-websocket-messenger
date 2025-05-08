@@ -1,8 +1,8 @@
 import typing
-import uuid
 
 import cqrs
 import fastapi
+import pydantic
 from fastapi_app.exception_handlers import registry
 
 from domain import events
@@ -21,7 +21,7 @@ router = fastapi.APIRouter(prefix="/{chat_id}/tap", tags=["Tapping"])
     ),
 )
 async def tap(
-    chat_id: uuid.UUID,
+    chat_id: pydantic.UUID4,
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     emitter: cqrs.EventEmitter = fastapi.Depends(
         dependency=dependencies.event_emitter_factory,

@@ -1,5 +1,4 @@
 import typing
-import uuid
 
 import cqrs
 import fastapi
@@ -32,7 +31,7 @@ router = fastapi.APIRouter(prefix="/reactions", tags=["Reactions"])
     ),
 )
 async def react(
-    message_id: uuid.UUID,
+    message_id: pydantic.UUID4,
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     reaction: requests.Reaction = fastapi.Body(...),
     mediator: cqrs.RequestMediator = fastapi.Depends(
@@ -60,7 +59,7 @@ async def react(
     ),
 )
 async def unreact(
-    message_id: uuid.UUID,
+    message_id: pydantic.UUID4,
     reaction: requests.Reaction = fastapi.Body(...),
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
@@ -90,7 +89,7 @@ async def unreact(
     ),
 )
 async def get_reactors(
-    message_id: uuid.UUID,
+    message_id: pydantic.UUID4,
     reaction: typing.Text = fastapi.Depends(validators.emoji_validator),
     limit: pydantic.NonNegativeInt = fastapi.Query(default=10),
     offset: pydantic.NonNegativeInt = fastapi.Query(default=0),

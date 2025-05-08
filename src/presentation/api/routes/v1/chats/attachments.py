@@ -1,6 +1,5 @@
 import logging
 import typing
-import uuid
 
 import cqrs
 import fastapi
@@ -18,7 +17,7 @@ from service.requests.attachments import (
     upload_attachment as upload_attachment_request,
 )
 
-router = fastapi.APIRouter(prefix="/{chat_id}/attachments", tags=["Attachments"])
+router = fastapi.APIRouter(prefix="/{chat_id}/attachments", tags=["Attachments"], deprecated=True)
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +28,7 @@ logger = logging.getLogger(__name__)
     responses=registry.get_exception_responses(exceptions.ChatNotFound),
 )
 async def upload_attachment(
-    chat_id: uuid.UUID,
+    chat_id: pydantic.UUID4,
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     attachment: fastapi.UploadFile = fastapi.File(...),
     content_type: attachment_entities.AttachmentType = fastapi.Body(...),
@@ -66,7 +65,7 @@ async def upload_attachment(
     ),
 )
 async def get_attachments(
-    chat_id: uuid.UUID,
+    chat_id: pydantic.UUID4,
     limit: pydantic.NonNegativeInt = fastapi.Query(default=10),
     offset: pydantic.NonNegativeInt = fastapi.Query(default=0),
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),

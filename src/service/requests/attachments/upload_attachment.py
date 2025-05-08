@@ -1,5 +1,4 @@
 import typing
-import uuid
 
 import cqrs
 import pydantic
@@ -8,7 +7,7 @@ from domain import attachments
 
 
 class UploadAttachment(cqrs.Request):
-    chat_id: uuid.UUID
+    chat_id: pydantic.UUID4
     uploader: typing.Text
     filename: typing.Text
     content_type: attachments.AttachmentType

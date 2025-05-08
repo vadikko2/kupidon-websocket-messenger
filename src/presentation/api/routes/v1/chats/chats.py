@@ -1,6 +1,5 @@
 import logging
 import typing
-import uuid
 
 import cqrs
 import fastapi
@@ -89,7 +88,7 @@ async def get_chats(
     ),
 )
 async def delete_chat(
-    chat_id: uuid.UUID,
+    chat_id: pydantic.UUID4,
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,

@@ -1,5 +1,4 @@
 import typing
-import uuid
 
 import cqrs
 import fastapi
@@ -32,7 +31,7 @@ router = fastapi.APIRouter(prefix="/{chat_id}/messages", tags=["Messages"])
     ),
 )
 async def post_message(
-    chat_id: uuid.UUID,
+    chat_id: pydantic.UUID4,
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     message: requests.PostMessage = fastapi.Body(...),
     mediator: cqrs.RequestMediator = fastapi.Depends(
@@ -69,9 +68,9 @@ async def post_message(
     ),
 )
 async def get_messages(
-    chat_id: uuid.UUID,
+    chat_id: pydantic.UUID4,
     limit: pydantic.NonNegativeInt = fastapi.Query(default=10),
-    latest_message_id: uuid.UUID | None = fastapi.Query(default=None),
+    latest_message_id: pydantic.UUID4 | None = fastapi.Query(default=None),
     reverse: bool = fastapi.Query(default=False),
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(

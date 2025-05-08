@@ -5,8 +5,8 @@ import orjson
 import socketio
 from socketio import async_redis_manager
 
-from adapters.redis import connections, settings as redis_settings
 from infrastructure.brokers import redis as redis_broker
+from infrastructure.database.cache.redis import connections, settings as redis_settings
 from service.handlers.requests.subscriptions import subscription as subscription_service
 
 logger = logging.getLogger(__name__)

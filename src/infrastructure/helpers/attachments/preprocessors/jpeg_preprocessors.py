@@ -49,8 +49,6 @@ class JPEGPreview100x100AttachmentPreprocessor:
         return f"{self.name}/{update_filename_jpeg(file_name)}"
 
 
-class JPEGPreview200x200AttachmentPreprocessor(
-    JPEGPreview100x100AttachmentPreprocessor,
-):
+class JPEGPreview200x200AttachmentPreprocessor(JPEGPreview100x100AttachmentPreprocessor):
     size = (200, 200)
     name = "jpg_200x200"

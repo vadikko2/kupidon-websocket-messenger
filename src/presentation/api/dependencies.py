@@ -9,7 +9,7 @@ from cqrs.events import bootstrap as event_bootstrap
 from cqrs.requests import bootstrap as request_bootstrap
 from fastapi import status
 
-from adapters.redis import connections
+from infrastructure.database.cache.redis import connections
 from infrastructure.brokers import messages_broker, redis as redis_broker
 from infrastructure.storages import attachment_storage, s3
 from presentation.api.schema import validators

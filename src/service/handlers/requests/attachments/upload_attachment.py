@@ -5,6 +5,7 @@ import typing
 import uuid
 
 import cqrs
+from cqrs.events import event
 
 from domain import attachments
 from infrastructure.helpers.attachments.preprocessors import chain
@@ -32,8 +33,8 @@ class UploadAttachmentHandler(
         self.preprocessing_chains = preprocessing_chains
 
     @property
-    def events(self):
-        return self.uow.get_events()
+    def events(self) -> typing.List[event.Event]:
+        return list(self.uow.get_events())
 
     async def _upload_file_to_storage(
         self,
@@ -73,19 +74,16 @@ class UploadAttachmentHandler(
 
             uploading_dt = datetime.datetime.now()
             uploading_file_name = f"{new_attachment.attachment_id}_{request.filename}"
-            uploading_path = (
-                f"{request.uploader}/{uploading_dt.year}/{uploading_dt.month}"
-            )
+            uploading_path = f"{request.uploader}/{uploading_dt.year}/{uploading_dt.month}"
 
-            urls: typing.List[typing.Text] = []
-
-            # upload original
-            urls.append(
+            urls: typing.List[typing.Text] = [
                 await self._upload_file_to_storage(
                     io.BytesIO(request.content),
                     f"{uploading_path}/{uploading_file_name}",
                 ),
-            )
+            ]
+
+            # upload original
 
             # preprocess
             for preprocessing_chain in self.preprocessing_chains:
@@ -108,7 +106,7 @@ class UploadAttachmentHandler(
                     )
 
             # mark as uploaded
-            new_attachment.upload(urls=urls, uploaded_dt=uploading_dt)
+            new_attachment.upload(urls=urls, uploaded_dt=uploading_dt)  # pyright: ignore[reportArgumentType]
 
             # save
             await self.uow.attachment_repository.add(new_attachment)

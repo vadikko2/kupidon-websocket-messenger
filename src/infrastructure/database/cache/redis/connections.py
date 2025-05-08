@@ -1,6 +1,6 @@
 import redis.asyncio as redis
 
-from adapters.redis import pools
+from infrastructure.database.cache.redis import pools
 
 
 class RedisConnectionFactory:

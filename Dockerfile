@@ -5,7 +5,7 @@ LABEL maintainer="Vadim Kozyrevskiy" \
 
 # hadolint ignore=DL3008
 RUN apt-get update && \
-    apt-get install --no-install-recommends -y git && \
+    apt-get install --no-install-recommends -y git ffmpeg && \
     pip install --no-cache-dir --upgrade pip==24.* && \
     rm -rf /var/lib/apt/lists/*
 
