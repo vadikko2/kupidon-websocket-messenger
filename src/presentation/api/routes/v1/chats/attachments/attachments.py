@@ -17,7 +17,7 @@ from service.requests.attachments import (
     upload_attachment as upload_attachment_request,
 )
 
-router = fastapi.APIRouter(prefix="/{chat_id}/attachments", tags=["Attachments"], deprecated=True)
+router = fastapi.APIRouter()
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
     "",
     status_code=status.HTTP_201_CREATED,
     responses=registry.get_exception_responses(exceptions.ChatNotFound),
+    deprecated=True,
 )
 async def upload_attachment(
     chat_id: pydantic.UUID4,
@@ -69,6 +70,8 @@ async def get_attachments(
     limit: pydantic.NonNegativeInt = fastapi.Query(default=10),
     offset: pydantic.NonNegativeInt = fastapi.Query(default=0),
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    filter_type: typing.Sequence[attachment_entities.AttachmentType] = fastapi.Query(default=[]),
+    filter_id: typing.Sequence[pydantic.UUID4] = fastapi.Query(default=[]),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
     ),
@@ -82,6 +85,8 @@ async def get_attachments(
             account_id=account_id,
             limit=limit,
             offset=offset,
+            type_filter=list(filter_type),
+            attachment_id_filter=list(filter_id),
         ),
     )
     return response.Response(

@@ -7,7 +7,7 @@ import uuid
 import cqrs
 import pydantic
 
-from domain import events
+from domain import events, exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,10 @@ class AttachmentType(enum.StrEnum):
     VIDEO = "video"
     AUDIO = "audio"
     FILE = "file"
+
     CIRCLE = "circle"
+    VOICE = "voice"
+    STICKER = "sticker"
 
 
 class Attachment(pydantic.BaseModel):
@@ -40,25 +43,41 @@ class Attachment(pydantic.BaseModel):
     )
     uploaded: datetime.datetime = pydantic.Field(default_factory=datetime.datetime.now)
 
-    urls: typing.Sequence[pydantic.AnyHttpUrl] = pydantic.Field(default_factory=list)
+    urls: typing.Sequence[str] = pydantic.Field(default_factory=list)
     filename: typing.Optional[typing.Text] = pydantic.Field(
         default=None,
         max_length=100,
     )
+
     content_type: AttachmentType = pydantic.Field(frozen=True)
+    meta: typing.Dict | None = pydantic.Field(default_factory=dict)
 
     event_list: typing.List[cqrs.DomainEvent] = pydantic.Field(
         default_factory=list,
         exclude=True,
     )
 
+    @pydantic.model_validator(mode="after")
+    def check_fields(self):
+        if self.meta is None:
+            self.meta = {}
+
+        return self
+
     def upload(
         self,
-        urls: typing.List[pydantic.AnyHttpUrl],
+        urls: typing.List[typing.Text],
         uploaded_dt: datetime.datetime | None = None,
+        meta: typing.Dict | None = None,
     ) -> None:
+        """
+        Uploads attachment
+        """
         if uploaded_dt:
             self.uploaded = uploaded_dt
+
+        if self.meta or self.urls:
+            raise exceptions.AttachmentAlreadyUploaded(self.attachment_id)
 
         self.urls = urls
         self.event_list.append(
@@ -67,6 +86,10 @@ class Attachment(pydantic.BaseModel):
                 urls=self.urls,  # type: ignore
             ),
         )
+        if meta is None:
+            meta = {}
+
+        self.meta = meta
         logger.info(f"Attachment marks as uploaded: {self.attachment_id}")
 
     def get_events(self) -> typing.List[cqrs.DomainEvent]:

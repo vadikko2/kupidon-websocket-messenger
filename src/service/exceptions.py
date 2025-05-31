@@ -35,9 +35,9 @@ class AttachmentNotForSender(Exception):
 
 
 class AttachmentUploadError(Exception):
-    def __init__(self, filename: typing.Text, exception: Exception) -> None:
+    def __init__(self, exception: Exception) -> None:
         super().__init__(
-            f"Failed to upload attachment {filename}: {exception}",
+            f"Failed to upload attachment: {exception}",
         )
 
 
@@ -56,3 +56,8 @@ class SubscriptionNotStarted(Exception):
 class MessageNotDeleted(Exception):
     def __init__(self, message_id: uuid.UUID) -> None:
         super().__init__(f"Message {message_id} not deleted")
+
+
+class UnsupportedVoiceFormat(Exception):
+    def __init__(self, format_name: typing.Text) -> None:
+        super().__init__(f"Unsupported voice format: {format_name}")

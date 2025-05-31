@@ -18,6 +18,7 @@ from service.handlers.requests.attachments import (
     get_attachments as get_attachments_handler,
     upload_attachment as upload_attachment_handler,
 )
+from service.handlers.requests.attachments.voice import upload_voice as upload_voice_handler
 from service.handlers.requests.chats import (
     delete_chat as delete_chat_handler,
     get_chats as get_chats_handler,
@@ -38,6 +39,7 @@ from service.requests.attachments import (
     get_attachments as get_attachments_request,
     upload_attachment as upload_attachment_request,
 )
+from service.requests.attachments.voice import upload_voice as upload_voice_request
 from service.requests.chats import (
     delete_chat as delete_chat_request,
     get_chats as get_chats_request,
@@ -87,6 +89,10 @@ def init_requests(mapper: requests.RequestMap) -> None:
     mapper.bind(
         upload_attachment_request.UploadAttachment,
         upload_attachment_handler.UploadAttachmentHandler,
+    )
+    mapper.bind(
+        upload_voice_request.UploadVoice,
+        upload_voice_handler.UploadVoiceHandler,
     )
     mapper.bind(
         react_message_request.ReactMessage,

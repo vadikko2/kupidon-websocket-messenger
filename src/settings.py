@@ -24,4 +24,6 @@ class App(pydantic_settings.BaseSettings, case_sensitive=True):
     NAME: typing.Text = pydantic.Field(default="messanger-api")
     ENV: typing.Text = pydantic.Field(default="local")
 
+    TMP_ATTACHMENTS_DIR: typing.Text = pydantic.Field(default="/tmp/attachments")
+
     model_config = pydantic_settings.SettingsConfigDict(env_prefix="APP_")

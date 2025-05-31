@@ -3,7 +3,7 @@ from fastapi_app.exception_handlers import bind_exception, models
 from starlette import requests
 
 from domain import exceptions as domain_exceptions
-from presentation.api.schema.validators import EmojiValidationError
+from presentation.api.schema import validators
 from service import exceptions as service_exceptions
 
 
@@ -82,6 +82,22 @@ def too_many_reactions_handler(
 @bind_exception(status.HTTP_400_BAD_REQUEST)
 def emoji_validation_error_handler(
     _: requests.Request,
-    error: EmojiValidationError,
+    error: validators.EmojiValidationError,
+) -> models.ErrorResponse:
+    return models.ErrorResponse(message=str(error))
+
+
+@bind_exception(status.HTTP_400_BAD_REQUEST)
+def attachments_upload_error_handler(
+    _: requests.Request,
+    error: service_exceptions.AttachmentUploadError,
+) -> models.ErrorResponse:
+    return models.ErrorResponse(message=str(error))
+
+
+@bind_exception(status.HTTP_409_CONFLICT)
+def attachment_already_uploaded_handler(
+    _: requests.Request,
+    error: domain_exceptions.AttachmentAlreadyUploaded,
 ) -> models.ErrorResponse:
     return models.ErrorResponse(message=str(error))

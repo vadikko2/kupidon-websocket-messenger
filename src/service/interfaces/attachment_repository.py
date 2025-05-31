@@ -20,6 +20,7 @@ class AttachmentRepository(typing.Protocol):
     async def get_many(
         self,
         *attachment_ids: uuid.UUID,
+        type_filter: typing.List[attachments.AttachmentType] | None = None,
     ) -> typing.List[attachments.Attachment]:
         """Returns specified attachments"""
         raise NotImplementedError
@@ -29,6 +30,7 @@ class AttachmentRepository(typing.Protocol):
         chat_id: uuid.UUID,
         limit: int,
         offset: int,
+        type_filter: typing.List[attachments.AttachmentType] | None = None,
     ) -> typing.List[attachments.Attachment]:
         """Returns all attachments for specified chat"""
         raise NotImplementedError

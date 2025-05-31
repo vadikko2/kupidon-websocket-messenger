@@ -1,0 +1,63 @@
+import logging
+import typing
+
+import cqrs
+import fastapi
+import pydantic
+from fastapi_app import response
+from fastapi_app.exception_handlers import registry
+from starlette import status
+
+from domain import exceptions as domain_exceptions
+from domain.attachments import voice
+from presentation.api import dependencies
+from presentation.api.schema.v1 import responses
+from service import exceptions as service_exceptions
+from service.requests.attachments.voice import upload_voice as upload_voice_request
+
+router = fastapi.APIRouter(prefix="")
+logger = logging.getLogger(__name__)
+
+
+@router.post(
+    "",
+    status_code=status.HTTP_201_CREATED,
+    responses=registry.get_exception_responses(
+        service_exceptions.ChatNotFound,
+        service_exceptions.AttachmentUploadError,
+        domain_exceptions.AttachmentAlreadyUploaded,
+    ),
+)
+async def upload_voice(
+    chat_id: pydantic.UUID4,
+    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    voice_file: fastapi.UploadFile = fastapi.File(description="Voice file"),
+    voice_type: voice.VoiceTypes = fastapi.Body(description="Voice type", default=voice.VoiceTypes.MP3),
+    duration_seconds: pydantic.PositiveInt = fastapi.Body(description="Voice duration in seconds"),
+    request_mediator: cqrs.RequestMediator = fastapi.Depends(
+        dependencies.request_mediator_factory,
+    ),
+) -> response.Response[responses.VoiceUploaded]:
+    """
+    # Uploads voice
+    """
+    result: upload_voice_request.VoiceUploaded = await request_mediator.send(
+        upload_voice_request.UploadVoice(
+            chat_id=chat_id,
+            uploader=account_id,
+            voice_format=voice_type,
+            duration_seconds=duration_seconds,
+            content=voice_file.file.read(),
+        ),
+    )
+    return response.Response[responses.VoiceUploaded](
+        result=responses.VoiceUploaded(
+            attachment_id=result.attachment_id,
+            info=responses.VoiceInfo(
+                duration_seconds=duration_seconds,
+                download_url=result.attachment_url,  # pyright: ignore[reportArgumentType]
+                voice_type=voice_type,
+                amplitudes=result.amplitudes,
+            ),
+        ),
+    )

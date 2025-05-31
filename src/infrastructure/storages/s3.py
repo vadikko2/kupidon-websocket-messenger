@@ -5,7 +5,7 @@ import boto3.session
 from botocore import client
 
 from infrastructure import settings
-from infrastructure.storages import attachment_storage
+from service.interfaces import attachment_storage
 
 logging.getLogger("botocore").setLevel(logging.ERROR)
 logging.getLogger("s3transfer").setLevel(logging.ERROR)
@@ -31,9 +31,7 @@ class S3AttachmentStorage(attachment_storage.AttachmentStorage):
         attachment: typing.BinaryIO,
         filename: typing.Text,
     ) -> typing.Text:
-        full_filename = (
-            f"{self.path_prefix}/{filename}" if self.path_prefix else filename
-        )
+        full_filename = f"{self.path_prefix}/{filename}" if self.path_prefix else filename
 
         session = boto3.session.Session()
         s3: client.BaseClient = session.client(

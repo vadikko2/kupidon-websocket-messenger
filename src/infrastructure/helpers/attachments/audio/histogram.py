@@ -1,15 +1,24 @@
 import array
 import math
+import pathlib
 import typing
 
 import pydub
 
-MAX_COLUMNS = 25
+MAX_COLUMNS = 100
 MAX_LEVELS = 32
 
 
+class DecodeVoiceError(Exception):
+    pass
+
+
+class HistogramExtractionError(Exception):
+    pass
+
+
 class AudioToHistogram:
-    def __init__(self, decoder: typing.Callable[[typing.BinaryIO], array.array[int]]):
+    def __init__(self, decoder: typing.Callable[[pathlib.Path], array.array[int]]):
         self._decoder = decoder
 
     @staticmethod
@@ -43,7 +52,7 @@ class AudioToHistogram:
     def quantize(
         amplitudes: list[tuple[float, float]],
         max_levels: int,
-    ) -> list[tuple[int, int]]:
+    ) -> list[int]:
         """
         Квантование амплитуд до нужного уровня детализации
         :param amplitudes: значения амплитуд
@@ -55,18 +64,24 @@ class AudioToHistogram:
         value_for_quant_max = abs(max_amplitude_value // (max_levels // 2))
         value_for_quant_min = abs(min_amplitude_value // (max_levels // 2))
 
-        return list(map(lambda x: (int(x[0] // value_for_quant_max), int(x[1] // value_for_quant_min)), amplitudes))
+        return list(map(lambda x: int(x[0] // value_for_quant_max) + int(x[1] // value_for_quant_min), amplitudes))
 
     def __call__(
         self,
-        audio_io: typing.BinaryIO,
+        audio_filename: pathlib.Path,
         max_columns: int = MAX_COLUMNS,
         max_levels: int = MAX_LEVELS,
-    ) -> list[tuple[int, int]]:
-        amplitudes = self._decoder(audio_io)
-        aggregated_by_columns_data = self.aggregate(amplitudes, max_columns)
-        return self.quantize(aggregated_by_columns_data, max_levels)
+    ) -> list[int]:
+        amplitudes = self._decoder(audio_filename)
+        try:
+            aggregated_by_columns_data = self.aggregate(amplitudes, max_columns)
+            return self.quantize(aggregated_by_columns_data, max_levels)
+        except Exception as e:
+            raise HistogramExtractionError(e)
 
 
-def mp3_decoder(audio_io: typing.BinaryIO) -> array.array[int]:
-    return pydub.AudioSegment.from_mp3(audio_io).get_array_of_samples()
+def mp3_decoder(filename: pathlib.Path) -> array.array[int]:
+    try:
+        return pydub.AudioSegment.from_file(str(filename.absolute())).get_array_of_samples()
+    except Exception as e:
+        raise DecodeVoiceError(f"MP3 decoding failed: {str(e)}")

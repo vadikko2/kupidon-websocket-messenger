@@ -5,13 +5,14 @@ import di
 import redis.asyncio as redis
 from di import dependent
 
-from infrastructure.database.cache.redis import connections as redis_connections
 from domain import attachments
 from infrastructure import unit_of_work as mock_unit_of_work
 from infrastructure.brokers import messages_broker, redis as redis_broker
+from infrastructure.database.cache.redis import connections as redis_connections
 from infrastructure.helpers.attachments.preprocessors import chain, jpeg_preprocessors
-from infrastructure.storages import attachment_storage, s3
+from infrastructure.storages import s3
 from service import unit_of_work
+from service.interfaces import attachment_storage
 
 container = di.Container()
 

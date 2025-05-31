@@ -2,12 +2,10 @@ import logging
 from logging import config
 
 import fastapi_app
-import socketio
 from fastapi_app import logging as fastapi_logging
 
 import settings
 from presentation.api import errors, routes
-from presentation.api.routes.v2.subscription import sio
 
 log_settings = settings.Logging()
 app_settings = settings.App()
@@ -33,7 +31,6 @@ app = fastapi_app.create(
     env_title=app_settings.ENV,
     query_routers=[
         routes.v1_router,
-        routes.v2_router,
         routes.healthcheck.router,
     ],
     exception_handlers=[
@@ -51,8 +48,3 @@ app = fastapi_app.create(
     cors_enable=True,
     log_config=log_config,
 )
-
-# Socket.IO
-socketio_app = socketio.ASGIApp(socketio_server=sio, other_asgi_app=app)
-app.add_route("/socket.io/", route=socketio_app, methods=["GET", "POST"])  # pyright: ignore[reportArgumentType]
-app.add_websocket_route("/socket.io/", socketio_app)  # pyright: ignore[reportArgumentType]

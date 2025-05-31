@@ -9,12 +9,13 @@ from cqrs.events import bootstrap as event_bootstrap
 from cqrs.requests import bootstrap as request_bootstrap
 from fastapi import status
 
-from infrastructure.database.cache.redis import connections
 from infrastructure.brokers import messages_broker, redis as redis_broker
-from infrastructure.storages import attachment_storage, s3
+from infrastructure.database.cache.redis import connections
+from infrastructure.storages import s3
 from presentation.api.schema import validators
 from service import dependencies, mapping
 from service.handlers.requests.subscriptions import subscription as subscription_service
+from service.interfaces import attachment_storage
 
 logger = logging.getLogger(__name__)
 

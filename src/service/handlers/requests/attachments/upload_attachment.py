@@ -9,8 +9,8 @@ from cqrs.events import event
 
 from domain import attachments
 from infrastructure.helpers.attachments.preprocessors import chain
-from infrastructure.storages import attachment_storage
 from service import exceptions, unit_of_work
+from service.interfaces import attachment_storage
 from service.requests.attachments import upload_attachment
 
 logger = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ class UploadAttachmentHandler(
         try:
             url = await self.storage.upload(file_object, filename)
         except Exception as e:
-            raise exceptions.AttachmentUploadError(filename, e)
+            raise exceptions.AttachmentUploadError(e)
 
         logger.info(f"Uploaded attachment: {url}")
         return url

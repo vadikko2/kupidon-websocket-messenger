@@ -31,11 +31,18 @@ class GetAttachmentsHandler(
                     chat_id=request.chat_id,
                 )
 
-            attachments = await self.uow.attachment_repository.get_all(
-                request.chat_id,
-                request.limit,
-                request.offset,
-            )
+            if not request.attachment_id_filter:
+                attachments = await self.uow.attachment_repository.get_all(
+                    request.chat_id,
+                    request.limit,
+                    request.offset,
+                    type_filter=request.type_filter,
+                )
+            else:
+                attachments = await self.uow.attachment_repository.get_many(
+                    *request.attachment_id_filter,
+                    type_filter=request.type_filter,
+                )
 
         return get_attachments.Attachments(
             attachments=[
@@ -45,6 +52,7 @@ class GetAttachmentsHandler(
                     urls=attachment.urls,  # type: ignore
                     uploaded=attachment.uploaded,
                     content_type=attachment.content_type,
+                    meta=attachment.meta or {},
                 )
                 for attachment in attachments
                 if attachment.uploaded

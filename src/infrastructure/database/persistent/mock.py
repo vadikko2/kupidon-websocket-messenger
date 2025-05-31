@@ -294,6 +294,7 @@ class MockAttachmentRepository:
     async def get_many(
         self,
         *attachment_ids: uuid.UUID,
+        type_filter: typing.List[attachments.AttachmentType] | None = None,
     ) -> typing.List[attachments.Attachment]:
         if not attachment_ids:
             return []
@@ -310,6 +311,9 @@ class MockAttachmentRepository:
             for attachment_bytes in attachments_bytes
             if attachment_bytes
         ]
+        if type_filter:
+            result = [attachment for attachment in result if attachment.content_type in type_filter]
+
         self._seen.update(result)
         return result
 
@@ -318,6 +322,7 @@ class MockAttachmentRepository:
         chat_id: uuid.UUID,
         limit: int,
         offset: int,
+        type_filter: typing.List[attachments.AttachmentType] | None = None,
     ) -> typing.List[attachments.Attachment]:
         attachments_in_chat_bytes_coroutine = await self._redis_pipeline.lrange(
             # pyright: ignore[reportGeneralTypeIssues]
@@ -345,6 +350,10 @@ class MockAttachmentRepository:
             key=lambda attachment: attachment.created,
             reverse=True,
         )
+
+        if type_filter:
+            result = [attachment for attachment in result if attachment.content_type in type_filter]
+
         self._seen.update(result[offset : offset + limit])
         return result[offset : offset + limit]
 

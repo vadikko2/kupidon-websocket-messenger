@@ -2,7 +2,7 @@ import typing
 
 import cqrs
 
-from service.repositories import (
+from service.interfaces import (
     attachment_repository,
     chat_repository,
     message_repository as msg_repository,
