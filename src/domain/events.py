@@ -34,6 +34,11 @@ class NewAttachmentUploaded(cqrs.DomainEvent, frozen=True):
     urls: typing.List[pydantic.AnyHttpUrl]
 
 
+class AttachmentSent(cqrs.DomainEvent, frozen=True):
+    message_id: pydantic.UUID4
+    attachment_id: pydantic.UUID4
+
+
 class MessageReacted(cqrs.DomainEvent, frozen=True):
     reaction_id: pydantic.UUID4
     reactor: typing.Text

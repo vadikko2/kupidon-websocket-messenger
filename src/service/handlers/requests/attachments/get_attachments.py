@@ -37,11 +37,13 @@ class GetAttachmentsHandler(
                     request.limit,
                     request.offset,
                     type_filter=request.type_filter,
+                    status_filter=request.status_filter,
                 )
             else:
                 attachments = await self.uow.attachment_repository.get_many(
                     *request.attachment_id_filter,
                     type_filter=request.type_filter,
+                    status_filter=request.status_filter,
                 )
 
         return get_attachments.Attachments(

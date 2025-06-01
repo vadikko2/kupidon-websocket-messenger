@@ -30,6 +30,12 @@ class MockMessageRepository:
             MESSAGES_PREFIX.format(message.message_id),
             orjson.dumps(message.model_dump(mode="json")),
         )
+        for attachment in message.attachments:
+            await self._redis_pipeline.set(
+                ATTACHMENTS_PREFIX.format(attachment.attachment_id),
+                orjson.dumps(attachment.model_dump(mode="json")),
+            )
+            self._seen.add(attachment)
         self._seen.add(message)
 
     async def get(self, message_id: uuid.UUID) -> messages.Message | None:
@@ -53,9 +59,16 @@ class MockMessageRepository:
 
     def events(self) -> typing.List[cqrs.Event]:
         new_events = []
-        for message in self._seen:
-            while message.event_list:
-                new_events.append(message.event_list.pop())
+        for entity in self._seen:
+            match entity:
+                case messages.Message():
+                    while entity.event_list:
+                        new_events.append(entity.event_list.pop())
+                case attachments.Attachment():
+                    while entity.event_list:
+                        new_events.append(entity.event_list.pop())
+                case _:
+                    pass
         return new_events
 
 
@@ -295,6 +308,7 @@ class MockAttachmentRepository:
         self,
         *attachment_ids: uuid.UUID,
         type_filter: typing.List[attachments.AttachmentType] | None = None,
+        status_filter: typing.List[attachments.AttachmentStatus] | None = None,
     ) -> typing.List[attachments.Attachment]:
         if not attachment_ids:
             return []
@@ -313,6 +327,8 @@ class MockAttachmentRepository:
         ]
         if type_filter:
             result = [attachment for attachment in result if attachment.content_type in type_filter]
+        if status_filter:
+            result = [attachment for attachment in result if attachment.status in status_filter]
 
         self._seen.update(result)
         return result
@@ -323,6 +339,7 @@ class MockAttachmentRepository:
         limit: int,
         offset: int,
         type_filter: typing.List[attachments.AttachmentType] | None = None,
+        status_filter: typing.List[attachments.AttachmentStatus] | None = None,
     ) -> typing.List[attachments.Attachment]:
         attachments_in_chat_bytes_coroutine = await self._redis_pipeline.lrange(
             # pyright: ignore[reportGeneralTypeIssues]
@@ -353,6 +370,8 @@ class MockAttachmentRepository:
 
         if type_filter:
             result = [attachment for attachment in result if attachment.content_type in type_filter]
+        if status_filter:
+            result = [attachment for attachment in result if attachment.status in status_filter]
 
         self._seen.update(result[offset : offset + limit])
         return result[offset : offset + limit]

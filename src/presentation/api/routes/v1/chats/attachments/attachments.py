@@ -71,6 +71,7 @@ async def get_attachments(
     offset: pydantic.NonNegativeInt = fastapi.Query(default=0),
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     filter_type: typing.Sequence[attachment_entities.AttachmentType] = fastapi.Query(default=[]),
+    filter_status: typing.Sequence[attachment_entities.AttachmentStatus] = fastapi.Query(default=[]),
     filter_id: typing.Sequence[pydantic.UUID4] = fastapi.Query(default=[]),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
@@ -86,6 +87,7 @@ async def get_attachments(
             limit=limit,
             offset=offset,
             type_filter=list(filter_type),
+            status_filter=list(filter_status),
             attachment_id_filter=list(filter_id),
         ),
     )

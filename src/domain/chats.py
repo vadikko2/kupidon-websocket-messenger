@@ -100,6 +100,9 @@ class Chat(pydantic.BaseModel):
 
         logger.debug(f"Message {message.message_id} added to chat {self.chat_id}")
 
+        for attach in message.attachments:
+            attach.send(message.message_id)
+
         self.event_list.append(
             events.NewMessageAdded(
                 chat_id=self.chat_id,

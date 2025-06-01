@@ -101,3 +101,11 @@ def attachment_already_uploaded_handler(
     error: domain_exceptions.AttachmentAlreadyUploaded,
 ) -> models.ErrorResponse:
     return models.ErrorResponse(message=str(error))
+
+
+@bind_exception(status.HTTP_409_CONFLICT)
+def attachment_already_sent_handler(
+    _: requests.Request,
+    error: domain_exceptions.AttachmentAlreadySent,
+) -> models.ErrorResponse:
+    return models.ErrorResponse(message=str(error))

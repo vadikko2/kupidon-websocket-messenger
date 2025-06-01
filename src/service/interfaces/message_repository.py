@@ -3,11 +3,11 @@ import uuid
 
 import cqrs
 
-from domain import messages
+from domain import attachments, messages
 
 
 class MessageRepository(typing.Protocol):
-    _seen: typing.Set[messages.Message]
+    _seen: typing.Set[messages.Message | attachments.Attachment]
 
     async def add(self, message: messages.Message) -> None:
         """

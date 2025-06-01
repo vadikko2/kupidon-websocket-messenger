@@ -12,6 +12,7 @@ class GetAttachments(cqrs.Request):
     account_id: typing.Text
 
     type_filter: typing.List[attachments.AttachmentType] = pydantic.Field(default_factory=list)
+    status_filter: typing.List[attachments.AttachmentStatus] = pydantic.Field(default_factory=list)
     attachment_id_filter: typing.List[pydantic.UUID4] = pydantic.Field(default_factory=list)
 
     limit: pydantic.NonNegativeInt

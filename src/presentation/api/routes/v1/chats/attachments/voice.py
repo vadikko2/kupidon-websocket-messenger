@@ -1,4 +1,3 @@
-import logging
 import typing
 
 import cqrs
@@ -16,7 +15,6 @@ from service import exceptions as service_exceptions
 from service.requests.attachments.voice import upload_voice as upload_voice_request
 
 router = fastapi.APIRouter(prefix="")
-logger = logging.getLogger(__name__)
 
 
 @router.post(

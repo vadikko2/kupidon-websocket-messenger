@@ -12,6 +12,13 @@ from domain import events, exceptions
 logger = logging.getLogger(__name__)
 
 
+class AttachmentStatus(enum.StrEnum):
+    NEW = "new"
+    UPLOADED = "uploaded"
+    SENT = "sent"
+    DELETED = "deleted"
+
+
 class AttachmentType(enum.StrEnum):
     """
     Attachment types
@@ -35,6 +42,7 @@ class Attachment(pydantic.BaseModel):
     attachment_id: pydantic.UUID4 = pydantic.Field(default_factory=uuid.uuid4, frozen=True)
 
     chat_id: pydantic.UUID4 = pydantic.Field(frozen=True)
+    message_sent_id: pydantic.UUID4 | None = None
     uploader: typing.Text = pydantic.Field(frozen=True)
 
     created: datetime.datetime = pydantic.Field(
@@ -42,6 +50,9 @@ class Attachment(pydantic.BaseModel):
         frozen=True,
     )
     uploaded: datetime.datetime = pydantic.Field(default_factory=datetime.datetime.now)
+    sent: datetime.datetime | None = None
+
+    status: AttachmentStatus = pydantic.Field(default=AttachmentStatus.NEW)
 
     urls: typing.Sequence[str] = pydantic.Field(default_factory=list)
     filename: typing.Optional[typing.Text] = pydantic.Field(
@@ -90,7 +101,28 @@ class Attachment(pydantic.BaseModel):
             meta = {}
 
         self.meta = meta
-        logger.info(f"Attachment marks as uploaded: {self.attachment_id}")
+        logger.debug(f"Attachment {self.attachment_id} marks uploaded to chat {self.chat_id}")
+
+        self.status = AttachmentStatus.UPLOADED
+
+    def send(self, message_id: uuid.UUID) -> None:
+        """
+        Sends attachment
+        """
+        if self.sent or self.message_sent_id:
+            raise exceptions.AttachmentAlreadySent(self.attachment_id)
+
+        self.sent = datetime.datetime.now()
+        self.message_sent_id = message_id
+
+        self.event_list.append(
+            events.AttachmentSent(
+                message_id=message_id,
+                attachment_id=self.attachment_id,
+            ),
+        )
+        self.status = AttachmentStatus.SENT
+        logger.debug(f"Attachment {self.attachment_id} sent with message {message_id}")
 
     def get_events(self) -> typing.List[cqrs.DomainEvent]:
         """

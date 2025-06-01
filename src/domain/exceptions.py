@@ -17,3 +17,8 @@ class TooManyReactions(Exception):
 class AttachmentAlreadyUploaded(Exception):
     def __init__(self, attachment_id: uuid.UUID) -> None:
         super().__init__(f"Attachment {attachment_id} already uploaded")
+
+
+class AttachmentAlreadySent(Exception):
+    def __init__(self, attachment_id: uuid.UUID) -> None:
+        super().__init__(f"Attachment {attachment_id} already sent")

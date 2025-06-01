@@ -21,6 +21,7 @@ class AttachmentRepository(typing.Protocol):
         self,
         *attachment_ids: uuid.UUID,
         type_filter: typing.List[attachments.AttachmentType] | None = None,
+        status_filter: typing.List[attachments.AttachmentStatus] | None = None,
     ) -> typing.List[attachments.Attachment]:
         """Returns specified attachments"""
         raise NotImplementedError
@@ -31,6 +32,7 @@ class AttachmentRepository(typing.Protocol):
         limit: int,
         offset: int,
         type_filter: typing.List[attachments.AttachmentType] | None = None,
+        status_filter: typing.List[attachments.AttachmentStatus] | None = None,
     ) -> typing.List[attachments.Attachment]:
         """Returns all attachments for specified chat"""
         raise NotImplementedError

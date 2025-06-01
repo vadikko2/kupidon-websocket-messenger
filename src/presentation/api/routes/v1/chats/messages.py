@@ -7,6 +7,7 @@ from fastapi import status
 from fastapi_app import response
 from fastapi_app.exception_handlers import registry
 
+from domain import exceptions as domain_exceptions
 from presentation.api import dependencies
 from presentation.api.schema import pagination
 from presentation.api.schema.v1 import requests, responses
@@ -25,6 +26,7 @@ router = fastapi.APIRouter(prefix="/{chat_id}/messages", tags=["Messages"])
     responses=registry.get_exception_responses(
         exceptions.ChatNotFound,
         exceptions.AttachmentNotFound,
+        domain_exceptions.AttachmentAlreadySent,
         exceptions.AttachmentNotForChat,
         exceptions.AttachmentNotForSender,
         exceptions.ParticipantNotInChat,
