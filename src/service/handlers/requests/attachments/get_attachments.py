@@ -51,6 +51,7 @@ class GetAttachmentsHandler(
                 get_attachments.AttachmentInfo(
                     chat_id=chat.chat_id,
                     attachment_id=attachment.attachment_id,
+                    attachment_status=attachment.status,
                     urls=attachment.urls,  # type: ignore
                     uploaded=attachment.uploaded,
                     content_type=attachment.content_type,

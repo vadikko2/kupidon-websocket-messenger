@@ -60,6 +60,7 @@ class GetMessagesHandler(
                 message_attachments = [
                     get_attachments.AttachmentInfo(
                         attachment_id=attach.attachment_id,
+                        attachment_status=attach.status,
                         chat_id=attach.chat_id,
                         urls=attach.urls,  # pyright: ignore[reportArgumentType]
                         uploaded=attach.uploaded,

@@ -21,6 +21,8 @@ class GetAttachments(cqrs.Request):
 
 class AttachmentInfo(pydantic.BaseModel):
     attachment_id: pydantic.UUID4
+    attachment_status: attachments.AttachmentStatus
+
     chat_id: pydantic.UUID4
     urls: typing.Sequence[pydantic.AnyHttpUrl]
     uploaded: datetime.datetime
