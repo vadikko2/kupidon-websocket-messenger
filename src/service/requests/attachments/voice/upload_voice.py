@@ -13,11 +13,11 @@ class UploadVoice(cqrs.Request):
     voice_format: voice.VoiceTypes
 
     content: bytes = pydantic.Field(exclude=True)
-    duration_seconds: pydantic.NonNegativeInt
+    duration_milliseconds: pydantic.NonNegativeInt
 
 
 class VoiceUploaded(cqrs.Response):
     attachment_id: pydantic.UUID4
     attachment_url: typing.Text
 
-    amplitudes: typing.List[pydantic.StrictInt]
+    amplitudes: typing.List[typing.Tuple[pydantic.StrictInt, pydantic.StrictInt]]

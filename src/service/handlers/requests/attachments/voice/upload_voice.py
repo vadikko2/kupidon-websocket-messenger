@@ -108,10 +108,10 @@ class UploadVoiceHandler(cqrs.RequestHandler[upload_voice.UploadVoice, upload_vo
                     urls=[url],
                     uploaded_dt=uploading_dt,
                     meta=voice.VoiceAttachmentMeta(
-                        length=request.duration_seconds,
                         voice_type=voice.VoiceTypes(request.voice_format),
                         amplitudes=voice_histogram,
-                        duration_seconds=request.duration_seconds,
+                        duration_seconds=request.duration_milliseconds,
+                        duration_milliseconds=request.duration_milliseconds,
                     ).model_dump(mode="python"),
                 )
 

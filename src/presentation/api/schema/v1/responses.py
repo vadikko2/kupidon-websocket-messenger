@@ -25,9 +25,9 @@ class VoiceInfo(pydantic.BaseModel, frozen=True):
     download_url: pydantic.AnyHttpUrl = pydantic.Field(description="Download URL")
 
     voice_type: voice.VoiceTypes = pydantic.Field(description="Voice type")
-    duration_seconds: pydantic.PositiveInt = pydantic.Field(description="Voice length in seconds")
+    duration_milliseconds: pydantic.PositiveInt = pydantic.Field(description="Voice length in milliseconds")
 
-    amplitudes: typing.List[pydantic.StrictInt] = pydantic.Field(
+    amplitudes: typing.List[typing.Tuple[pydantic.StrictInt, pydantic.StrictInt]] = pydantic.Field(
         description="Voice amplitude",
         default_factory=list,
     )

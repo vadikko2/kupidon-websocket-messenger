@@ -31,7 +31,7 @@ async def upload_voice(
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     voice_file: fastapi.UploadFile = fastapi.File(description="Voice file"),
     voice_type: voice.VoiceTypes = fastapi.Body(description="Voice type", default=voice.VoiceTypes.MP3),
-    duration_seconds: pydantic.PositiveInt = fastapi.Body(description="Voice duration in seconds"),
+    duration_milliseconds: pydantic.PositiveInt = fastapi.Body(description="Voice duration in milliseconds"),
     request_mediator: cqrs.RequestMediator = fastapi.Depends(
         dependencies.request_mediator_factory,
     ),
@@ -44,7 +44,7 @@ async def upload_voice(
             chat_id=chat_id,
             uploader=account_id,
             voice_format=voice_type,
-            duration_seconds=duration_seconds,
+            duration_milliseconds=duration_milliseconds,
             content=voice_file.file.read(),
         ),
     )
@@ -52,7 +52,7 @@ async def upload_voice(
         result=responses.VoiceUploaded(
             attachment_id=result.attachment_id,
             info=responses.VoiceInfo(
-                duration_seconds=duration_seconds,
+                duration_milliseconds=duration_milliseconds,
                 download_url=result.attachment_url,  # pyright: ignore[reportArgumentType]
                 voice_type=voice_type,
                 amplitudes=result.amplitudes,

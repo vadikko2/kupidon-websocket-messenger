@@ -52,7 +52,7 @@ class AudioToHistogram:
     def quantize(
         amplitudes: list[tuple[float, float]],
         max_levels: int,
-    ) -> list[int]:
+    ) -> list[tuple[int, int]]:
         """
         Квантование амплитуд до нужного уровня детализации
         :param amplitudes: значения амплитуд
@@ -64,14 +64,14 @@ class AudioToHistogram:
         value_for_quant_max = abs(max_amplitude_value // (max_levels // 2))
         value_for_quant_min = abs(min_amplitude_value // (max_levels // 2))
 
-        return list(map(lambda x: int(x[0] // value_for_quant_max) + int(x[1] // value_for_quant_min), amplitudes))
+        return list(map(lambda x: (int(x[0] // value_for_quant_max), int(x[1] // value_for_quant_min)), amplitudes))
 
     def __call__(
         self,
         audio_filename: pathlib.Path,
         max_columns: int = MAX_COLUMNS,
         max_levels: int = MAX_LEVELS,
-    ) -> list[int]:
+    ) -> list[tuple[int, int]]:
         amplitudes = self._decoder(audio_filename)
         try:
             aggregated_by_columns_data = self.aggregate(amplitudes, max_columns)
