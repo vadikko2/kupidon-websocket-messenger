@@ -9,7 +9,8 @@ from domain import attachments
 from infrastructure import unit_of_work as mock_unit_of_work
 from infrastructure.brokers import messages_broker, redis as redis_broker
 from infrastructure.database.cache.redis import connections as redis_connections
-from infrastructure.helpers.attachments.preprocessors import chain, jpeg_preprocessors
+from infrastructure.helpers.attachments.image import preview, transcode
+from infrastructure.helpers.attachments.preprocessors import chain
 from infrastructure.storages import s3
 from service import unit_of_work
 from service.interfaces import attachment_storage
@@ -41,9 +42,9 @@ PreprocessingChainBind = di.bind_by_type(
                     content_type=attachments.AttachmentType.IMAGE,
                     chain_name="image",
                     preprocessors=[
-                        jpeg_preprocessors.JpegTranscodeAttachmentPreprocessor(),
-                        jpeg_preprocessors.JPEGPreview200x200AttachmentPreprocessor(),
-                        jpeg_preprocessors.JPEGPreview100x100AttachmentPreprocessor(),
+                        transcode.JpegTranscodeAttachmentPreprocessor(),
+                        preview.JPEGPreview200x200AttachmentPreprocessor(),
+                        preview.JPEGPreview100x100AttachmentPreprocessor(),
                     ],
                 ),
             ],

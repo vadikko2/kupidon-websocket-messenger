@@ -9,11 +9,12 @@ import uuid
 import cqrs
 
 import settings
-from domain.attachments import attachments, voice
+from domain import attachments
 from infrastructure.helpers.attachments.audio import histogram
 from service import exceptions, unit_of_work
 from service.interfaces import attachment_storage
-from service.requests.attachments.voice import upload_voice
+from service.requests.attachments import upload_voice
+from service.services import storages
 
 logger = logging.getLogger(__name__)
 
@@ -32,21 +33,6 @@ class UploadVoiceHandler(cqrs.RequestHandler[upload_voice.UploadVoice, upload_vo
     @property
     def events(self) -> typing.List[cqrs.Event]:
         return []
-
-    async def _upload_file_to_storage(
-        self,
-        file_object: typing.BinaryIO,
-        filename: typing.Text,
-    ) -> typing.Text:
-        """Uploads file to storage and returns its URL"""
-        try:
-            file_object.seek(0)
-            url = await self.storage.upload(file_object, filename)
-        except Exception as e:
-            raise exceptions.AttachmentUploadError(e)
-
-        logger.info(f"Uploaded attachment: {url}")
-        return url
 
     async def handle(self, request: upload_voice.UploadVoice) -> upload_voice.VoiceUploaded:
         async with self.uow:
@@ -99,7 +85,8 @@ class UploadVoiceHandler(cqrs.RequestHandler[upload_voice.UploadVoice, upload_vo
                     uploader=request.uploader,
                     content_type=attachments.AttachmentType.VOICE,
                 )
-                url = await self._upload_file_to_storage(
+                url = await storages.upload_file_to_storage(
+                    self.storage,
                     io.BytesIO(request.content),
                     f"{uploading_path}/{uploading_file_name}",
                 )
@@ -107,8 +94,8 @@ class UploadVoiceHandler(cqrs.RequestHandler[upload_voice.UploadVoice, upload_vo
                 new_attachment.upload(
                     urls=[url],
                     uploaded_dt=uploading_dt,
-                    meta=voice.VoiceAttachmentMeta(
-                        voice_type=voice.VoiceTypes(request.voice_format),
+                    meta=attachments.VoiceAttachmentMeta(
+                        voice_type=attachments.VoiceTypes(request.voice_format),
                         amplitudes=voice_histogram,
                         duration_seconds=request.duration_milliseconds,
                         duration_milliseconds=request.duration_milliseconds,

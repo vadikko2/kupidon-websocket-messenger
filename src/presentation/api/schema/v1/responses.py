@@ -3,7 +3,7 @@ import typing
 
 import pydantic
 
-from domain.attachments import voice
+from domain import attachments
 
 
 class MessageSent(pydantic.BaseModel):
@@ -15,16 +15,19 @@ class ChatCreated(pydantic.BaseModel):
     chat_id: pydantic.UUID4
 
 
-class VoiceUploaded(pydantic.BaseModel, frozen=True):
+Info = typing.TypeVar("Info")
+
+
+class Uploaded(pydantic.BaseModel, typing.Generic[Info], frozen=True):
     attachment_id: pydantic.UUID4
 
-    info: "VoiceInfo"
+    info: Info
 
 
 class VoiceInfo(pydantic.BaseModel, frozen=True):
     download_url: pydantic.AnyHttpUrl = pydantic.Field(description="Download URL")
 
-    voice_type: voice.VoiceTypes = pydantic.Field(description="Voice type")
+    voice_type: attachments.VoiceTypes = pydantic.Field(description="Voice type")
     duration_milliseconds: pydantic.PositiveInt = pydantic.Field(description="Voice length in milliseconds")
 
     amplitudes: typing.List[typing.Tuple[pydantic.StrictInt, pydantic.StrictInt]] = pydantic.Field(
@@ -36,3 +39,13 @@ class VoiceInfo(pydantic.BaseModel, frozen=True):
     @property
     def amplitudes_count(self) -> typing.Optional[pydantic.NonNegativeInt]:
         return len(self.amplitudes) if self.amplitudes is not None else 0
+
+
+class ImageInfo(pydantic.BaseModel, frozen=True):
+    download_url: pydantic.AnyHttpUrl = pydantic.Field(description="Download URL")
+
+    url_100x100: pydantic.AnyHttpUrl
+    url_200x200: pydantic.AnyHttpUrl
+
+    height: pydantic.NonNegativeInt = pydantic.Field(description="Image height")
+    width: pydantic.NonNegativeInt = pydantic.Field(description="Image width")

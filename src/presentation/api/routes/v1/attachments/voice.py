@@ -7,12 +7,11 @@ from fastapi_app import response
 from fastapi_app.exception_handlers import registry
 from starlette import status
 
-from domain import exceptions as domain_exceptions
-from domain.attachments import voice
+from domain import attachments, exceptions as domain_exceptions
 from presentation.api import dependencies
 from presentation.api.schema.v1 import responses
 from service import exceptions as service_exceptions
-from service.requests.attachments.voice import upload_voice as upload_voice_request
+from service.requests.attachments import upload_voice as upload_voice_request
 
 router = fastapi.APIRouter(prefix="")
 
@@ -30,12 +29,12 @@ async def upload_voice(
     chat_id: pydantic.UUID4,
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     voice_file: fastapi.UploadFile = fastapi.File(description="Voice file"),
-    voice_type: voice.VoiceTypes = fastapi.Body(description="Voice type", default=voice.VoiceTypes.MP3),
+    voice_type: attachments.VoiceTypes = fastapi.Body(description="Voice type", default=attachments.VoiceTypes.MP3),
     duration_milliseconds: pydantic.PositiveInt = fastapi.Body(description="Voice duration in milliseconds"),
     request_mediator: cqrs.RequestMediator = fastapi.Depends(
         dependencies.request_mediator_factory,
     ),
-) -> response.Response[responses.VoiceUploaded]:
+) -> response.Response[responses.Uploaded[responses.VoiceInfo]]:
     """
     # Uploads voice
     """
@@ -48,8 +47,8 @@ async def upload_voice(
             content=voice_file.file.read(),
         ),
     )
-    return response.Response[responses.VoiceUploaded](
-        result=responses.VoiceUploaded(
+    return response.Response[responses.Uploaded[responses.VoiceInfo]](
+        result=responses.Uploaded(
             attachment_id=result.attachment_id,
             info=responses.VoiceInfo(
                 duration_milliseconds=duration_milliseconds,

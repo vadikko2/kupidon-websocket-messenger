@@ -1,6 +1,7 @@
 import fastapi
 
-from presentation.api.routes.v1.chats import attachments, chats, messages, tapping
+from presentation.api.routes.v1 import attachments
+from presentation.api.routes.v1.chats import chats, messages, tapping
 
 router = fastapi.APIRouter(prefix="")
 

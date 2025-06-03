@@ -1,3 +1,7 @@
+"""
+Dont use this module for new attachment types
+"""
+
 import datetime
 import io
 import logging
@@ -12,6 +16,7 @@ from infrastructure.helpers.attachments.preprocessors import chain
 from service import exceptions, unit_of_work
 from service.interfaces import attachment_storage
 from service.requests.attachments import upload_attachment
+from service.services import storages
 
 logger = logging.getLogger(__name__)
 
@@ -35,20 +40,6 @@ class UploadAttachmentHandler(
     @property
     def events(self) -> typing.List[event.Event]:
         return list(self.uow.get_events())
-
-    async def _upload_file_to_storage(
-        self,
-        file_object: typing.BinaryIO,
-        filename: typing.Text,
-    ) -> typing.Text:
-        """Uploads file to storage and returns its URL"""
-        try:
-            url = await self.storage.upload(file_object, filename)
-        except Exception as e:
-            raise exceptions.AttachmentUploadError(e)
-
-        logger.info(f"Uploaded attachment: {url}")
-        return url
 
     async def handle(
         self,
@@ -77,7 +68,8 @@ class UploadAttachmentHandler(
             uploading_path = f"{request.uploader}/{uploading_dt.year}/{uploading_dt.month}"
 
             urls: typing.List[typing.Text] = [
-                await self._upload_file_to_storage(
+                await storages.upload_file_to_storage(
+                    self.storage,
                     io.BytesIO(request.content),
                     f"{uploading_path}/{uploading_file_name}",
                 ),
@@ -99,7 +91,8 @@ class UploadAttachmentHandler(
                 ):
                     # upload preprocessed
                     urls.append(
-                        await self._upload_file_to_storage(
+                        await storages.upload_file_to_storage(
+                            self.storage,
                             processed_content,
                             f"{uploading_path}/{processed_filename}",
                         ),

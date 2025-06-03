@@ -1,6 +1,6 @@
 import fastapi
 
-from presentation.api.routes.v1.chats.attachments import attachments, voice, image
+from presentation.api.routes.v1.attachments import attachments, image, voice
 
 router = fastapi.APIRouter(prefix="/{chat_id}", tags=["Attachments"])
 
