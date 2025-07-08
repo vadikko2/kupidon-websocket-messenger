@@ -15,7 +15,7 @@ class ChatCreated(pydantic.BaseModel):
     chat_id: pydantic.UUID4
 
 
-Info = typing.TypeVar("Info")
+Info = typing.TypeVar("Info", bound=pydantic.BaseModel)
 
 
 class Uploaded(pydantic.BaseModel, typing.Generic[Info], frozen=True):
@@ -35,9 +35,9 @@ class VoiceInfo(pydantic.BaseModel, frozen=True):
         default_factory=list,
     )
 
-    @pydantic.computed_field()
+    @pydantic.computed_field(return_type=int)
     @property
-    def amplitudes_count(self) -> typing.Optional[pydantic.NonNegativeInt]:
+    def amplitudes_count(self) -> int:
         return len(self.amplitudes) if self.amplitudes is not None else 0
 
 

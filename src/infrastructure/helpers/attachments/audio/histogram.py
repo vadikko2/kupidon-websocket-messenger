@@ -5,7 +5,7 @@ import typing
 
 import pydub
 
-MAX_COLUMNS = 100
+MAX_COLUMNS = 30
 MAX_LEVELS = 32
 
 

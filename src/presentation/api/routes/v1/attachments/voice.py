@@ -48,7 +48,7 @@ async def upload_voice(
         ),
     )
     return response.Response[responses.Uploaded[responses.VoiceInfo]](
-        result=responses.Uploaded(
+        result=responses.Uploaded[responses.VoiceInfo](
             attachment_id=result.attachment_id,
             info=responses.VoiceInfo(
                 duration_milliseconds=duration_milliseconds,
