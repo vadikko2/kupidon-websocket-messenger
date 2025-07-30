@@ -52,11 +52,12 @@ async def open_chat(
 @router.get(
     "",
     tags=["Chats"],
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
 )
 async def get_chats(
     limit: pydantic.NonNegativeInt = fastapi.Query(default=10),
     offset: pydantic.NonNegativeInt = fastapi.Query(default=0),
+    chat_ids: typing.Sequence[pydantic.UUID4] = fastapi.Query(default=[]),
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
@@ -66,7 +67,7 @@ async def get_chats(
     # Returns chat with specified participant
     """
     result: get_chats_request.Chats = await mediator.send(
-        get_chats_request.GetChats(participant=account_id),
+        get_chats_request.GetChats(participant=account_id, chat_ids=chat_ids if chat_ids else None),
     )
     return response.Response(
         result=pagination.Pagination[get_chats_request.ChatInfo](

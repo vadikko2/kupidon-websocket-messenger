@@ -164,3 +164,4 @@ cython_debug/
 report.xml
 tmp/
 .DS_Store
+./push_auth.json

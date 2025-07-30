@@ -7,6 +7,7 @@ import pydantic
 
 class GetChats(cqrs.Request):
     participant: typing.Text
+    chat_ids: typing.Sequence[pydantic.UUID4] | None
 
 
 class ChatInfo(cqrs.Response):

@@ -17,6 +17,13 @@ class GetChatsHandler(cqrs.RequestHandler[get_chats.GetChats, get_chats.Chats]):
             chats = await self.uow.chat_repository.get_all(
                 participant=request.participant,
             )
+            if request.chat_ids is not None:
+                chats = list(
+                    filter(
+                        lambda chat: chat.chat_id in request.chat_ids or [],  # pyright: ignore[reportOperatorIssue]
+                        chats,
+                    ),
+                )
             last_read_messages = await self.uow.read_message_repository.last_read_many(
                 account_id=request.participant,
                 chat_ids=[chat.chat_id for chat in chats],
@@ -26,10 +33,7 @@ class GetChatsHandler(cqrs.RequestHandler[get_chats.GetChats, get_chats.Chats]):
                     (chat_id, last_message_id)
                     for chat_id, last_message_id in zip(
                         [chat.chat_id for chat in chats],
-                        [
-                            last_msg.message.message_id if last_msg else None
-                            for last_msg in last_read_messages
-                        ],
+                        [last_msg.message.message_id if last_msg else None for last_msg in last_read_messages],
                     )
                 ],
             )
@@ -49,9 +53,7 @@ class GetChatsHandler(cqrs.RequestHandler[get_chats.GetChats, get_chats.Chats]):
                     not_read_messages_count=not_read_count,
                     last_activity_timestamp=chat.last_activity_timestamp,
                     last_message_id=chat.last_message_id,
-                    last_read_message_id=last_read.message.message_id
-                    if last_read
-                    else None,
+                    last_read_message_id=last_read.message.message_id if last_read else None,
                 )
                 chats_info.append(chat_info)
 
