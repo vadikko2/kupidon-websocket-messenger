@@ -9,6 +9,8 @@ class NewMessageAdded(cqrs.DomainEvent, frozen=True):
     chat_id: pydantic.UUID4
     message_id: pydantic.UUID4
 
+    sender: typing.Text
+
 
 class NewParticipantAdded(cqrs.DomainEvent, frozen=True):
     chat_id: pydantic.UUID4
@@ -21,6 +23,14 @@ class MessageRead(cqrs.DomainEvent, frozen=True):
     message_id: pydantic.UUID4
     reader_id: typing.Text
     read_at: datetime.datetime
+
+
+class MessageUpdated(cqrs.DomainEvent, frozen=True):
+    chat_id: pydantic.UUID4
+    message_id: pydantic.UUID4
+    message_sender: typing.Text
+    message_content: typing.Optional[typing.Text]
+    message_attachments: typing.List[pydantic.UUID4]
 
 
 class MessageDeleted(cqrs.DomainEvent, frozen=True):

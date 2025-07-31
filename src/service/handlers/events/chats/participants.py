@@ -7,6 +7,7 @@ import orjson
 from domain import events
 from infrastructure.brokers import messages_broker
 from service import exceptions, unit_of_work
+from service.validators import chats as chat_validators
 
 
 class NewParticipantAddedHandler(cqrs.EventHandler[events.NewParticipantAdded]):
@@ -17,15 +18,9 @@ class NewParticipantAddedHandler(cqrs.EventHandler[events.NewParticipantAdded]):
     async def handle(self, event: events.NewParticipantAdded) -> None:
         async with self.uow:
             chat = await self.uow.chat_repository.get(event.chat_id)
-
             if chat is None:
                 raise exceptions.ChatNotFound(event.chat_id)
-
-            if not chat.is_participant(event.account_id):
-                raise exceptions.ParticipantNotInChat(
-                    event.account_id,
-                    event.chat_id,
-                )
+            chat_validators.raise_if_sender_not_in_chat(chat, event.chat_id, event.account_id)
 
             new_participant_event: typing.ByteString = orjson.dumps(
                 cqrs.NotificationEvent[events.NewParticipantAdded](

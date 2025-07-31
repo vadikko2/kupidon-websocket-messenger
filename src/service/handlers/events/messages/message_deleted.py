@@ -5,6 +5,7 @@ from domain import events
 from infrastructure.brokers import messages_broker
 from service import exceptions, unit_of_work
 from service.requests.ecst_events.messages import message_deleted
+from service.validators import messages as message_validators
 
 
 class MessageDeletedHandler(cqrs.EventHandler[events.MessageDeleted]):
@@ -15,12 +16,9 @@ class MessageDeletedHandler(cqrs.EventHandler[events.MessageDeleted]):
     async def handle(self, event: events.MessageDeleted) -> None:
         async with self.uow:
             message = await self.uow.message_repository.get(event.message_id)
-
-            if message is None:
+            if not message:
                 raise exceptions.MessageNotFound(event.message_id)
-
-            if not message.deleted:
-                raise exceptions.MessageNotDeleted(event.message_id)
+            message_validators.raise_if_message_not_deleted(loaded_message=message)
 
             await self.broker.send_message(
                 event.message_sender,

@@ -17,8 +17,12 @@ from service import exceptions, unit_of_work
 from service.interfaces import attachment_storage
 from service.requests.attachments import upload_attachment
 from service.services import storages
+from service.validators import chats as chat_validators
 
 logger = logging.getLogger(__name__)
+logger.warning(
+    "Dont use this module for new attachment types, use service.services.storages instead",
+)
 
 
 class UploadAttachmentHandler(
@@ -48,12 +52,8 @@ class UploadAttachmentHandler(
         async with self.uow:
             chat = await self.uow.chat_repository.get(request.chat_id)
             if chat is None:
-                raise exceptions.ChatNotFound(chat_id=request.chat_id)
-            if not chat.is_participant(request.uploader):
-                raise exceptions.ParticipantNotInChat(
-                    account_id=request.uploader,
-                    chat_id=request.chat_id,
-                )
+                raise exceptions.ChatNotFound(request.chat_id)
+            chat_validators.raise_if_sender_not_in_chat(chat, request.chat_id, request.uploader)
 
             new_attachment = attachments.Attachment(
                 attachment_id=uuid.uuid4(),

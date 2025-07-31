@@ -4,6 +4,7 @@ import cqrs
 
 from service import exceptions, unit_of_work
 from service.requests.messages import delete_message
+from service.validators import messages as message_validators
 
 logger = logging.getLogger(__name__)
 
@@ -19,11 +20,13 @@ class DeleteMessageHandler(cqrs.RequestHandler[delete_message.DeleteMessage, Non
     async def handle(self, request: delete_message.DeleteMessage) -> None:
         async with self.uow:
             message = await self.uow.message_repository.get(request.message_id)
-            if message is None or message.deleted:
+            if not message:
                 raise exceptions.MessageNotFound(request.message_id)
 
+            message_validators.raise_if_message_deleted(message)
+
             if request.deleter != message.sender:
-                raise exceptions.ParticipantNotInChat(request.deleter, message.chat_id)
+                raise exceptions.MessageNotForAccount(message.message_id, request.deleter)
 
             message.delete()
 

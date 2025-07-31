@@ -30,6 +30,7 @@ from service.handlers.requests.messages import (
     delete_message as delete_message_handler,
     get_messages as get_messages_handler,
     send_message as send_message_handler,
+    update_message as update_message_handler,
 )
 from service.handlers.requests.reactions import (
     get_reactors as get_reactors_handler,
@@ -52,6 +53,7 @@ from service.requests.messages import (
     delete_message as delete_message_request,
     get_messages as get_messages_request,
     send_message as send_message_request,
+    update_message as update_message_request,
 )
 from service.requests.reactions import (
     get_reactors as get_reactors_request,
@@ -79,6 +81,10 @@ def init_requests(mapper: requests.RequestMap) -> None:
     mapper.bind(
         get_messages_request.GetMessages,
         get_messages_handler.GetMessagesHandler,
+    )
+    mapper.bind(
+        update_message_request.UpdateMessage,
+        update_message_handler.UpdateMessageHandler,
     )
     mapper.bind(
         get_messages_request.GetMessagePreview,

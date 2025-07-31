@@ -107,6 +107,7 @@ class Chat(pydantic.BaseModel):
             events.NewMessageAdded(
                 chat_id=self.chat_id,
                 message_id=message.message_id,
+                sender=message.sender,
             ),
         )
 

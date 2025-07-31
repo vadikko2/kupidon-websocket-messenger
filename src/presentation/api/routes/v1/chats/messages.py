@@ -15,6 +15,7 @@ from service import exceptions
 from service.requests.messages import (
     get_messages as get_messages_request,
     send_message as send_message_request,
+    update_message as update_message_request,
 )
 
 router = fastapi.APIRouter(prefix="/{chat_id}/messages", tags=["Messages"])
@@ -68,6 +69,7 @@ async def post_message(
         exceptions.ChatNotFound,
         exceptions.ParticipantNotInChat,
     ),
+    description="Публикация сообщений в чате",
 )
 async def get_messages(
     chat_id: pydantic.UUID4,
@@ -101,3 +103,35 @@ async def get_messages(
             reverse=reverse,
         ),
     )
+
+
+@router.patch(
+    "",
+    status_code=status.HTTP_200_OK,
+    responses=registry.get_exception_responses(
+        exceptions.MessageNotFound,
+        exceptions.ParticipantNotInChat,
+        exceptions.ChatNotFound,
+        exceptions.MessageNotForAccount,
+    ),
+)
+async def edit_message(
+    chat_id: pydantic.UUID4,
+    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    message: requests.UpdateMessage = fastapi.Body(...),
+    mediator: cqrs.RequestMediator = fastapi.Depends(
+        dependency=dependencies.request_mediator_factory,
+    ),
+) -> response.Response[update_message_request.MessageUpdated]:
+    """
+    # Updates message content
+    """
+    command = update_message_request.UpdateMessage(
+        chat_id=chat_id,
+        message_id=message.message_id,
+        updater=account_id,
+        content=message.content,
+        attachments=message.attachments,
+    )
+    result: update_message_request.MessageUpdated = await mediator.send(command)
+    return response.Response(result=result)

@@ -61,3 +61,10 @@ class MessageNotDeleted(Exception):
 class UnsupportedVoiceFormat(Exception):
     def __init__(self, format_name: typing.Text) -> None:
         super().__init__(f"Unsupported voice format: {format_name}")
+
+
+class MessageNotForAccount(Exception):
+    def __init__(self, message_id: uuid.UUID, account_id: typing.Text) -> None:
+        super().__init__(
+            f"Message {message_id} not for account {account_id}",
+        )

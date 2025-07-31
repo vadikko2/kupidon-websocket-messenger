@@ -23,6 +23,7 @@ router = fastapi.APIRouter(prefix="")
         service_exceptions.ChatNotFound,
         service_exceptions.AttachmentUploadError,
         domain_exceptions.AttachmentAlreadyUploaded,
+        service_exceptions.UnsupportedVoiceFormat,
     ),
 )
 async def upload_voice(

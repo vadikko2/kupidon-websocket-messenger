@@ -5,6 +5,7 @@ from cqrs.events import event
 
 from service import exceptions, unit_of_work
 from service.requests.attachments import get_attachments
+from service.validators import chats as chat_validators
 
 
 class GetAttachmentsHandler(
@@ -24,12 +25,8 @@ class GetAttachmentsHandler(
         async with self.uow:
             chat = await self.uow.chat_repository.get(request.chat_id)
             if chat is None:
-                raise exceptions.ChatNotFound(chat_id=request.chat_id)
-            if not chat.is_participant(request.account_id):
-                raise exceptions.ParticipantNotInChat(
-                    account_id=request.account_id,
-                    chat_id=request.chat_id,
-                )
+                raise exceptions.ChatNotFound(request.chat_id)
+            chat_validators.raise_if_sender_not_in_chat(chat, request.chat_id, request.account_id)
 
             if not request.attachment_id_filter:
                 attachments = await self.uow.attachment_repository.get_all(

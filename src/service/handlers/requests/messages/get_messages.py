@@ -6,6 +6,7 @@ import cqrs
 from service import exceptions, unit_of_work
 from service.requests.attachments import get_attachments
 from service.requests.messages import get_messages
+from service.validators import chats as chat_validators, messages as message_validators
 
 
 class GetMessagesHandler(
@@ -29,12 +30,11 @@ class GetMessagesHandler(
 
             if chat_history is None:
                 raise exceptions.ChatNotFound(request.chat_id)
-
-            if not chat_history.is_participant(request.account):
-                raise exceptions.ParticipantNotInChat(
-                    request.account,
-                    chat_history.chat_id,
-                )
+            chat_validators.raise_if_sender_not_in_chat(
+                chat_history,
+                request.chat_id,
+                request.account,
+            )
 
             messages: typing.List[get_messages.MessageInfo] = []
             last_read_message = chat_history.last_read_by(request.account)
@@ -138,27 +138,15 @@ class GetMessagePreviewHandler(
         request: get_messages.GetMessagePreview,
     ) -> get_messages.MessagePreview:
         async with self.uow:
-            message = await self.uow.message_repository.get(
-                message_id=request.message_id,
-            )
+            message = await self.uow.message_repository.get(message_id=request.message_id)
             if not message:
                 raise exceptions.MessageNotFound(request.message_id)
+            message_validators.raise_if_message_deleted(message)
 
-            chat = await self.uow.chat_repository.get(
-                chat_id=message.chat_id,
-            )
-
-            if not chat:
+            chat = await self.uow.chat_repository.get(chat_id=message.chat_id)
+            if chat is None:
                 raise exceptions.ChatNotFound(message.chat_id)
-
-            if not chat.is_participant(request.account):
-                raise exceptions.ParticipantNotInChat(
-                    request.account,
-                    chat.chat_id,
-                )
-
-            if message.deleted:
-                raise exceptions.MessageNotFound(request.message_id)
+            chat_validators.raise_if_sender_not_in_chat(chat, message.chat_id, request.account)
 
             return get_messages.MessagePreview(
                 message_id=message.message_id,

@@ -15,6 +15,7 @@ from service import exceptions, unit_of_work
 from service.interfaces import attachment_storage
 from service.requests.attachments import upload_voice
 from service.services import storages
+from service.validators import chats as chat_validators
 
 logger = logging.getLogger(__name__)
 
@@ -38,12 +39,8 @@ class UploadVoiceHandler(cqrs.RequestHandler[upload_voice.UploadVoice, upload_vo
         async with self.uow:
             chat = await self.uow.chat_repository.get(request.chat_id)
             if chat is None:
-                raise exceptions.ChatNotFound(chat_id=request.chat_id)
-            if not chat.is_participant(request.uploader):
-                raise exceptions.ParticipantNotInChat(
-                    account_id=request.uploader,
-                    chat_id=request.chat_id,
-                )
+                raise exceptions.ChatNotFound(request.chat_id)
+            chat_validators.raise_if_sender_not_in_chat(chat, request.chat_id, request.uploader)
 
             decoders_map = {
                 "mp3": histogram.mp3_decoder,

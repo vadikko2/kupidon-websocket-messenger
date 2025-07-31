@@ -6,6 +6,7 @@ import orjson
 from redis.asyncio import client
 
 from domain import attachments, chats, messages
+from service.interfaces import attachment_repository, chat_repository, message_repository
 
 CHAT_HISTORY_PREFIX = "chat_history_{}"
 CHATS_PREFIX = "chat_{}"
@@ -16,7 +17,7 @@ CHAT_ATTACHMENTS_PREFIX = "chat_attachments_{}"
 READ_MESSAGES_PREFIX = "read_messages_{chat_id}_{participant_id}"
 
 
-class MockMessageRepository:
+class MockMessageRepository(message_repository.MessageRepository):
     def __init__(self, redis_pipeline: client.Pipeline):
         self._redis_pipeline = redis_pipeline
         self._seen = set()
@@ -72,7 +73,7 @@ class MockMessageRepository:
         return new_events
 
 
-class MockChatRepository:
+class MockChatRepository(chat_repository.ChatRepository):
     def __init__(self, redis_pipeline: client.Pipeline):
         self._redis_pipeline = redis_pipeline
         self._seen = set()
@@ -274,7 +275,7 @@ class MockChatRepository:
         return new_events
 
 
-class MockAttachmentRepository:
+class MockAttachmentRepository(attachment_repository.AttachmentRepository):
     def __init__(self, redis_pipeline: client.Pipeline):
         self._redis_pipeline = redis_pipeline
         self._seen = set()
@@ -384,7 +385,7 @@ class MockAttachmentRepository:
         return new_events
 
 
-class MockReadMessageRepository:
+class MockReadMessageRepository(message_repository.ReadMessageRepository):
     def __init__(self, redis_pipeline: client.Pipeline):
         self._redis_pipeline = redis_pipeline
         self._seen = set()

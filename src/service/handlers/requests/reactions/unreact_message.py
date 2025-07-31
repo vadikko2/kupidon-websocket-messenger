@@ -2,6 +2,7 @@ import cqrs
 
 from service import exceptions, unit_of_work
 from service.requests.reactions import unreact_message
+from service.validators import messages as message_validators
 
 
 class UnreactMessageHandler(cqrs.RequestHandler[unreact_message.UnreactMessage, None]):
@@ -15,9 +16,9 @@ class UnreactMessageHandler(cqrs.RequestHandler[unreact_message.UnreactMessage, 
     async def handle(self, request: unreact_message.UnreactMessage) -> None:
         async with self.uow:
             message = await self.uow.message_repository.get(request.message_id)
-
-            if message is None or message.deleted:
+            if not message:
                 raise exceptions.MessageNotFound(request.message_id)
+            message_validators.raise_if_message_deleted(message)
 
             reaction = next(
                 filter(

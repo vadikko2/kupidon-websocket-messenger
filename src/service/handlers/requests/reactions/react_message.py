@@ -3,6 +3,7 @@ import cqrs
 from domain import reactions
 from service import exceptions, unit_of_work
 from service.requests.reactions import react_message
+from service.validators import messages as message_validators
 
 
 class ReactMessageHandler(cqrs.RequestHandler[react_message.ReactMessage, None]):
@@ -16,9 +17,9 @@ class ReactMessageHandler(cqrs.RequestHandler[react_message.ReactMessage, None])
     async def handle(self, request: react_message.ReactMessage) -> None:
         async with self.uow:
             message = await self.uow.message_repository.get(request.message_id)
-
-            if message is None or message.deleted:
+            if not message:
                 raise exceptions.MessageNotFound(request.message_id)
+            message_validators.raise_if_message_deleted(message)
 
             new_reaction = reactions.Reaction(
                 message_id=request.message_id,

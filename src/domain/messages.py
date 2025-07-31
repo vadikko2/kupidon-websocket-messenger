@@ -30,11 +30,10 @@ class Message(pydantic.BaseModel):
     reply_to: typing.Optional[pydantic.UUID4] = pydantic.Field(default=None, frozen=True)
     deleted: bool = False
 
-    content: typing.Optional[typing.Text] = pydantic.Field(frozen=True, default=None)
+    content: typing.Optional[typing.Text] = pydantic.Field(default=None)
     attachments: typing.List[attachment_entities.Attachment] = pydantic.Field(
         default_factory=list,
         max_length=5,
-        frozen=True,
     )
     reactions: typing.List[reaction_entities.Reaction] = pydantic.Field(
         default_factory=list,
@@ -54,7 +53,33 @@ class Message(pydantic.BaseModel):
         exclude=True,
     )
 
+    def update(
+        self,
+        content: typing.Text | None,
+        attachments: typing.List[attachment_entities.Attachment] | None = None,
+    ) -> None:
+        """
+        Updates message
+        """
+        self.content = content
+        self.attachments = attachments or []
+        self.updated = datetime.datetime.now()
+        logger.debug(f"Message {self.message_id} updated")
+
+        self.event_list.append(
+            events.MessageUpdated(
+                chat_id=self.chat_id,
+                message_id=self.message_id,
+                message_sender=self.sender,
+                message_content=self.content,
+                message_attachments=[attach.attachment_id for attach in self.attachments],
+            ),
+        )
+
     def delete(self) -> None:
+        """
+        Deletes message
+        """
         if self.deleted:
             logger.debug(f"Message {self.message_id} already deleted")
             return

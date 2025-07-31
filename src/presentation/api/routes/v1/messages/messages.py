@@ -54,7 +54,7 @@ async def apply_message_read(
     responses=registry.get_exception_responses(
         exceptions.ChatNotFound,
         exceptions.MessageNotFound,
-        exceptions.ParticipantNotInChat,
+        exceptions.MessageNotForAccount,
     ),
 )
 async def delete_message(

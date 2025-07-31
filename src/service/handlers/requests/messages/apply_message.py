@@ -2,6 +2,7 @@ import cqrs
 
 from service import exceptions, unit_of_work
 from service.requests.messages import apply_message
+from service.validators import chats as chat_validators, messages as message_validators
 
 
 class ApplyMessageHandler(
@@ -18,25 +19,17 @@ class ApplyMessageHandler(
         async with self.uow:
             # Достаем сообщение
             message = await self.uow.message_repository.get(request.message_id)
-
-            if message is None or message.deleted:
+            if not message:
                 raise exceptions.MessageNotFound(request.message_id)
+            message_validators.raise_if_message_deleted(message)
 
             chat = await self.uow.chat_repository.get(message.chat_id)
             if chat is None:
                 raise exceptions.ChatNotFound(message.chat_id)
-
-            if not chat.is_participant(request.applier):
-                raise exceptions.ParticipantNotInChat(
-                    request.applier,
-                    message.chat_id,
-                )
+            chat_validators.raise_if_sender_not_in_chat(chat, message.chat_id, request.applier)
 
             # Проверяем что последнее прочитанное не позже чем текущее
-            last_read = await self.uow.read_message_repository.last_read(
-                request.applier,
-                message.chat_id,
-            )
+            last_read = await self.uow.read_message_repository.last_read(request.applier, message.chat_id)
             if last_read is not None and last_read.message.created >= message.created:
                 return
 

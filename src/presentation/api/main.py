@@ -35,6 +35,7 @@ app = fastapi_app.create(
     ],
     exception_handlers=[
         errors.handlers.message_not_found_handler,
+        errors.handlers.message_not_for_account_handler,
         errors.handlers.chat_not_found_handler,
         errors.handlers.attachment_already_sent_handler,
         errors.handlers.attachment_already_uploaded_handler,
@@ -42,6 +43,7 @@ app = fastapi_app.create(
         errors.handlers.attachment_not_for_chat_handler,
         errors.handlers.attachment_not_for_sender_handler,
         errors.handlers.attachments_upload_error_handler,
+        errors.handlers.unsupported_voice_format_handler,
         errors.handlers.not_participant_in_chat_handler,
         errors.handlers.start_subscription_error_handler,
         errors.handlers.subscription_not_started_handler,

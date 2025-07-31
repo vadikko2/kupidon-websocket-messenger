@@ -12,6 +12,7 @@ from service import exceptions, unit_of_work
 from service.interfaces import attachment_storage
 from service.requests.attachments import upload_image
 from service.services import storages
+from service.validators import chats as chat_validators
 
 
 class UploadImageHandler(cqrs.RequestHandler[upload_image.UploadImage, upload_image.ImageUploaded]):
@@ -31,12 +32,12 @@ class UploadImageHandler(cqrs.RequestHandler[upload_image.UploadImage, upload_im
         async with self.uow:
             chat = await self.uow.chat_repository.get(request.chat_id)
             if chat is None:
-                raise exceptions.ChatNotFound(chat_id=request.chat_id)
-            if not chat.is_participant(request.uploader):
-                raise exceptions.ParticipantNotInChat(
-                    account_id=request.uploader,
-                    chat_id=request.chat_id,
-                )
+                raise exceptions.ChatNotFound(request.chat_id)
+            chat_validators.raise_if_sender_not_in_chat(
+                chat,
+                request.chat_id,
+                request.uploader,
+            )
 
             transcode_processor = transcode.JpegTranscodeAttachmentPreprocessor()
             preview_100x100_processor = preview.JPEGPreview100x100AttachmentPreprocessor()

@@ -5,6 +5,7 @@ import cqrs
 from domain import messages
 from service import exceptions, unit_of_work
 from service.requests.messages import send_message
+from service.validators import attachments as attachment_validators, chats as chat_validators
 
 logger = logging.getLogger(__name__)
 
@@ -24,41 +25,22 @@ class SendMessageHandler(
         request: send_message.SendMessage,
     ) -> send_message.MessageSent:
         async with self.uow:
-            # Check chat
             chat = await self.uow.chat_repository.get(request.chat_id)
-
             if chat is None:
                 raise exceptions.ChatNotFound(request.chat_id)
-
-            # Check participants
-            if not chat.is_participant(request.sender):
-                raise exceptions.ParticipantNotInChat(
-                    request.sender,
-                    chat.chat_id,
-                )
+            chat_validators.raise_if_sender_not_in_chat(
+                chat,
+                request.chat_id,
+                request.sender,
+            )
 
             # Check attachments
             attachments = await self.uow.attachment_repository.get_many(
                 *request.attachments,
             )
-            for attachment in attachments:
-                if attachment.chat_id != request.chat_id:
-                    raise exceptions.AttachmentNotForChat(
-                        attachment.attachment_id,
-                        request.chat_id,
-                    )
-                if attachment.uploader != request.sender:
-                    raise exceptions.AttachmentNotForSender(
-                        attachment.attachment_id,
-                        request.sender,
-                    )
-
-            difference = set(request.attachments) - set(
-                [att.attachment_id for att in attachments],
-            )
-
-            if difference:
-                raise exceptions.AttachmentNotFound(next(iter(difference)))
+            attachment_validators.raise_if_attachment_not_found(attachments, request.attachments)
+            attachment_validators.raise_if_attachment_not_for_chat(attachments, request.chat_id)
+            attachment_validators.raise_if_attachment_not_for_sender(attachments, request.sender)
 
             # Create message
             new_message = messages.Message(

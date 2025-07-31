@@ -109,3 +109,19 @@ def attachment_already_sent_handler(
     error: domain_exceptions.AttachmentAlreadySent,
 ) -> models.ErrorResponse:
     return models.ErrorResponse(message=str(error))
+
+
+@bind_exception(status.HTTP_400_BAD_REQUEST)
+def unsupported_voice_format_handler(
+    _: requests.Request,
+    error: service_exceptions.UnsupportedVoiceFormat,
+) -> models.ErrorResponse:
+    return models.ErrorResponse(message=str(error))
+
+
+@bind_exception(status.HTTP_400_BAD_REQUEST)
+def message_not_for_account_handler(
+    _: requests.Request,
+    error: service_exceptions.MessageNotForAccount,
+) -> models.ErrorResponse:
+    return models.ErrorResponse(message=str(error))

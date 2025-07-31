@@ -59,3 +59,23 @@ class PostMessage(pydantic.BaseModel, frozen=True):
         if self.content is None and not self.attachments:
             raise ValueError("Message should have content or attachments")
         return self
+
+
+class UpdateMessage(pydantic.BaseModel, frozen=True):
+    message_id: pydantic.UUID4 = pydantic.Field(
+        description="Message ID",
+    )
+    content: typing.Optional[typing.Text] = pydantic.Field(
+        description="Message content",
+        examples=["Hello World!"],
+        min_length=constants.MIN_MESSAGE_LENGTH,
+        max_length=constants.MAX_MESSAGE_LENGTH,
+        json_schema_extra={"nullable": True},
+        frozen=True,
+        default=None,
+    )
+    attachments: typing.List[pydantic.UUID4] = pydantic.Field(
+        description="Attachments IDs",
+        default_factory=list,
+        max_length=5,
+    )
