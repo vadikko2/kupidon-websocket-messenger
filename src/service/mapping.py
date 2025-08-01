@@ -9,8 +9,8 @@ from service.handlers.events.chats import (
 from service.handlers.events.messages import (
     message_deleted as message_deleted_handler,
     message_read as message_reed_handler,
-    new_message_added as new_message_added_handler,
     message_updated as message_updated_handler,
+    new_message_added as new_message_added_handler,
 )
 from service.handlers.events.reactions import (
     message_reacted as message_reacted_handler,
@@ -19,6 +19,7 @@ from service.handlers.events.reactions import (
 from service.handlers.requests.attachments import (
     get_attachments as get_attachments_handler,
     upload_attachment as upload_attachment_handler,
+    upload_circle as upload_circle_handler,
     upload_image as upload_image_handler,
     upload_voice as upload_voice_handler,
 )
@@ -42,6 +43,7 @@ from service.handlers.requests.reactions import (
 from service.requests.attachments import (
     get_attachments as get_attachments_request,
     upload_attachment as upload_attachment_request,
+    upload_circle as upload_circle_request,
     upload_image as upload_image_request,
     upload_voice as upload_voice_request,
 )
@@ -103,6 +105,10 @@ def init_requests(mapper: requests.RequestMap) -> None:
     mapper.bind(
         upload_voice_request.UploadVoice,
         upload_voice_handler.UploadVoiceHandler,
+    )
+    mapper.bind(
+        upload_circle_request.UploadCircle,
+        upload_circle_handler.UploadCircleHandler,
     )
     mapper.bind(
         upload_image_request.UploadImage,

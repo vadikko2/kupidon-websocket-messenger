@@ -41,6 +41,13 @@ class VoiceInfo(pydantic.BaseModel, frozen=True):
         return len(self.amplitudes) if self.amplitudes is not None else 0
 
 
+class CircleInfo(pydantic.BaseModel, frozen=True):
+    download_url: pydantic.AnyHttpUrl = pydantic.Field(description="Download URL")
+
+    circle_type: attachments.CircleTypes = pydantic.Field(description="Circle type")
+    duration_milliseconds: pydantic.PositiveInt = pydantic.Field(description="Circle length in milliseconds")
+
+
 class ImageInfo(pydantic.BaseModel, frozen=True):
     download_url: pydantic.AnyHttpUrl = pydantic.Field(description="Download URL")
 
