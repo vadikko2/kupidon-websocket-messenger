@@ -79,3 +79,11 @@ class UpdateMessage(pydantic.BaseModel, frozen=True):
         default_factory=list,
         max_length=5,
     )
+
+
+class ChatTag(pydantic.BaseModel, frozen=True):
+    tag: pydantic.StrictStr = pydantic.Field(
+        min_length=1,
+        max_length=10,
+        examples=["tag-1", "tag-2"],
+    )

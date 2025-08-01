@@ -24,9 +24,11 @@ from service.handlers.requests.attachments import (
     upload_voice as upload_voice_handler,
 )
 from service.handlers.requests.chats import (
+    add_tag as add_tag_handler,
     delete_chat as delete_chat_handler,
     get_chats as get_chats_handler,
     open_chat as open_chat_handler,
+    remove_tag as remove_tag_handler,
 )
 from service.handlers.requests.messages import (
     apply_message as apply_message_handler,
@@ -48,9 +50,11 @@ from service.requests.attachments import (
     upload_voice as upload_voice_request,
 )
 from service.requests.chats import (
+    add_tag as add_tag_request,
     delete_chat as delete_chat_request,
     get_chats as get_chats_request,
     open_chat as open_chat_request,
+    remove_tag as remove_tag_request,
 )
 from service.requests.messages import (
     apply_message as apply_message_request,
@@ -77,6 +81,8 @@ def init_requests(mapper: requests.RequestMap) -> None:
     )
     mapper.bind(open_chat_request.OpenChat, open_chat_handler.OpenChatHandler)
     mapper.bind(delete_chat_request.DeleteChat, delete_chat_handler.DeleteChatHandler)
+    mapper.bind(add_tag_request.AddTag, add_tag_handler.AddTagHandler)
+    mapper.bind(remove_tag_request.RemoveTag, remove_tag_handler.RemoveTagHandler)
     mapper.bind(
         send_message_request.SendMessage,
         send_message_handler.SendMessageHandler,

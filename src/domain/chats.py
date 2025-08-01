@@ -6,37 +6,9 @@ import uuid
 import cqrs
 import pydantic
 
-from domain import events, messages
+from domain import events, exceptions, messages, participants as participant_entities
 
 logger = logging.getLogger(__name__)
-
-
-class Participant(pydantic.BaseModel):
-    """
-    Participant entity
-    """
-
-    account_id: typing.Text = pydantic.Field(frozen=True)
-    initiated_by: typing.Text = pydantic.Field(frozen=True)
-
-    last_read_message: typing.Optional[messages.Message] = pydantic.Field(default=None)
-
-    def set_last_read_message(self, message: messages.Message):
-        self.last_read_message = message
-
-    def __eq__(self, other):
-        if not isinstance(other, Participant):
-            return False
-        return self.account_id == other.account_id
-
-    def __hash__(self):
-        return hash(self.account_id)
-
-    def __repr__(self):
-        return self.account_id
-
-    def __str__(self):
-        return self.account_id
 
 
 class Chat(pydantic.BaseModel):
@@ -57,7 +29,7 @@ class Chat(pydantic.BaseModel):
         description="Initiator account ID",
         frozen=True,
     )
-    participants: typing.Set[Participant] = pydantic.Field(default_factory=set)
+    participants: typing.Set[participant_entities.Participant] = pydantic.Field(default_factory=set)
 
     last_message: typing.Optional[messages.Message] = pydantic.Field(default=None)
     last_activity_timestamp: datetime.datetime = pydantic.Field(
@@ -146,7 +118,7 @@ class Chat(pydantic.BaseModel):
             return
 
         self.participants.add(
-            Participant(account_id=account_id, initiated_by=initiated_by),
+            participant_entities.Participant(account_id=account_id, initiated_by=initiated_by),
         )
         logger.debug(
             f"Account {account_id} added to chat {self.chat_id} by {initiated_by}",
@@ -159,6 +131,22 @@ class Chat(pydantic.BaseModel):
                 invited_by=initiated_by,
             ),
         )
+
+    def add_tag(self, account_id: typing.Text, tag: participant_entities.ChatTag) -> None:
+        """
+        Adds tag to participant
+        """
+        if (participant := self.is_participant(account_id)) is None:
+            raise exceptions.ParticipantNotInChat(account_id, self.chat_id)
+        participant.add_tag(tag)
+
+    def remove_tag(self, account_id: typing.Text, tag: participant_entities.ChatTag) -> None:
+        """
+        Removes tag from participant
+        """
+        if (participant := self.is_participant(account_id)) is None:
+            raise exceptions.ParticipantNotInChat(account_id, self.chat_id)
+        participant.remove_tag(tag)
 
     def delete_for(self, account_id: typing.Text) -> None:
         """
@@ -177,7 +165,7 @@ class Chat(pydantic.BaseModel):
 
         return participant.last_read_message
 
-    def is_participant(self, account_id: typing.Text) -> Participant | None:
+    def is_participant(self, account_id: typing.Text) -> participant_entities.Participant | None:
         """
         Checks if account is participant
         """

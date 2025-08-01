@@ -22,3 +22,8 @@ class AttachmentAlreadyUploaded(Exception):
 class AttachmentAlreadySent(Exception):
     def __init__(self, attachment_id: uuid.UUID) -> None:
         super().__init__(f"Attachment {attachment_id} already sent")
+
+
+class ParticipantNotInChat(Exception):
+    def __init__(self, account_id: typing.Text, chat_id: uuid.UUID) -> None:
+        super().__init__(f"Participant {account_id} not in chat {chat_id}")

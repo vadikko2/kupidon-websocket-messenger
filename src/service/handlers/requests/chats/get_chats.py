@@ -45,11 +45,15 @@ class GetChatsHandler(cqrs.RequestHandler[get_chats.GetChats, get_chats.Chats]):
                 last_read_messages,
                 not_read_messages_count,
             ):
+                participant = chat.is_participant(request.participant)
+                if participant is None:
+                    continue
                 chat_info = get_chats.ChatInfo(
                     chat_id=chat.chat_id,
                     name=chat.name,
                     avatar=chat.avatar,
                     participants_count=chat.participants_count,
+                    tags=[tag.tag for tag in participant.tags],
                     not_read_messages_count=not_read_count,
                     last_activity_timestamp=chat.last_activity_timestamp,
                     last_message_id=chat.last_message_id,

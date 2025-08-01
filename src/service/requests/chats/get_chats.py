@@ -14,6 +14,7 @@ class ChatInfo(cqrs.Response):
     chat_id: pydantic.UUID4
     name: typing.Text
     avatar: typing.Optional[pydantic.AnyHttpUrl] = None
+    tags: typing.List[typing.Text] = pydantic.Field(default_factory=list)
     participants_count: pydantic.NonNegativeInt
     last_activity_timestamp: typing.Optional[datetime.datetime]
     last_message_id: typing.Optional[pydantic.UUID4] = None
