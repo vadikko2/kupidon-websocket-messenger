@@ -1,3 +1,5 @@
+import logging
+
 import cqrs
 
 from service import exceptions, unit_of_work
@@ -7,6 +9,8 @@ from service.validators import (
     chats as chat_validators,
     messages as message_validators,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class UpdateMessageHandler(
@@ -51,6 +55,7 @@ class UpdateMessageHandler(
             await self.uow.message_repository.update(message)
             await self.uow.commit()
 
+        logger.debug(f"Message {request.message_id} updated by {request.updater}")
         return update_message_request.MessageUpdated(
             message_id=message.message_id,
             chat_id=message.chat_id,

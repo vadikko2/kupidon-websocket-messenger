@@ -8,7 +8,9 @@ from service.handlers.events.chats import (
 )
 from service.handlers.events.messages import (
     message_deleted as message_deleted_handler,
+    message_read as message_reed_handler,
     new_message_added as new_message_added_handler,
+    message_updated as message_updated_handler,
 )
 from service.handlers.events.reactions import (
     message_reacted as message_reacted_handler,
@@ -124,6 +126,14 @@ def init_events(mapper: events.EventMap) -> None:
     mapper.bind(
         domain_events.NewMessageAdded,
         new_message_added_handler.NewMessageAddedHandler,
+    )
+    mapper.bind(
+        domain_events.MessageRead,
+        message_reed_handler.MessageReadHandler,
+    )
+    mapper.bind(
+        domain_events.MessageUpdated,
+        message_updated_handler.MessageUpdatedHandler,
     )
     mapper.bind(
         domain_events.MessageReacted,

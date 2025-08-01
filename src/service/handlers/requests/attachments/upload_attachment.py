@@ -1,5 +1,5 @@
 """
-Dont use this module for new attachment types
+Don`t use this module for new attachment types
 """
 
 import datetime
@@ -76,7 +76,6 @@ class UploadAttachmentHandler(
             ]
 
             # upload original
-
             # preprocess
             for preprocessing_chain in self.preprocessing_chains:
                 if not preprocessing_chain.content_type == request.content_type:
