@@ -47,4 +47,4 @@ COPY ./src/ /code/src/
 
 EXPOSE 80
 EXPOSE 443
-CMD ["uvicorn", "--app-dir", "/code/src/", "presentation.api.main:app", "--workers", "1", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "--app-dir", "/code/src/", "presentation.api.main:app", "--workers", "4", "--host", "0.0.0.0", "--port", "80"]
