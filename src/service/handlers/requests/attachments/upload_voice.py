@@ -2,7 +2,7 @@ import datetime
 import hashlib
 import io
 import logging
-import pathlib
+import tempfile
 import typing
 import uuid
 
@@ -58,21 +58,14 @@ class UploadVoiceHandler(cqrs.RequestHandler[upload_voice.UploadVoice, upload_vo
             uploading_dt = datetime.datetime.now()
             uploading_file_name = f"{attachment_uuid}.{request.voice_format}"
             uploading_path = f"{request.uploader}/{uploading_dt.year}/{uploading_dt.month}"
-            tmp_file_path = (
-                pathlib.Path(app_settings.TMP_ATTACHMENTS_DIR)
-                / pathlib.Path(uploading_path)
-                / pathlib.Path(uploading_file_name)
-            )
 
-            if not tmp_file_path.parent.exists():
-                tmp_file_path.parent.mkdir(parents=True)
+            # Используем временный файл с автоматическим удалением
+            with tempfile.NamedTemporaryFile(suffix=f".{request.voice_format}", delete=True) as tmp_file:
+                tmp_file.write(request.content)
+                tmp_file.flush()  # Убедимся, что данные записаны на диск
 
-            with tmp_file_path.open("wb") as f:
-                f.write(request.content)
-
-            try:
                 try:
-                    voice_histogram = histogram.AudioToHistogram(decoders_map[request.voice_format])(tmp_file_path)
+                    voice_histogram = histogram.AudioToHistogram(decoders_map[request.voice_format])(tmp_file.name)
                 except (histogram.HistogramExtractionError, histogram.DecodeVoiceError) as e:
                     raise exceptions.AttachmentUploadError(e)
 
@@ -82,6 +75,9 @@ class UploadVoiceHandler(cqrs.RequestHandler[upload_voice.UploadVoice, upload_vo
                     uploader=request.uploader,
                     content_type=attachments.AttachmentType.VOICE,
                 )
+
+                # Перемещаем указатель в начало для чтения
+                tmp_file.seek(0)
                 url = await storages.upload_file_to_storage(
                     self.storage,
                     io.BytesIO(request.content),
@@ -107,6 +103,3 @@ class UploadVoiceHandler(cqrs.RequestHandler[upload_voice.UploadVoice, upload_vo
                     attachment_url=url,
                     amplitudes=voice_histogram,
                 )
-            finally:
-                if tmp_file_path.exists():
-                    tmp_file_path.unlink()

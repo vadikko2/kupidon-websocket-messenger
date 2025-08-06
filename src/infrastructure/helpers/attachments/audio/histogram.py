@@ -1,6 +1,5 @@
 import array
 import math
-import pathlib
 import typing
 
 import pydub
@@ -18,7 +17,7 @@ class HistogramExtractionError(Exception):
 
 
 class AudioToHistogram:
-    def __init__(self, decoder: typing.Callable[[pathlib.Path], array.array[int]]):
+    def __init__(self, decoder: typing.Callable[[str], array.array[int]]):
         self._decoder = decoder
 
     @staticmethod
@@ -68,7 +67,7 @@ class AudioToHistogram:
 
     def __call__(
         self,
-        audio_filename: pathlib.Path,
+        audio_filename: str,
         max_columns: int = MAX_COLUMNS,
         max_levels: int = MAX_LEVELS,
     ) -> list[tuple[int, int]]:
@@ -80,8 +79,8 @@ class AudioToHistogram:
             raise HistogramExtractionError(e)
 
 
-def mp3_decoder(filename: pathlib.Path) -> array.array[int]:
+def mp3_decoder(filename: str) -> array.array[int]:
     try:
-        return pydub.AudioSegment.from_file(str(filename.absolute())).get_array_of_samples()
+        return pydub.AudioSegment.from_file(filename).get_array_of_samples()
     except Exception as e:
         raise DecodeVoiceError(f"MP3 decoding failed: {str(e)}")
