@@ -44,7 +44,6 @@ ENV S3_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY
 RUN pip install --no-cache-dir -r /code/requirements.txt --root-user-action=ignore
 
 COPY ./src/ /code/src/
-COPY ./tmp/ /code/tmp/
 
 EXPOSE 80
 EXPOSE 443
