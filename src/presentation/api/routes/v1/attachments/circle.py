@@ -52,7 +52,7 @@ async def upload_circle(
         ),
     )
     return response.Response[responses.Uploaded[responses.CircleInfo]](
-        result=responses.Uploaded[responses.VoiceInfo](
+        result=responses.Uploaded[responses.CircleInfo](
             attachment_id=result.attachment_id,
             info=responses.CircleInfo(
                 duration_milliseconds=duration_milliseconds,
