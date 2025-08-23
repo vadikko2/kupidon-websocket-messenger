@@ -8,8 +8,8 @@ import uuid
 import cqrs
 
 from domain import attachments
-from service import exceptions, unit_of_work
-from service.interfaces import attachment_storage
+from service import exceptions
+from service.interfaces import attachment_storage, unit_of_work
 from service.requests.attachments import upload_circle
 from service.services import storages
 from service.validators import chats as chat_validators

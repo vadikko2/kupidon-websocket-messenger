@@ -13,8 +13,8 @@ from cqrs.events import event
 
 from domain import attachments
 from infrastructure.helpers.attachments.preprocessors import chain
-from service import exceptions, unit_of_work
-from service.interfaces import attachment_storage
+from service import exceptions
+from service.interfaces import attachment_storage, unit_of_work
 from service.requests.attachments import upload_attachment
 from service.services import storages
 from service.validators import chats as chat_validators

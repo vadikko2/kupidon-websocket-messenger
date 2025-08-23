@@ -1,6 +1,7 @@
 import cqrs
 
-from service import exceptions, unit_of_work
+from service import exceptions
+from service.interfaces import unit_of_work
 from service.requests.messages import apply_message
 from service.validators import chats as chat_validators, messages as message_validators
 

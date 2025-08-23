@@ -1,6 +1,6 @@
 import cqrs
 
-from service import unit_of_work
+from service.interfaces import unit_of_work
 from service.requests.chats import get_chats
 
 

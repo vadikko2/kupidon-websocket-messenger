@@ -3,7 +3,8 @@ import typing
 
 import cqrs
 
-from service import exceptions, unit_of_work
+from service import exceptions
+from service.interfaces import unit_of_work
 from service.requests.attachments import get_attachments
 from service.requests.messages import get_messages
 from service.validators import chats as chat_validators, messages as message_validators

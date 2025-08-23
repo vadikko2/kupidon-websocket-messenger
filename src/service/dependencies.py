@@ -12,8 +12,7 @@ from infrastructure.database.cache.redis import connections as redis_connections
 from infrastructure.helpers.attachments.image import preview, transcode
 from infrastructure.helpers.attachments.preprocessors import chain
 from infrastructure.storages import s3
-from service import unit_of_work
-from service.interfaces import attachment_storage
+from service.interfaces import attachment_storage, unit_of_work
 
 container = di.Container()
 

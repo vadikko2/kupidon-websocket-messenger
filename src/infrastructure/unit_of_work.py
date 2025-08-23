@@ -5,9 +5,10 @@ import cqrs
 import redis.asyncio as redis
 
 from infrastructure.database.persistent import mock
+from service.interfaces import unit_of_work
 
 
-class MockMessageUoW:
+class MockMessageUoW(unit_of_work.UoW):
     def __init__(self, redis_factory: typing.Callable[[], redis.Redis]):
         self._redis_factory = redis_factory
 

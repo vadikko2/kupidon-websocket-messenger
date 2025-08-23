@@ -5,7 +5,8 @@ import orjson
 
 from domain import events
 from infrastructure.brokers import messages_broker
-from service import exceptions, unit_of_work
+from service import exceptions
+from service.interfaces import unit_of_work
 from service.requests.ecst_events.chats import new_chat
 from service.validators import chats as chat_validators
 

@@ -4,7 +4,8 @@ import cqrs
 from cqrs.events import event
 
 from domain import exceptions as domain_exceptions, participants
-from service import exceptions, unit_of_work
+from service import exceptions
+from service.interfaces import unit_of_work
 from service.requests.chats import add_tag
 from service.validators import chats as chat_validators
 

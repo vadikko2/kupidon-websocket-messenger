@@ -8,7 +8,8 @@ from cqrs.events import event
 
 from domain import attachments
 from infrastructure.helpers.attachments.image import preview, transcode
-from service import exceptions, unit_of_work
+from service import exceptions
+from service.interfaces import unit_of_work
 from service.interfaces import attachment_storage
 from service.requests.attachments import upload_image
 from service.services import storages

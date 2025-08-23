@@ -4,7 +4,8 @@ import cqrs
 from cqrs.events import event
 
 from domain import chats
-from service import exceptions, unit_of_work
+from service import exceptions
+from service.interfaces import unit_of_work
 from service.requests.chats import delete_chat
 
 

@@ -59,7 +59,11 @@ async def get_chats(
     offset: pydantic.NonNegativeInt = fastapi.Query(default=0),
     chat_id: typing.List[pydantic.UUID4] = fastapi.Query(default=[], description="Chat ids"),
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
-    with_participant_id: typing.List[typing.Text] = fastapi.Query(default=[], description="Participant ids"),
+    with_participant_id: typing.List[typing.Text] = fastapi.Query(
+        default=[],
+        description="Participant ids",
+        max_length=10,
+    ),
     strict_participants_search: pydantic.StrictBool = fastapi.Query(
         default=False,
         description="Strict participants search",

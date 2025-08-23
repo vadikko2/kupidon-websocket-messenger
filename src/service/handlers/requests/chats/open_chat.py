@@ -1,7 +1,7 @@
 import cqrs
 
 from domain import chats
-from service import unit_of_work
+from service.interfaces import unit_of_work
 from service.requests.chats import open_chat
 
 
@@ -11,7 +11,7 @@ class OpenChatHandler(cqrs.RequestHandler[open_chat.OpenChat, open_chat.ChatOpen
 
     @property
     def events(self):
-        return self.uow.get_events()
+        return list(self.uow.get_events())
 
     async def handle(self, request: open_chat.OpenChat) -> open_chat.ChatOpened:
         new_chat = chats.Chat(
