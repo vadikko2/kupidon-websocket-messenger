@@ -15,7 +15,9 @@ class GetChatsHandler(cqrs.RequestHandler[get_chats.GetChats, get_chats.Chats]):
     async def handle(self, request: get_chats.GetChats) -> get_chats.Chats:
         async with self.uow:
             chats = await self.uow.chat_repository.get_all(
-                participant=request.participant,
+                request.participant,
+                with_participants=request.with_participant_ids,
+                strict_participants_search=request.strict_participants_search,
             )
             if request.chat_ids is not None:
                 chats = list(

@@ -13,9 +13,9 @@ from presentation.api.schema import pagination
 from presentation.api.schema.v1 import requests, responses
 from service import exceptions
 from service.requests.chats import (
+    delete_chat as delete_chat_request,
     get_chats as get_chats_request,
     open_chat as open_chat_request,
-    delete_chat as delete_chat_request,
 )
 
 router = fastapi.APIRouter(prefix="")
@@ -57,8 +57,13 @@ async def open_chat(
 async def get_chats(
     limit: pydantic.NonNegativeInt = fastapi.Query(default=10),
     offset: pydantic.NonNegativeInt = fastapi.Query(default=0),
-    chat_ids: typing.Sequence[pydantic.UUID4] = fastapi.Query(default=[]),
+    chat_id: typing.List[pydantic.UUID4] = fastapi.Query(default=[], description="Chat ids"),
     account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    participant_id: typing.List[typing.Text] = fastapi.Query(default=[], description="Participant ids"),
+    strict_participants_search: pydantic.StrictBool = fastapi.Query(
+        default=False,
+        description="Strict participants search",
+    ),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
     ),
@@ -67,7 +72,12 @@ async def get_chats(
     # Returns chat with specified participant
     """
     result: get_chats_request.Chats = await mediator.send(
-        get_chats_request.GetChats(participant=account_id, chat_ids=chat_ids if chat_ids else None),
+        get_chats_request.GetChats(
+            participant=account_id,
+            chat_ids=chat_id if chat_id else None,
+            with_participant_ids=participant_id if participant_id else None,
+            strict_participants_search=strict_participants_search,
+        ),
     )
     return response.Response(
         result=pagination.Pagination[get_chats_request.ChatInfo](
@@ -75,6 +85,7 @@ async def get_chats(
             base_items=result.chats,
             limit=limit,
             offset=offset,
+            count=len(result.chats),
         ),
     )
 

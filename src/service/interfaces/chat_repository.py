@@ -78,7 +78,12 @@ class ChatRepository(typing.Protocol):
         """
         raise NotImplementedError
 
-    async def get_all(self, participant: typing.Text) -> typing.List[chats.Chat]:
+    async def get_all(
+        self,
+        participant: typing.Text,
+        with_participants: typing.List[typing.Text] | None = None,
+        strict_participants_search: bool = False,
+    ) -> typing.List[chats.Chat]:
         """
         Gets all chats
         """

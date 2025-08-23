@@ -240,7 +240,12 @@ class MockChatRepository(chat_repository.ChatRepository):
             result.append(await self.count_after(chat_id, msg_id))
         return result
 
-    async def get_all(self, participant: typing.Text) -> typing.List[chats.Chat]:
+    async def get_all(
+        self,
+        participant: typing.Text,
+        with_participants: typing.List[typing.Text] | None = None,
+        strict_participants_search: bool = False,
+    ) -> typing.List[chats.Chat]:
         participant_chats_bytes_coroutine = await self._redis_pipeline.lrange(
             # pyright: ignore[reportGeneralTypeIssues]
             PARTICIPANT_CHATS_PREFIX.format(participant),
@@ -259,13 +264,30 @@ class MockChatRepository(chat_repository.ChatRepository):
         if not chats_bytes:
             return []
 
-        result = sorted(
-            [chats.Chat.model_validate(orjson.loads(chat_bytes)) for chat_bytes in chats_bytes if chat_bytes],
-            key=lambda chat: chat.last_activity_timestamp,
-            reverse=True,
-        )
-        self._seen.update(result)
-        return result
+        result = [chats.Chat.model_validate(orjson.loads(chat_bytes)) for chat_bytes in chats_bytes if chat_bytes]
+        if with_participants is not None:
+            if not strict_participants_search:
+                filtered_result = []
+                for chat in result:
+                    for other_participant in with_participants:
+                        if chat.is_participant(other_participant):
+                            filtered_result.append(chat)
+                result = filtered_result
+            else:
+                filtered_result = []
+                for chat in result:
+                    participants_len = len(chat.participants)
+                    if participants_len == len(with_participants) + 1:
+                        for other_participant in with_participants:
+                            if not chat.is_participant(other_participant):
+                                break
+                        else:
+                            filtered_result.append(chat)
+                result = filtered_result
+
+        sorted_result = sorted(result, key=lambda chat: chat.last_activity_timestamp, reverse=True)
+        self._seen.update(sorted_result)
+        return sorted_result
 
     def events(self):
         new_events = []
