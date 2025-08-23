@@ -17,7 +17,7 @@ class ChatInfo(cqrs.Response):
     name: typing.Text
     avatar: typing.Optional[pydantic.AnyHttpUrl] = None
     tags: typing.List[typing.Text] = pydantic.Field(default_factory=list)
-    participants_count: pydantic.NonNegativeInt
+    participant_ids: typing.List[typing.Text]
     last_activity_timestamp: typing.Optional[datetime.datetime]
     last_message_id: typing.Optional[pydantic.UUID4] = None
     last_read_message_id: typing.Optional[pydantic.UUID4] = None
@@ -25,6 +25,10 @@ class ChatInfo(cqrs.Response):
         description="Count of not read messages",
         default=0,
     )
+
+    @pydantic.computed_field()
+    def participants_count(self) -> pydantic.NonNegativeInt:
+        return len(self.participant_ids)
 
 
 class Chats(cqrs.Response):

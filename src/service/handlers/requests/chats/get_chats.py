@@ -54,7 +54,7 @@ class GetChatsHandler(cqrs.RequestHandler[get_chats.GetChats, get_chats.Chats]):
                     chat_id=chat.chat_id,
                     name=chat.name,
                     avatar=chat.avatar,
-                    participants_count=chat.participants_count,
+                    participant_ids=[participant.account_id for participant in chat.participants],
                     tags=[tag.tag for tag in participant.tags],
                     not_read_messages_count=not_read_count,
                     last_activity_timestamp=chat.last_activity_timestamp,
