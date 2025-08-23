@@ -37,9 +37,6 @@ class MockMessageUoW(unit_of_work.UoW):
         finally:
             del self._redis_pipeline
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        await self.rollback()
-
     def get_events(self) -> typing.Iterable[cqrs.Event]:
         return itertools.chain(
             self.message_repository.events(),

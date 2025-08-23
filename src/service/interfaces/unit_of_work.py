@@ -28,9 +28,8 @@ class UoW(abc.ABC):
     async def rollback(self):
         raise NotImplementedError
 
-    @abc.abstractmethod
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        raise NotImplementedError
+        await self.rollback()
 
     @abc.abstractmethod
     def get_events(self) -> typing.Iterable[cqrs.Event]:
