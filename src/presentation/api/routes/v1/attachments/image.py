@@ -1,5 +1,3 @@
-import typing
-
 import cqrs
 import fastapi
 import pydantic
@@ -10,7 +8,7 @@ from domain import exceptions as domain_exceptions
 from presentation.api import dependencies
 from presentation.api.schema.v1 import responses
 from service import exceptions as service_exceptions
-from service.requests.attachments import upload_image as upload_image_requests
+from service.models.attachments import upload_image as upload_image_requests
 
 router = fastapi.APIRouter(prefix="")
 
@@ -26,7 +24,7 @@ router = fastapi.APIRouter(prefix="")
 )
 async def upload_image(
     chat_id: pydantic.UUID4,
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(dependencies.get_account_id),
     image_file: fastapi.UploadFile = fastapi.File(description="Image file"),
     image_height: pydantic.NonNegativeInt = fastapi.Body(description="Image height"),
     image_width: pydantic.NonNegativeInt = fastapi.Body(description="Image width"),
@@ -55,6 +53,7 @@ async def upload_image(
                 width=image_width,
                 url_100x100=result.attachment_urls[1],  # pyright: ignore[reportArgumentType]
                 url_200x200=result.attachment_urls[2],  # pyright: ignore[reportArgumentType]
+                blurhash=result.blurhash,
             ),
         ),
     )

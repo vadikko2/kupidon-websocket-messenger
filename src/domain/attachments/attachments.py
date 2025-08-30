@@ -43,7 +43,7 @@ class Attachment(pydantic.BaseModel):
 
     chat_id: pydantic.UUID4 = pydantic.Field(frozen=True)
     message_sent_id: pydantic.UUID4 | None = None
-    uploader: typing.Text = pydantic.Field(frozen=True)
+    uploader: str = pydantic.Field(frozen=True)
 
     created: datetime.datetime = pydantic.Field(
         default_factory=datetime.datetime.now,
@@ -55,15 +55,15 @@ class Attachment(pydantic.BaseModel):
     status: AttachmentStatus = pydantic.Field(default=AttachmentStatus.NEW)
 
     urls: typing.Sequence[str] = pydantic.Field(default_factory=list)
-    filename: typing.Optional[typing.Text] = pydantic.Field(
+    filename: str | None = pydantic.Field(
         default=None,
         max_length=100,
     )
 
     content_type: AttachmentType = pydantic.Field(frozen=True)
-    meta: typing.Dict | None = pydantic.Field(default_factory=dict)
+    meta: dict | None = pydantic.Field(default_factory=dict)
 
-    event_list: typing.List[cqrs.DomainEvent] = pydantic.Field(
+    event_list: list[cqrs.DomainEvent] = pydantic.Field(
         default_factory=list,
         exclude=True,
     )
@@ -77,9 +77,9 @@ class Attachment(pydantic.BaseModel):
 
     def upload(
         self,
-        urls: typing.List[typing.Text],
+        urls: list[str],
         uploaded_dt: datetime.datetime | None = None,
-        meta: typing.Dict | None = None,
+        meta: dict | None = None,
     ) -> None:
         """
         Uploads attachment
@@ -124,7 +124,7 @@ class Attachment(pydantic.BaseModel):
         self.status = AttachmentStatus.SENT
         logger.debug(f"Attachment {self.attachment_id} sent with message {message_id}")
 
-    def get_events(self) -> typing.List[cqrs.DomainEvent]:
+    def get_events(self) -> list[cqrs.DomainEvent]:
         """
         Returns new domain events
         """

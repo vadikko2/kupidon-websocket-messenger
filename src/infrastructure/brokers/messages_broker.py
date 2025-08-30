@@ -1,5 +1,4 @@
 import abc
-import typing
 
 
 class MessageBroker(abc.ABC):
@@ -8,7 +7,7 @@ class MessageBroker(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def send_message(self, channel_name: typing.Text, message: bytes) -> None:
+    async def send_message(self, channel_name: str, message: bytes) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -16,11 +15,11 @@ class MessageBroker(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def subscribe(self, channel_name: typing.Text) -> None:
+    async def subscribe(self, channel_name: str) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def unsubscribe(self, channel_name: typing.Text) -> None:
+    async def unsubscribe(self, channel_name: str) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod

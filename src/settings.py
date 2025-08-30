@@ -1,5 +1,3 @@
-import typing
-
 import dotenv
 import pydantic
 import pydantic_settings
@@ -12,7 +10,7 @@ VERSION = "0.10.0"
 class Logging(pydantic_settings.BaseSettings, case_sensitive=True):
     """Logging config"""
 
-    LEVEL: typing.Text = pydantic.Field(default="DEBUG")
+    LEVEL: str = pydantic.Field(default="DEBUG")
     COLORIZE: bool = pydantic.Field(default=True)
     SERIALIZE: bool = pydantic.Field(default=False)
 
@@ -21,9 +19,9 @@ class Logging(pydantic_settings.BaseSettings, case_sensitive=True):
 
 class App(pydantic_settings.BaseSettings, case_sensitive=True):
     DEBUG: bool = pydantic.Field(default=False)
-    NAME: typing.Text = pydantic.Field(default="messanger-api")
-    ENV: typing.Text = pydantic.Field(default="local")
+    NAME: str = pydantic.Field(default="messanger-api")
+    ENV: str = pydantic.Field(default="local")
 
-    TMP_ATTACHMENTS_DIR: typing.Text = pydantic.Field(default="./tmp/attachments")
+    TMP_ATTACHMENTS_DIR: str = pydantic.Field(default="./tmp/attachments")
 
     model_config = pydantic_settings.SettingsConfigDict(env_prefix="APP_")

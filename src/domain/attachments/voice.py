@@ -1,5 +1,4 @@
 import enum
-import typing
 
 import pydantic
 
@@ -14,7 +13,7 @@ class VoiceAttachmentMeta(pydantic.BaseModel):
     duration_seconds: pydantic.PositiveInt = pydantic.Field(description="Voice duration in seconds")
     duration_milliseconds: pydantic.PositiveInt = pydantic.Field(description="Voice duration in duration_milliseconds")
 
-    amplitudes: typing.Optional[typing.List[typing.Tuple[pydantic.StrictInt, pydantic.StrictInt]]] = pydantic.Field(
+    amplitudes: list[tuple[pydantic.StrictInt, pydantic.StrictInt]] | None = pydantic.Field(
         description="Voice amplitude",
         default=None,
     )

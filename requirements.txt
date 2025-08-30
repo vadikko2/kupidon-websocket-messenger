@@ -1,10 +1,24 @@
-fastapi_app@git+https://github.com/vadikko2/fastapi-app@0.0.2
+# Common
 python-cqrs==3.0.0
 orjson==3.9.15
-redis==5.0.3
-fastapi==0.109.2
 pydantic==2.8.2
 pydantic-settings==2.2.1
-pillow==10.4.0
+
+# API
+fastapi_app@git+https://github.com/vadikko2/fastapi-app@0.0.2
+fastapi==0.109.2
+
+# Cache
+redis==5.0.3
+
+# S3
 boto3==1.34.131
+
+# Images
+blurhash==1.1.5
+simplejpeg==1.8.2
+pillow==10.4.0
+
+
+# Audio
 pydub==0.25.1

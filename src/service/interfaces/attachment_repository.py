@@ -7,7 +7,7 @@ from domain import attachments
 
 
 class AttachmentRepository(typing.Protocol):
-    _seen: typing.Set[attachments.Attachment]
+    _seen: set[attachments.Attachment]
 
     async def add(self, attachment: attachments.Attachment) -> None:
         """Adds new attachment"""
@@ -20,9 +20,9 @@ class AttachmentRepository(typing.Protocol):
     async def get_many(
         self,
         *attachment_ids: uuid.UUID,
-        type_filter: typing.List[attachments.AttachmentType] | None = None,
-        status_filter: typing.List[attachments.AttachmentStatus] | None = None,
-    ) -> typing.List[attachments.Attachment]:
+        type_filter: list[attachments.AttachmentType] | None = None,
+        status_filter: list[attachments.AttachmentStatus] | None = None,
+    ) -> list[attachments.Attachment]:
         """Returns specified attachments"""
         raise NotImplementedError
 
@@ -31,13 +31,13 @@ class AttachmentRepository(typing.Protocol):
         chat_id: uuid.UUID,
         limit: int,
         offset: int,
-        type_filter: typing.List[attachments.AttachmentType] | None = None,
-        status_filter: typing.List[attachments.AttachmentStatus] | None = None,
-    ) -> typing.List[attachments.Attachment]:
+        type_filter: list[attachments.AttachmentType] | None = None,
+        status_filter: list[attachments.AttachmentStatus] | None = None,
+    ) -> list[attachments.Attachment]:
         """Returns all attachments for specified chat"""
         raise NotImplementedError
 
-    def events(self) -> typing.List[cqrs.Event]:
+    def events(self) -> list[cqrs.Event]:
         """
         Returns new domain events
         """

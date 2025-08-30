@@ -1,0 +1,35 @@
+import datetime
+import typing
+
+import cqrs
+import pydantic
+
+from domain import attachments
+
+
+class GetAttachments(cqrs.Request):
+    chat_id: pydantic.UUID4
+    account_id: str
+
+    type_filter: list[attachments.AttachmentType] = pydantic.Field(default_factory=list)
+    status_filter: list[attachments.AttachmentStatus] = pydantic.Field(default_factory=list)
+    attachment_id_filter: list[pydantic.UUID4] = pydantic.Field(default_factory=list)
+
+    limit: pydantic.NonNegativeInt
+    offset: pydantic.NonNegativeInt
+
+
+class AttachmentInfo(pydantic.BaseModel):
+    attachment_id: pydantic.UUID4
+    attachment_status: attachments.AttachmentStatus
+
+    chat_id: pydantic.UUID4
+    urls: typing.Sequence[str]
+    uploaded: datetime.datetime
+    content_type: attachments.AttachmentType
+
+    meta: dict[pydantic.StrictStr, typing.Any] = pydantic.Field(default_factory=dict)
+
+
+class Attachments(cqrs.Response):
+    attachments: list[AttachmentInfo]

@@ -7,7 +7,7 @@ from domain import attachments, messages
 
 
 class MessageRepository(typing.Protocol):
-    _seen: typing.Set[messages.Message | attachments.Attachment]
+    _seen: set[messages.Message | attachments.Attachment]
 
     async def add(self, message: messages.Message) -> None:
         """
@@ -27,7 +27,7 @@ class MessageRepository(typing.Protocol):
         """
         raise NotImplementedError
 
-    def events(self) -> typing.List[cqrs.Event]:
+    def events(self) -> list[cqrs.Event]:
         """
         Returns new domain events
         """
@@ -35,11 +35,11 @@ class MessageRepository(typing.Protocol):
 
 
 class ReadMessageRepository(typing.Protocol):
-    _seen: typing.Set[messages.ReedMessage]
+    _seen: set[messages.ReedMessage]
 
     async def last_read(
         self,
-        account_id: typing.Text,
+        account_id: str,
         chat_id: uuid.UUID,
     ) -> messages.ReedMessage | None:
         """
@@ -49,9 +49,9 @@ class ReadMessageRepository(typing.Protocol):
 
     async def last_read_many(
         self,
-        account_id: typing.Text,
-        chat_ids: typing.List[uuid.UUID],
-    ) -> typing.List[messages.ReedMessage | None]:
+        account_id: str,
+        chat_ids: list[uuid.UUID],
+    ) -> list[messages.ReedMessage | None]:
         """
         Returns last read messages by account in specified chats
         """

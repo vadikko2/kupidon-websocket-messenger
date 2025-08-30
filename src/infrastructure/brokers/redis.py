@@ -25,7 +25,7 @@ class RedisMessageBroker(messages_broker.MessageBroker):
     async def start(self) -> None:
         self.pubsub = self.connect.pubsub()
 
-    async def send_message(self, channel_name: typing.Text, message: bytes) -> None:
+    async def send_message(self, channel_name: str, message: bytes) -> None:
         logger.debug(f"Sending new message {message} to {channel_name}")
         await self.connect.publish(channel_name, message)
 
@@ -46,7 +46,7 @@ class RedisMessageBroker(messages_broker.MessageBroker):
 
         return message.get("data")
 
-    async def subscribe(self, channel_name: typing.Text) -> None:
+    async def subscribe(self, channel_name: str) -> None:
         if self.pubsub is None:
             raise Exception("Broker not started")
 
@@ -54,7 +54,7 @@ class RedisMessageBroker(messages_broker.MessageBroker):
         await self.pubsub.subscribe(channel_name)
         self.subscribed_channels.add(channel_name)
 
-    async def unsubscribe(self, channel_name: typing.Text) -> None:
+    async def unsubscribe(self, channel_name: str) -> None:
         if self.pubsub is None or not self.pubsub.subscribed:
             raise Exception("Broker not started")
 

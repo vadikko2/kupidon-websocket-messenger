@@ -1,12 +1,10 @@
-import typing
-
 import pydantic
 
 from domain import messages
 
 
 class ChatTag(pydantic.BaseModel):
-    tag: typing.Text
+    tag: str
 
     def __eq__(self, other):
         if not isinstance(other, ChatTag):
@@ -22,11 +20,11 @@ class Participant(pydantic.BaseModel):
     Participant entity
     """
 
-    account_id: typing.Text = pydantic.Field(frozen=True)
-    initiated_by: typing.Text = pydantic.Field(frozen=True)
-    tags: typing.Set[ChatTag] = pydantic.Field(default_factory=set)
+    account_id: str = pydantic.Field(frozen=True)
+    initiated_by: str = pydantic.Field(frozen=True)
+    tags: set[ChatTag] = pydantic.Field(default_factory=set)
 
-    last_read_message: typing.Optional[messages.Message] = pydantic.Field(default=None)
+    last_read_message: messages.Message | None = pydantic.Field(default=None)
 
     def set_last_read_message(self, message: messages.Message):
         self.last_read_message = message

@@ -1,5 +1,3 @@
-import typing
-
 import cqrs
 import fastapi
 import pydantic
@@ -12,7 +10,7 @@ from presentation.api import dependencies
 from presentation.api.schema import pagination, validators
 from presentation.api.schema.v1 import requests
 from service import exceptions as service_exceptions
-from service.requests.reactions import (
+from service.models.reactions import (
     get_reactors as get_reactors_request,
     react_message,
     unreact_message,
@@ -32,7 +30,7 @@ router = fastapi.APIRouter(prefix="/reactions", tags=["Reactions"])
 )
 async def react(
     message_id: pydantic.UUID4,
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(dependencies.get_account_id),
     reaction: requests.Reaction = fastapi.Body(...),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
@@ -61,7 +59,7 @@ async def react(
 async def unreact(
     message_id: pydantic.UUID4,
     reaction: requests.Reaction = fastapi.Body(...),
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
     ),
@@ -90,13 +88,13 @@ async def unreact(
 )
 async def get_reactors(
     message_id: pydantic.UUID4,
-    reaction: typing.Text = fastapi.Depends(validators.emoji_validator),
+    reaction: str = fastapi.Depends(validators.emoji_validator),
     limit: pydantic.NonNegativeInt = fastapi.Query(default=10),
     offset: pydantic.NonNegativeInt = fastapi.Query(default=0),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
     ),
-) -> response.Response[pagination.Pagination[typing.Text]]:
+) -> response.Response[pagination.Pagination[str]]:
     """
     # Returns reactors for message reaction
     """
@@ -104,7 +102,7 @@ async def get_reactors(
         get_reactors_request.GetReactors(message_id=message_id, emoji=reaction),
     )
     return response.Response(
-        result=pagination.Pagination[typing.Text](
+        result=pagination.Pagination[str](
             url=f"/v1/messages/{message_id}/reactions/?reaction={reaction}",
             base_items=reactors.reactors,
             limit=limit,

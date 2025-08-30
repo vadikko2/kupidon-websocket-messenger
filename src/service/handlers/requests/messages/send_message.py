@@ -5,7 +5,7 @@ import cqrs
 from domain import messages
 from service import exceptions
 from service.interfaces import unit_of_work
-from service.requests.messages import send_message
+from service.models.messages import send_message
 from service.validators import attachments as attachment_validators, chats as chat_validators
 
 logger = logging.getLogger(__name__)

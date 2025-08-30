@@ -1,11 +1,10 @@
-import typing
 import uuid
 
 
 class TooManyReactions(Exception):
     def __init__(
         self,
-        reactor: typing.Text,
+        reactor: str,
         reaction_id: uuid.UUID,
         message_id: uuid.UUID,
     ) -> None:
@@ -25,5 +24,5 @@ class AttachmentAlreadySent(Exception):
 
 
 class ParticipantNotInChat(Exception):
-    def __init__(self, account_id: typing.Text, chat_id: uuid.UUID) -> None:
+    def __init__(self, account_id: str, chat_id: uuid.UUID) -> None:
         super().__init__(f"Participant {account_id} not in chat {chat_id}")

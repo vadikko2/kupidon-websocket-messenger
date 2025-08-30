@@ -1,6 +1,5 @@
 import functools
 import re
-import typing
 
 import fastapi
 
@@ -14,11 +13,11 @@ AccountId = functools.partial(
 
 
 class EmojiValidationError(Exception):
-    def __init__(self, emoji: typing.Text) -> None:
+    def __init__(self, emoji: str) -> None:
         super().__init__(f"Emoji {emoji} validation error.")
 
 
-def emoji_validator(emoji: typing.Text) -> typing.Text:
+def emoji_validator(emoji: str) -> str:
     # Регулярное выражение для проверки emoji
     emoji_pattern = re.compile(
         "[\U0001f600-\U0001f64f"  # emoticons

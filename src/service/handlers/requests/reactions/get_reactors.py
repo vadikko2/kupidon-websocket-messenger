@@ -2,7 +2,7 @@ import cqrs
 
 from service import exceptions
 from service.interfaces import unit_of_work
-from service.requests.reactions import get_reactors as get_reactors_request
+from service.models.reactions import get_reactors as get_reactors_request
 from service.validators import messages as message_validators
 
 

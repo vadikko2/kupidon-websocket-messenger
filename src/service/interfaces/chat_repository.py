@@ -7,7 +7,7 @@ from domain import chats, messages
 
 
 class ChatRepository(typing.Protocol):
-    _seen: typing.Set[chats.Chat]
+    _seen: set[chats.Chat]
 
     async def add(self, chat: chats.Chat) -> None:
         """
@@ -31,7 +31,7 @@ class ChatRepository(typing.Protocol):
         self,
         chat_id: uuid.UUID,
         messages_limit: int | None = None,
-        latest_message_id: typing.Optional[uuid.UUID] = None,
+        latest_message_id: uuid.UUID | None = None,
         reverse: bool = False,
     ) -> chats.Chat | None:
         """
@@ -71,8 +71,8 @@ class ChatRepository(typing.Protocol):
 
     async def count_after_many(
         self,
-        *message: typing.Tuple[uuid.UUID, uuid.UUID | None],
-    ) -> typing.List[int]:
+        *message: tuple[uuid.UUID, uuid.UUID | None],
+    ) -> list[int]:
         """
         Returns count of messages after specified messages
         """
@@ -80,16 +80,16 @@ class ChatRepository(typing.Protocol):
 
     async def get_all(
         self,
-        participant: typing.Text,
-        with_participants: typing.List[typing.Text] | None = None,
+        participant: str,
+        with_participants: list[str] | None = None,
         strict_participants_search: bool = False,
-    ) -> typing.List[chats.Chat]:
+    ) -> list[chats.Chat]:
         """
         Gets all chats
         """
         raise NotImplementedError
 
-    def events(self) -> typing.List[cqrs.Event]:
+    def events(self) -> list[cqrs.Event]:
         """
         Returns new domain events
         """

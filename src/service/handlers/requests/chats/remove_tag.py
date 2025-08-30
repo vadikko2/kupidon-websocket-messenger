@@ -1,12 +1,10 @@
-import typing
-
 import cqrs
 from cqrs.events import event
 
 from domain import exceptions as domain_exceptions, participants
 from service import exceptions
 from service.interfaces import unit_of_work
-from service.requests.chats import remove_tag
+from service.models.chats import remove_tag
 from service.validators import chats as chat_validators
 
 
@@ -15,7 +13,7 @@ class RemoveTagHandler(cqrs.RequestHandler[remove_tag.RemoveTag, None]):
         self.uow = uow
 
     @property
-    def events(self) -> typing.List[event.Event]:
+    def events(self) -> list[event.Event]:
         return list(self.uow.get_events())
 
     async def handle(self, request: remove_tag.RemoveTag) -> None:

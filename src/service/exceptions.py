@@ -1,9 +1,8 @@
-import typing
 import uuid
 
 
 class ParticipantNotInChat(Exception):
-    def __init__(self, account_id: typing.Text, chat_id: uuid.UUID) -> None:
+    def __init__(self, account_id: str, chat_id: uuid.UUID) -> None:
         super().__init__(
             f"Account {account_id} is not a participant in chat {chat_id}",
         )
@@ -30,7 +29,7 @@ class AttachmentNotForChat(Exception):
 
 
 class AttachmentNotForSender(Exception):
-    def __init__(self, attachment_id: uuid.UUID, account_id: typing.Text) -> None:
+    def __init__(self, attachment_id: uuid.UUID, account_id: str) -> None:
         super().__init__(f"Attachment {attachment_id} not for account {account_id}")
 
 
@@ -42,7 +41,7 @@ class AttachmentUploadError(Exception):
 
 
 class StartSubscriptionError(Exception):
-    def __init__(self, account_id: typing.Text, exception: Exception) -> None:
+    def __init__(self, account_id: str, exception: Exception) -> None:
         super().__init__(
             f"Failed to start subscription for account {account_id}: {exception}",
         )
@@ -59,12 +58,12 @@ class MessageNotDeleted(Exception):
 
 
 class UnsupportedVoiceFormat(Exception):
-    def __init__(self, format_name: typing.Text) -> None:
+    def __init__(self, format_name: str) -> None:
         super().__init__(f"Unsupported voice format: {format_name}")
 
 
 class MessageNotForAccount(Exception):
-    def __init__(self, message_id: uuid.UUID, account_id: typing.Text) -> None:
+    def __init__(self, message_id: uuid.UUID, account_id: str) -> None:
         super().__init__(
             f"Message {message_id} not for account {account_id}",
         )

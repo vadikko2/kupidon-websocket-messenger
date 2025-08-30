@@ -1,5 +1,3 @@
-import typing
-
 import cqrs
 import fastapi
 import pydantic
@@ -8,7 +6,7 @@ from fastapi_app.exception_handlers import registry
 from presentation.api import dependencies
 from presentation.api.schema.v1 import requests
 from service import exceptions
-from service.requests.chats import add_tag, remove_tag
+from service.models.chats import add_tag, remove_tag
 
 router = fastapi.APIRouter(prefix="/{chat_id}/tags", tags=["Tags"])
 
@@ -24,7 +22,7 @@ router = fastapi.APIRouter(prefix="/{chat_id}/tags", tags=["Tags"])
 )
 async def add_chat_tag(
     chat_id: pydantic.UUID4,
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(dependencies.get_account_id),
     tag: requests.ChatTag = fastapi.Body(...),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
@@ -53,7 +51,7 @@ async def add_chat_tag(
 )
 async def remove_chat_tag(
     chat_id: pydantic.UUID4,
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(dependencies.get_account_id),
     tag: requests.ChatTag = fastapi.Body(...),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,

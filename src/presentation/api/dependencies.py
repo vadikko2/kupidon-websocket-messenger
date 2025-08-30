@@ -1,6 +1,5 @@
 import functools
 import logging
-import typing
 
 import cqrs
 import fastapi
@@ -9,11 +8,12 @@ from cqrs.events import bootstrap as event_bootstrap
 from cqrs.requests import bootstrap as request_bootstrap
 from fastapi import status
 
+from infrastructure import dependencies
 from infrastructure.brokers import messages_broker, redis as redis_broker
 from infrastructure.database.cache.redis import connections
 from infrastructure.storages import s3
 from presentation.api.schema import validators
-from service import dependencies, mapping
+from service import mapping
 from service.handlers.requests.subscriptions import subscription as subscription_service
 from service.interfaces import attachment_storage
 
@@ -64,8 +64,8 @@ async def subscription_service_factory(
 
 
 async def get_account_id(
-    account_id: typing.Optional[typing.Text] = validators.AccountId(),
-) -> typing.Text:
+    account_id: str | None = validators.AccountId(),
+) -> str:
     """Returns account id from request header"""
     if account_id is None:
         logger.error("AccountID header not provided")
@@ -77,8 +77,8 @@ async def get_account_id(
 
 
 async def get_account_id_ws(
-    account_id: typing.Optional[typing.Text] = validators.AccountId(),
-) -> typing.Text:
+    account_id: str | None = validators.AccountId(),
+) -> str:
     """Returns account id from request header for WebSocket endpoints"""
     if account_id is None:
         logger.error("AccountID header not provided")

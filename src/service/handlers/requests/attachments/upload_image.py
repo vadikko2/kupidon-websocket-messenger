@@ -1,18 +1,16 @@
 import datetime
 import io
-import typing
 import uuid
 
 import cqrs
 from cqrs.events import event
 
 from domain import attachments
-from infrastructure.helpers.attachments.image import preview, transcode
 from service import exceptions
-from service.interfaces import unit_of_work
-from service.interfaces import attachment_storage
-from service.requests.attachments import upload_image
-from service.services import storages
+from service.helpers.attachments import upload_attachment
+from service.helpers.attachments.image import blurhash, preview, transcode
+from service.interfaces import attachment_storage, unit_of_work
+from service.models.attachments import upload_image
 from service.validators import chats as chat_validators
 
 
@@ -26,7 +24,7 @@ class UploadImageHandler(cqrs.RequestHandler[upload_image.UploadImage, upload_im
         self.uow = uow
 
     @property
-    def events(self) -> typing.List[event.Event]:
+    def events(self) -> list[event.Event]:
         return []
 
     async def handle(self, request: upload_image.UploadImage) -> upload_image.ImageUploaded:
@@ -40,6 +38,8 @@ class UploadImageHandler(cqrs.RequestHandler[upload_image.UploadImage, upload_im
                 request.uploader,
             )
 
+            blurhash_value = blurhash.generate_blurhash(io.BytesIO(request.content))
+
             transcode_processor = transcode.JpegTranscodeAttachmentPreprocessor()
             preview_100x100_processor = preview.JPEGPreview100x100AttachmentPreprocessor()
             preview_200x200_processor = preview.JPEGPreview200x200AttachmentPreprocessor()
@@ -52,8 +52,8 @@ class UploadImageHandler(cqrs.RequestHandler[upload_image.UploadImage, upload_im
             uploading_path = f"{request.uploader}/{uploading_dt.year}/{uploading_dt.month}"
 
             # upload original
-            urls: typing.List[typing.Text] = [
-                await storages.upload_file_to_storage(
+            urls: list[str] = [
+                await upload_attachment.upload_file_to_storage(
                     self.storage,
                     io.BytesIO(transcode_io),
                     f"{uploading_path}/{transcode_processor.new_filename(uploading_file_name)}",
@@ -62,13 +62,13 @@ class UploadImageHandler(cqrs.RequestHandler[upload_image.UploadImage, upload_im
 
             # upload preview
 
-            preview_100x100_url = await storages.upload_file_to_storage(
+            preview_100x100_url = await upload_attachment.upload_file_to_storage(
                 self.storage,
                 preview_100x100_processor(io.BytesIO(transcode_io)),
                 f"{uploading_path}/{preview_100x100_processor.new_filename(uploading_file_name)}",
             )
 
-            preview_200x200_url = await storages.upload_file_to_storage(
+            preview_200x200_url = await upload_attachment.upload_file_to_storage(
                 self.storage,
                 preview_200x200_processor(io.BytesIO(transcode_io)),
                 f"{uploading_path}/{preview_200x200_processor.new_filename(uploading_file_name)}",
@@ -90,6 +90,7 @@ class UploadImageHandler(cqrs.RequestHandler[upload_image.UploadImage, upload_im
                     url_100x100=preview_100x100_url,
                     url_200x200=preview_200x200_url,
                     image_type=attachments.ImageTypes.JPEG,
+                    blurhash=blurhash_value,
                 ).model_dump(mode="python"),
             )
 
@@ -104,4 +105,5 @@ class UploadImageHandler(cqrs.RequestHandler[upload_image.UploadImage, upload_im
                 preview_100x100_url,
                 preview_200x200_url,
             ],
+            blurhash=blurhash_value,
         )

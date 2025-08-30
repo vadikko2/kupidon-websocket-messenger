@@ -1,5 +1,3 @@
-import typing
-
 import cqrs
 import fastapi
 import pydantic
@@ -11,7 +9,7 @@ from domain import attachments, exceptions as domain_exceptions
 from presentation.api import dependencies
 from presentation.api.schema.v1 import responses
 from service import exceptions as service_exceptions
-from service.requests.attachments import upload_circle as upload_circle_request
+from service.models.attachments import upload_circle as upload_circle_request
 
 router = fastapi.APIRouter(prefix="")
 
@@ -28,7 +26,7 @@ router = fastapi.APIRouter(prefix="")
 )
 async def upload_circle(
     chat_id: pydantic.UUID4,
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(dependencies.get_account_id),
     circle_file: fastapi.UploadFile = fastapi.File(description="Circle file"),
     circle_type: attachments.CircleTypes = fastapi.Body(
         description="Circle type",

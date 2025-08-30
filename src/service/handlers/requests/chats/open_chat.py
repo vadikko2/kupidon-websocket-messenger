@@ -2,7 +2,7 @@ import cqrs
 
 from domain import chats
 from service.interfaces import unit_of_work
-from service.requests.chats import open_chat
+from service.models.chats import open_chat
 
 
 class OpenChatHandler(cqrs.RequestHandler[open_chat.OpenChat, open_chat.ChatOpened]):

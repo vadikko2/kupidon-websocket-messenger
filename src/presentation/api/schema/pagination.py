@@ -7,16 +7,16 @@ Item = typing.TypeVar("Item")
 
 def slice_items(
     items: typing.Sequence[Item],
-    limit: pydantic.NonNegativeInt,
-    offset: pydantic.NonNegativeInt,
+    limit: int,
+    offset: int,
 ) -> typing.Sequence[Item]:
     return items[offset : offset + limit]
 
 
 class Pagination(pydantic.BaseModel, typing.Generic[Item]):
-    _pagination_params: typing.ClassVar[typing.Text] = "&limit={limit}&offset={offset}"
+    _pagination_params: typing.ClassVar[str] = "&limit={limit}&offset={offset}"
 
-    url: typing.Text = pydantic.Field(exclude=True)
+    url: pydantic.StrictStr = pydantic.Field(exclude=True)
     base_items: typing.Sequence[Item] = pydantic.Field(
         default_factory=list,
         frozen=True,
@@ -30,7 +30,7 @@ class Pagination(pydantic.BaseModel, typing.Generic[Item]):
         self,
         limit: pydantic.NonNegativeInt,
         offset: pydantic.NonNegativeInt,
-    ) -> typing.Text:
+    ) -> str:
         return (self.url + self._pagination_params).format(
             limit=limit,
             offset=offset,
@@ -47,7 +47,7 @@ class Pagination(pydantic.BaseModel, typing.Generic[Item]):
 
     @pydantic.computed_field()
     @property
-    def next(self) -> typing.Text | None:
+    def next(self) -> pydantic.StrictStr | None:
         if len(self.items) < self.limit:
             return None
 
@@ -58,7 +58,7 @@ class Pagination(pydantic.BaseModel, typing.Generic[Item]):
 
     @pydantic.computed_field()
     @property
-    def previous(self) -> typing.Text | None:
+    def previous(self) -> pydantic.StrictStr | None:
         if self.offset - self.limit < 0:
             return None
 
@@ -72,20 +72,20 @@ class MessagesPaginator(Pagination, typing.Generic[Item]):
     limit: pydantic.NonNegativeInt = pydantic.Field(default=0, exclude=True)
     offset: pydantic.NonNegativeInt = pydantic.Field(default=0, exclude=True)
 
-    next_id: typing.Optional[pydantic.UUID4] = None
-    previous_id: typing.Optional[pydantic.UUID4] = None
+    next_id: pydantic.UUID4 | None = None
+    previous_id: pydantic.UUID4 | None = None
     reverse: pydantic.StrictBool = pydantic.Field(default=False, exclude=False)
 
     @pydantic.computed_field()
     @property
-    def next(self) -> typing.Text | None:
+    def next(self) -> str | None:
         if self.next_id is None:
             return None
         return self.url + f"?last_message_id={self.next_id}&reverse={str(self.reverse).lower()}"
 
     @pydantic.computed_field()
     @property
-    def previous(self) -> typing.Text | None:
+    def previous(self) -> str | None:
         if self.previous_id is None:
             return None
         return self.url + f"?last_message_id={self.previous_id}&reverse={str(self.reverse).lower()}"

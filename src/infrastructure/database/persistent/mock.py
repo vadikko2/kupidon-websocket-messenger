@@ -1,4 +1,3 @@
-import typing
 import uuid
 
 import cqrs
@@ -58,7 +57,7 @@ class MockMessageRepository(message_repository.MessageRepository):
         )
         self._seen.add(message)
 
-    def events(self) -> typing.List[cqrs.Event]:
+    def events(self) -> list[cqrs.Event]:
         new_events = []
         for entity in self._seen:
             match entity:
@@ -114,7 +113,7 @@ class MockChatRepository(chat_repository.ChatRepository):
         self,
         chat_id: uuid.UUID,
         messages_limit: int | None = None,
-        latest_message_id: typing.Optional[uuid.UUID] = None,
+        latest_message_id: uuid.UUID | None = None,
         reverse: bool = False,
     ) -> chats.Chat | None:
         chat_bytes_coroutine = await self._redis_pipeline.get(
@@ -163,7 +162,7 @@ class MockChatRepository(chat_repository.ChatRepository):
                     break
         return chat
 
-    async def get_all_messages_in_chat(self, chat_id: uuid.UUID) -> typing.List[messages.Message]:
+    async def get_all_messages_in_chat(self, chat_id: uuid.UUID) -> list[messages.Message]:
         all_chat_messages_bytes_coroutine = await self._redis_pipeline.lrange(
             # pyright: ignore[reportGeneralTypeIssues]
             CHAT_HISTORY_PREFIX.format(chat_id),
@@ -230,8 +229,8 @@ class MockChatRepository(chat_repository.ChatRepository):
 
     async def count_after_many(
         self,
-        *message: typing.Tuple[uuid.UUID, uuid.UUID | None],
-    ) -> typing.List[int]:
+        *message: tuple[uuid.UUID, uuid.UUID | None],
+    ) -> list[int]:
         """
         Returns count of messages after specified messages
         """
@@ -242,10 +241,10 @@ class MockChatRepository(chat_repository.ChatRepository):
 
     async def get_all(
         self,
-        participant: typing.Text,
-        with_participants: typing.List[typing.Text] | None = None,
+        participant: str,
+        with_participants: list[str] | None = None,
         strict_participants_search: bool = False,
-    ) -> typing.List[chats.Chat]:
+    ) -> list[chats.Chat]:
         participant_chats_bytes_coroutine = await self._redis_pipeline.lrange(
             # pyright: ignore[reportGeneralTypeIssues]
             PARTICIPANT_CHATS_PREFIX.format(participant),
@@ -330,9 +329,9 @@ class MockAttachmentRepository(attachment_repository.AttachmentRepository):
     async def get_many(
         self,
         *attachment_ids: uuid.UUID,
-        type_filter: typing.List[attachments.AttachmentType] | None = None,
-        status_filter: typing.List[attachments.AttachmentStatus] | None = None,
-    ) -> typing.List[attachments.Attachment]:
+        type_filter: list[attachments.AttachmentType] | None = None,
+        status_filter: list[attachments.AttachmentStatus] | None = None,
+    ) -> list[attachments.Attachment]:
         if not attachment_ids:
             return []
 
@@ -361,9 +360,9 @@ class MockAttachmentRepository(attachment_repository.AttachmentRepository):
         chat_id: uuid.UUID,
         limit: int,
         offset: int,
-        type_filter: typing.List[attachments.AttachmentType] | None = None,
-        status_filter: typing.List[attachments.AttachmentStatus] | None = None,
-    ) -> typing.List[attachments.Attachment]:
+        type_filter: list[attachments.AttachmentType] | None = None,
+        status_filter: list[attachments.AttachmentStatus] | None = None,
+    ) -> list[attachments.Attachment]:
         attachments_in_chat_bytes_coroutine = await self._redis_pipeline.lrange(
             # pyright: ignore[reportGeneralTypeIssues]
             CHAT_ATTACHMENTS_PREFIX.format(chat_id),
@@ -399,7 +398,7 @@ class MockAttachmentRepository(attachment_repository.AttachmentRepository):
         self._seen.update(result[offset : offset + limit])
         return result[offset : offset + limit]
 
-    def events(self) -> typing.List[cqrs.Event]:
+    def events(self) -> list[cqrs.Event]:
         new_events = []
         for attachment in self._seen:
             while attachment.event_list:
@@ -414,7 +413,7 @@ class MockReadMessageRepository(message_repository.ReadMessageRepository):
 
     async def last_read(
         self,
-        account_id: typing.Text,
+        account_id: str,
         chat_id: uuid.UUID,
     ) -> messages.ReedMessage | None:
         seen_messages_bytes_coroutine = await self._redis_pipeline.lrange(  # pyright: ignore[reportGeneralTypeIssues]
@@ -442,9 +441,9 @@ class MockReadMessageRepository(message_repository.ReadMessageRepository):
 
     async def last_read_many(
         self,
-        account_id: typing.Text,
-        chat_ids: typing.List[uuid.UUID],
-    ) -> typing.List[messages.ReedMessage | None]:
+        account_id: str,
+        chat_ids: list[uuid.UUID],
+    ) -> list[messages.ReedMessage | None]:
         result = []
         for chat_id in chat_ids:
             result.append(await self.last_read(account_id, chat_id))

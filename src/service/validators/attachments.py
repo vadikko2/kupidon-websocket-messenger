@@ -32,7 +32,7 @@ def raise_if_attachment_not_for_chat(
 
 def raise_if_attachment_not_for_sender(
     loaded_attachments: typing.Sequence[attachments.Attachment],
-    uploader: typing.Text,
+    uploader: str,
 ):
     not_for_sender_attach = next(filter(lambda a: a.uploader != uploader, loaded_attachments), None)
     if not_for_sender_attach:

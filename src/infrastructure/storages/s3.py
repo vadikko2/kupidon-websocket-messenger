@@ -23,14 +23,14 @@ class S3AttachmentStorage(attachment_storage.AttachmentStorage):
         self.access_key_id = settings.s3_settings.ACCESS_KEY_ID
         self.secret_access_key = settings.s3_settings.SECRET_ACCESS_KEY
 
-    def _generate_download_url(self, filename: typing.Text) -> typing.Text:
+    def _generate_download_url(self, filename: str) -> str:
         return self.endpoint_url + "/" + self.bucket_name + "/" + filename
 
     async def upload(
         self,
         attachment: typing.BinaryIO,
-        filename: typing.Text,
-    ) -> typing.Text:
+        filename: str,
+    ) -> str:
         full_filename = f"{self.path_prefix}/{filename}" if self.path_prefix else filename
 
         session = boto3.session.Session()

@@ -1,7 +1,7 @@
 import cqrs
 
 from service.interfaces import unit_of_work
-from service.requests.chats import get_chats
+from service.models.chats import get_chats
 
 
 class GetChatsHandler(cqrs.RequestHandler[get_chats.GetChats, get_chats.Chats]):

@@ -1,5 +1,4 @@
 import datetime
-import typing
 
 import cqrs
 import pydantic
@@ -9,39 +8,39 @@ class NewMessageAdded(cqrs.DomainEvent, frozen=True):
     chat_id: pydantic.UUID4
     message_id: pydantic.UUID4
 
-    sender: typing.Text
+    sender: str
 
 
 class NewParticipantAdded(cqrs.DomainEvent, frozen=True):
     chat_id: pydantic.UUID4
-    account_id: typing.Text
-    invited_by: typing.Text
+    account_id: str
+    invited_by: str
 
 
 class MessageRead(cqrs.DomainEvent, frozen=True):
     chat_id: pydantic.UUID4
     message_id: pydantic.UUID4
-    reader_id: typing.Text
+    reader_id: str
     read_at: datetime.datetime
 
 
 class MessageUpdated(cqrs.DomainEvent, frozen=True):
     chat_id: pydantic.UUID4
     message_id: pydantic.UUID4
-    message_sender: typing.Text
-    message_content: typing.Optional[typing.Text]
-    message_attachments: typing.List[pydantic.UUID4]
+    message_sender: str
+    message_content: str | None
+    message_attachments: list[pydantic.UUID4]
 
 
 class MessageDeleted(cqrs.DomainEvent, frozen=True):
     chat_id: pydantic.UUID4
     message_id: pydantic.UUID4
-    message_sender: typing.Text
+    message_sender: str
 
 
 class NewAttachmentUploaded(cqrs.DomainEvent, frozen=True):
     attachment_id: pydantic.UUID4
-    urls: typing.List[pydantic.AnyHttpUrl]
+    urls: list[str]
 
 
 class AttachmentSent(cqrs.DomainEvent, frozen=True):
@@ -51,9 +50,9 @@ class AttachmentSent(cqrs.DomainEvent, frozen=True):
 
 class MessageReacted(cqrs.DomainEvent, frozen=True):
     reaction_id: pydantic.UUID4
-    reactor: typing.Text
+    reactor: str
     message_id: pydantic.UUID4
-    emoji: typing.Text
+    emoji: str
 
 
 class MessageUnreacted(cqrs.DomainEvent, frozen=True):
@@ -63,4 +62,4 @@ class MessageUnreacted(cqrs.DomainEvent, frozen=True):
 
 class TappingInChat(cqrs.DomainEvent, frozen=True):
     chat_id: pydantic.UUID4
-    account_id: typing.Text
+    account_id: str

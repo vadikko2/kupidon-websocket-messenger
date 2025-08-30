@@ -1,5 +1,4 @@
 import logging
-import typing
 
 import cqrs
 import fastapi
@@ -12,7 +11,7 @@ from presentation.api import dependencies
 from presentation.api.schema import pagination
 from presentation.api.schema.v1 import requests, responses
 from service import exceptions
-from service.requests.chats import (
+from service.models.chats import (
     delete_chat as delete_chat_request,
     get_chats as get_chats_request,
     open_chat as open_chat_request,
@@ -30,7 +29,7 @@ logger = logging.getLogger(__name__)
 )
 async def open_chat(
     body: requests.CreateChat = fastapi.Body(),
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
     ),
@@ -43,7 +42,7 @@ async def open_chat(
             initiator=account_id,
             participants=body.participants,
             name=body.name,
-            avatar=body.avatar,
+            avatar=str(body.avatar),
         ),
     )
     return response.Response(result=responses.ChatCreated(chat_id=result.chat_id))
@@ -57,9 +56,9 @@ async def open_chat(
 async def get_chats(
     limit: pydantic.NonNegativeInt = fastapi.Query(default=10),
     offset: pydantic.NonNegativeInt = fastapi.Query(default=0),
-    chat_id: typing.List[pydantic.UUID4] = fastapi.Query(default=[], description="Chat ids"),
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
-    with_participant_id: typing.List[typing.Text] = fastapi.Query(
+    chat_id: list[pydantic.UUID4] = fastapi.Query(default=[], description="Chat ids"),
+    account_id: str = fastapi.Depends(dependencies.get_account_id),
+    with_participant_id: list[str] = fastapi.Query(
         default=[],
         description="Participant ids",
         max_length=10,
@@ -105,7 +104,7 @@ async def get_chats(
 )
 async def delete_chat(
     chat_id: pydantic.UUID4,
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
     ),

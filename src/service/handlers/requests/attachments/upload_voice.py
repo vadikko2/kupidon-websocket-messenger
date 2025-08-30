@@ -3,19 +3,17 @@ import hashlib
 import io
 import logging
 import tempfile
-import typing
 import uuid
 
 import cqrs
 
 import settings
 from domain import attachments
-from infrastructure.helpers.attachments.audio import histogram
 from service import exceptions
-from service.interfaces import unit_of_work
-from service.interfaces import attachment_storage
-from service.requests.attachments import upload_voice
-from service.services import storages
+from service.helpers.attachments import upload_attachment
+from service.helpers.attachments.audio import histogram
+from service.interfaces import attachment_storage, unit_of_work
+from service.models.attachments import upload_voice
 from service.validators import chats as chat_validators
 
 logger = logging.getLogger(__name__)
@@ -33,7 +31,7 @@ class UploadVoiceHandler(cqrs.RequestHandler[upload_voice.UploadVoice, upload_vo
         self.uow = uow
 
     @property
-    def events(self) -> typing.List[cqrs.Event]:
+    def events(self) -> list[cqrs.Event]:
         return []
 
     async def handle(self, request: upload_voice.UploadVoice) -> upload_voice.VoiceUploaded:
@@ -79,7 +77,7 @@ class UploadVoiceHandler(cqrs.RequestHandler[upload_voice.UploadVoice, upload_vo
 
                 # Перемещаем указатель в начало для чтения
                 tmp_file.seek(0)
-                url = await storages.upload_file_to_storage(
+                url = await upload_attachment.upload_file_to_storage(
                     self.storage,
                     io.BytesIO(request.content),
                     f"{uploading_path}/{uploading_file_name}",

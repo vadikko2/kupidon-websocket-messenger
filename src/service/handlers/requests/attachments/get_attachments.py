@@ -1,11 +1,9 @@
-import typing
-
 import cqrs
 from cqrs.events import event
 
 from service import exceptions
 from service.interfaces import unit_of_work
-from service.requests.attachments import get_attachments
+from service.models.attachments import get_attachments
 from service.validators import chats as chat_validators
 
 
@@ -16,7 +14,7 @@ class GetAttachmentsHandler(
         self.uow = uow
 
     @property
-    def events(self) -> typing.List[event.Event]:
+    def events(self) -> list[event.Event]:
         return []
 
     async def handle(

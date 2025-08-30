@@ -30,7 +30,7 @@ class VoiceInfo(pydantic.BaseModel, frozen=True):
     voice_type: attachments.VoiceTypes = pydantic.Field(description="Voice type")
     duration_milliseconds: pydantic.PositiveInt = pydantic.Field(description="Voice length in milliseconds")
 
-    amplitudes: typing.List[typing.Tuple[pydantic.StrictInt, pydantic.StrictInt]] = pydantic.Field(
+    amplitudes: list[tuple[pydantic.StrictInt, pydantic.StrictInt]] = pydantic.Field(
         description="Voice amplitude",
         default_factory=list,
     )
@@ -56,3 +56,5 @@ class ImageInfo(pydantic.BaseModel, frozen=True):
 
     height: pydantic.NonNegativeInt = pydantic.Field(description="Image height")
     width: pydantic.NonNegativeInt = pydantic.Field(description="Image width")
+
+    blurhash: pydantic.StrictStr

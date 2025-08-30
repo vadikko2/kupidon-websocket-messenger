@@ -1,12 +1,11 @@
 import itertools
-import typing
 
 import cqrs
 
 from service import exceptions
 from service.interfaces import unit_of_work
-from service.requests.attachments import get_attachments
-from service.requests.messages import get_messages
+from service.models.attachments import get_attachments
+from service.models.messages import get_messages
 from service.validators import chats as chat_validators, messages as message_validators
 
 
@@ -37,7 +36,7 @@ class GetMessagesHandler(
                 request.account,
             )
 
-            messages: typing.List[get_messages.MessageInfo] = []
+            messages: list[get_messages.MessageInfo] = []
             last_read_message = chat_history.last_read_by(request.account)
 
             for message in chat_history.history:
@@ -71,7 +70,7 @@ class GetMessagesHandler(
                     for attach in message.attachments
                 ]
 
-                replied_message_info: typing.Optional[get_messages.MessagePreview] = None
+                replied_message_info = None
                 if message.reply_to:
                     replied_message = await self.uow.message_repository.get(message.reply_to)
                     if replied_message is not None:

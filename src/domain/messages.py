@@ -1,6 +1,5 @@
 import datetime
 import logging
-import typing
 import uuid
 
 import cqrs
@@ -26,16 +25,16 @@ class Message(pydantic.BaseModel):
 
     chat_id: pydantic.UUID4 = pydantic.Field(frozen=True)
     message_id: pydantic.UUID4 = pydantic.Field(default_factory=uuid.uuid4, frozen=True)
-    sender: typing.Text = pydantic.Field(frozen=True)
-    reply_to: typing.Optional[pydantic.UUID4] = pydantic.Field(default=None, frozen=True)
+    sender: str = pydantic.Field(frozen=True)
+    reply_to: pydantic.UUID4 | None = pydantic.Field(default=None, frozen=True)
     deleted: bool = False
 
-    content: typing.Optional[typing.Text] = pydantic.Field(default=None)
-    attachments: typing.List[attachment_entities.Attachment] = pydantic.Field(
+    content: str | None = pydantic.Field(default=None)
+    attachments: list[attachment_entities.Attachment] = pydantic.Field(
         default_factory=list,
         max_length=5,
     )
-    reactions: typing.List[reaction_entities.Reaction] = pydantic.Field(
+    reactions: list[reaction_entities.Reaction] = pydantic.Field(
         default_factory=list,
         max_length=TOTAL_EMOJI_NUMBER,
     )
@@ -48,15 +47,15 @@ class Message(pydantic.BaseModel):
         default_factory=datetime.datetime.now,
     )
 
-    event_list: typing.List[cqrs.DomainEvent] = pydantic.Field(
+    event_list: list[cqrs.DomainEvent] = pydantic.Field(
         default_factory=list,
         exclude=True,
     )
 
     def update(
         self,
-        content: typing.Text | None,
-        attachments: typing.List[attachment_entities.Attachment] | None = None,
+        content: str | None,
+        attachments: list[attachment_entities.Attachment] | None = None,
     ) -> None:
         """
         Updates message
@@ -95,7 +94,7 @@ class Message(pydantic.BaseModel):
             ),
         )
 
-    def _get_reactions_per_reactor(self, reactor: typing.Text) -> int:
+    def _get_reactions_per_reactor(self, reactor: str) -> int:
         """
         Returns number of reactions per reactor
         """
@@ -105,8 +104,8 @@ class Message(pydantic.BaseModel):
 
     def _already_reacted_by_reactor(
         self,
-        emoji: typing.Text,
-        reactor: typing.Text,
+        emoji: str,
+        reactor: str,
     ) -> bool:
         """
         Returns True if reactor already reacted with emoji
@@ -172,7 +171,7 @@ class Message(pydantic.BaseModel):
             ),
         )
 
-    def get_events(self) -> typing.List[cqrs.DomainEvent]:
+    def get_events(self) -> list[cqrs.DomainEvent]:
         """
         Returns new domain events
         """
@@ -198,7 +197,7 @@ class ReedMessage(pydantic.BaseModel):
     Represents a message that has been reed by an actor
     """
 
-    actor: typing.Text
+    actor: str
     message: Message
     timestamp: datetime.datetime = pydantic.Field(default_factory=datetime.datetime.now)
 

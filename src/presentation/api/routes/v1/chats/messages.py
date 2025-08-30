@@ -1,5 +1,3 @@
-import typing
-
 import cqrs
 import fastapi
 import pydantic
@@ -12,7 +10,7 @@ from presentation.api import dependencies
 from presentation.api.schema import pagination
 from presentation.api.schema.v1 import requests, responses
 from service import exceptions
-from service.requests.messages import (
+from service.models.messages import (
     get_messages as get_messages_request,
     send_message as send_message_request,
     update_message as update_message_request,
@@ -35,7 +33,7 @@ router = fastapi.APIRouter(prefix="/{chat_id}/messages", tags=["Messages"])
 )
 async def post_message(
     chat_id: pydantic.UUID4,
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    account_id: pydantic.StrictStr = fastapi.Depends(dependencies.get_account_id),
     message: requests.PostMessage = fastapi.Body(...),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
@@ -76,7 +74,7 @@ async def get_messages(
     limit: pydantic.NonNegativeInt = fastapi.Query(default=10),
     latest_message_id: pydantic.UUID4 | None = fastapi.Query(default=None),
     reverse: bool = fastapi.Query(default=False),
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    account_id: pydantic.StrictStr = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
     ),
@@ -117,7 +115,7 @@ async def get_messages(
 )
 async def edit_message(
     chat_id: pydantic.UUID4,
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    account_id: pydantic.StrictStr = fastapi.Depends(dependencies.get_account_id),
     message: requests.UpdateMessage = fastapi.Body(...),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,

@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import typing
 
 import fastapi
 from fastapi import status
@@ -19,7 +18,7 @@ logger = logging.getLogger(__name__)
 @router.websocket("")
 async def websocket_endpoint(
     websocket: fastapi.WebSocket,
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id_ws),
+    account_id: str = fastapi.Depends(dependencies.get_account_id_ws),
     subscription: subscription_service.SubscriptionService = fastapi.Depends(
         dependency=dependencies.subscription_service_factory,
     ),

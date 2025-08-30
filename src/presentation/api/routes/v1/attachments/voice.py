@@ -1,5 +1,3 @@
-import typing
-
 import cqrs
 import fastapi
 import pydantic
@@ -11,7 +9,7 @@ from domain import attachments, exceptions as domain_exceptions
 from presentation.api import dependencies
 from presentation.api.schema.v1 import responses
 from service import exceptions as service_exceptions
-from service.requests.attachments import upload_voice as upload_voice_request
+from service.models.attachments import upload_voice as upload_voice_request
 
 router = fastapi.APIRouter(prefix="")
 
@@ -28,7 +26,7 @@ router = fastapi.APIRouter(prefix="")
 )
 async def upload_voice(
     chat_id: pydantic.UUID4,
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(dependencies.get_account_id),
     voice_file: fastapi.UploadFile = fastapi.File(description="Voice file"),
     voice_type: attachments.VoiceTypes = fastapi.Body(description="Voice type", default=attachments.VoiceTypes.MP3),
     duration_milliseconds: pydantic.PositiveInt = fastapi.Body(description="Voice duration in milliseconds"),

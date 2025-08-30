@@ -1,12 +1,10 @@
-import typing
-
 import cqrs
 from cqrs.events import event
 
 from domain import chats
 from service import exceptions
 from service.interfaces import unit_of_work
-from service.requests.chats import delete_chat
+from service.models.chats import delete_chat
 
 
 class DeleteChatHandler(cqrs.RequestHandler[delete_chat.DeleteChat, None]):
@@ -14,7 +12,7 @@ class DeleteChatHandler(cqrs.RequestHandler[delete_chat.DeleteChat, None]):
         self.uow = uow
 
     @property
-    def events(self) -> typing.List[event.Event]:
+    def events(self) -> list[event.Event]:
         return []
 
     async def handle(self, request: delete_chat.DeleteChat) -> None:

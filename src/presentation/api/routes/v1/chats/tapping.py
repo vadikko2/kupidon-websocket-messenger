@@ -1,5 +1,3 @@
-import typing
-
 import cqrs
 import fastapi
 import pydantic
@@ -32,7 +30,7 @@ async def send_tap(
 async def tap_into_chat(
     chat_id: pydantic.UUID4,
     background_tasks: fastapi.BackgroundTasks,
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(dependencies.get_account_id),
     emitter: cqrs.EventEmitter = fastapi.Depends(
         dependency=dependencies.event_emitter_factory,
     ),

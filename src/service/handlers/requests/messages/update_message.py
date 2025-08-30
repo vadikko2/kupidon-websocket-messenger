@@ -4,7 +4,7 @@ import cqrs
 
 from service import exceptions
 from service.interfaces import unit_of_work
-from service.requests.messages import update_message as update_message_request
+from service.models.messages import update_message as update_message_request
 from service.validators import (
     attachments as attachment_validators,
     chats as chat_validators,

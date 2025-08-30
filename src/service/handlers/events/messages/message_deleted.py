@@ -5,7 +5,7 @@ from domain import events
 from infrastructure.brokers import messages_broker
 from service import exceptions
 from service.interfaces import unit_of_work
-from service.requests.ecst_events.messages import message_deleted
+from service.models.ecst_events.messages import message_deleted
 from service.validators import messages as message_validators
 
 

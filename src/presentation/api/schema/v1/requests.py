@@ -1,12 +1,10 @@
-import typing
-
 import pydantic
 
 from presentation.api.schema import constants, validators
 
 
 class Reaction(pydantic.BaseModel, frozen=True):
-    emoji: typing.Text = pydantic.Field(
+    emoji: pydantic.StrictStr = pydantic.Field(
         max_length=1,
         min_length=1,
         examples=["👍", "👎", "❤️"],
@@ -18,28 +16,28 @@ class Reaction(pydantic.BaseModel, frozen=True):
 
 
 class CreateChat(pydantic.BaseModel, frozen=True):
-    name: typing.Text = pydantic.Field(
+    name: pydantic.StrictStr = pydantic.Field(
         min_length=1,
         max_length=100,
         description="Chat name",
         examples=["Untitled"],
     )
-    participants: typing.List[typing.Text] = pydantic.Field(
+    participants: list[pydantic.StrictStr] = pydantic.Field(
         description="Participants IDs",
         examples=[["account-id-1", "account-id-2"]],
     )
-    avatar: typing.Optional[pydantic.AnyHttpUrl] = pydantic.Field(
+    avatar: pydantic.AnyHttpUrl | None = pydantic.Field(
         default=None,
         description="URL to avatar image",
     )
 
 
 class PostMessage(pydantic.BaseModel, frozen=True):
-    reply_to: typing.Optional[pydantic.UUID4] = pydantic.Field(
+    reply_to: pydantic.UUID4 | None = pydantic.Field(
         description="Message ID to reply to",
         default=None,
     )
-    content: typing.Optional[typing.Text] = pydantic.Field(
+    content: pydantic.StrictStr | None = pydantic.Field(
         description="Message content",
         examples=["Hello World!"],
         min_length=constants.MIN_MESSAGE_LENGTH,
@@ -48,7 +46,7 @@ class PostMessage(pydantic.BaseModel, frozen=True):
         frozen=True,
         default=None,
     )
-    attachments: typing.List[pydantic.UUID4] = pydantic.Field(
+    attachments: list[pydantic.UUID4] = pydantic.Field(
         description="Attachments IDs",
         default_factory=list,
         max_length=5,
@@ -65,7 +63,7 @@ class UpdateMessage(pydantic.BaseModel, frozen=True):
     message_id: pydantic.UUID4 = pydantic.Field(
         description="Message ID",
     )
-    content: typing.Optional[typing.Text] = pydantic.Field(
+    content: pydantic.StrictStr | None = pydantic.Field(
         description="Message content",
         examples=["Hello World!"],
         min_length=constants.MIN_MESSAGE_LENGTH,
@@ -74,7 +72,7 @@ class UpdateMessage(pydantic.BaseModel, frozen=True):
         frozen=True,
         default=None,
     )
-    attachments: typing.List[pydantic.UUID4] = pydantic.Field(
+    attachments: list[pydantic.UUID4] = pydantic.Field(
         description="Attachments IDs",
         default_factory=list,
         max_length=5,

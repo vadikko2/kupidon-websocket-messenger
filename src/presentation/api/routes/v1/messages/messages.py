@@ -1,5 +1,4 @@
 import logging
-import typing
 
 import cqrs
 import fastapi
@@ -10,7 +9,7 @@ from fastapi_app.exception_handlers import registry
 
 from presentation.api import dependencies
 from service import exceptions
-from service.requests.messages import (
+from service.models.messages import (
     apply_message as apply_message_request,
     delete_message as delete_message_request,
     get_messages as get_messages_request,
@@ -31,7 +30,7 @@ logger = logging.getLogger(__name__)
 )
 async def apply_message_read(
     message_id: pydantic.UUID4,
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
     ),
@@ -59,7 +58,7 @@ async def apply_message_read(
 )
 async def delete_message(
     message_id: pydantic.UUID4,
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
     ),
@@ -87,7 +86,7 @@ async def delete_message(
 )
 async def get_message_preview(
     message_id: pydantic.UUID4,
-    account_id: typing.Text = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(dependencies.get_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
     ),

@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import typing
 
 import cqrs
 import orjson
@@ -9,7 +8,7 @@ from domain import events as domain_events
 from infrastructure.brokers import messages_broker
 from service import exceptions
 from service.interfaces import unit_of_work
-from service.requests.ecst_events.messages import message_added
+from service.models.ecst_events.messages import message_added
 from service.validators import chats as chat_validators, messages as message_validators
 
 logger = logging.getLogger(__name__)
@@ -24,7 +23,7 @@ class NewMessageAddedHandler(cqrs.EventHandler[domain_events.NewMessageAdded]):
         self.uow = uow
         self.broker = broker
 
-    async def send_to_receiver(self, message: bytes, receiver: typing.Text) -> None:
+    async def send_to_receiver(self, message: bytes, receiver: str) -> None:
         try:
             await self.broker.send_message(receiver, message)
         except Exception as e:

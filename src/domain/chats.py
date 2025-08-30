@@ -1,6 +1,5 @@
 import datetime
 import logging
-import typing
 import uuid
 
 import cqrs
@@ -17,43 +16,43 @@ class Chat(pydantic.BaseModel):
     """
 
     chat_id: pydantic.UUID4 = pydantic.Field(default_factory=uuid.uuid4, frozen=True)
-    name: typing.Text = pydantic.Field(min_length=1, max_length=100)
-    avatar: pydantic.AnyHttpUrl | None = pydantic.Field(default=None)
+    name: str = pydantic.Field(min_length=1, max_length=100)
+    avatar: str | None = pydantic.Field(default=None)
 
     created: datetime.datetime = pydantic.Field(
         default_factory=datetime.datetime.now,
         frozen=True,
     )
 
-    initiator: typing.Text = pydantic.Field(
+    initiator: str = pydantic.Field(
         description="Initiator account ID",
         frozen=True,
     )
-    participants: typing.Set[participant_entities.Participant] = pydantic.Field(default_factory=set)
+    participants: set[participant_entities.Participant] = pydantic.Field(default_factory=set)
 
-    last_message: typing.Optional[messages.Message] = pydantic.Field(default=None)
+    last_message: messages.Message | None = pydantic.Field(default=None)
     last_activity_timestamp: datetime.datetime = pydantic.Field(
         default_factory=datetime.datetime.now,
     )
 
-    history: typing.List[messages.Message] = pydantic.Field(
+    history: list[messages.Message] = pydantic.Field(
         default_factory=list,
         exclude=True,
     )
 
-    event_list: typing.List[cqrs.DomainEvent] = pydantic.Field(
+    event_list: list[cqrs.DomainEvent] = pydantic.Field(
         default_factory=list,
         exclude=True,
     )
 
     @pydantic.computed_field()
     @property
-    def participants_count(self) -> pydantic.NonNegativeInt:
+    def participants_count(self) -> int:
         return len(self.participants)
 
     @pydantic.computed_field()
     @property
-    def last_message_id(self) -> typing.Optional[uuid.UUID]:
+    def last_message_id(self) -> uuid.UUID | None:
         if self.last_message is None:
             return None
         return self.last_message.message_id
@@ -83,11 +82,7 @@ class Chat(pydantic.BaseModel):
             ),
         )
 
-    def read_message(
-        self,
-        reader: typing.Text,
-        message: messages.Message,
-    ) -> messages.ReedMessage | None:
+    def read_message(self, reader: str, message: messages.Message) -> messages.ReedMessage | None:
         if message.deleted:
             return
 
@@ -106,11 +101,7 @@ class Chat(pydantic.BaseModel):
         )
         return read_message
 
-    def add_participant(
-        self,
-        account_id: typing.Text,
-        initiated_by: typing.Text,
-    ) -> None:
+    def add_participant(self, account_id: str, initiated_by: str) -> None:
         """
         Adds new participant to chat
         """
@@ -132,7 +123,7 @@ class Chat(pydantic.BaseModel):
             ),
         )
 
-    def add_tag(self, account_id: typing.Text, tag: participant_entities.ChatTag) -> None:
+    def add_tag(self, account_id: str, tag: participant_entities.ChatTag) -> None:
         """
         Adds tag to participant
         """
@@ -140,7 +131,7 @@ class Chat(pydantic.BaseModel):
             raise exceptions.ParticipantNotInChat(account_id, self.chat_id)
         participant.add_tag(tag)
 
-    def remove_tag(self, account_id: typing.Text, tag: participant_entities.ChatTag) -> None:
+    def remove_tag(self, account_id: str, tag: participant_entities.ChatTag) -> None:
         """
         Removes tag from participant
         """
@@ -148,7 +139,7 @@ class Chat(pydantic.BaseModel):
             raise exceptions.ParticipantNotInChat(account_id, self.chat_id)
         participant.remove_tag(tag)
 
-    def delete_for(self, account_id: typing.Text) -> None:
+    def delete_for(self, account_id: str) -> None:
         """
         Deletes chat for specified account
         """
@@ -159,19 +150,19 @@ class Chat(pydantic.BaseModel):
 
         logger.debug(f"Chat {self.chat_id} deleted for {account_id}")
 
-    def last_read_by(self, account_id: typing.Text) -> messages.Message | None:
+    def last_read_by(self, account_id: str) -> messages.Message | None:
         if (participant := self.is_participant(account_id)) is None:
             return
 
         return participant.last_read_message
 
-    def is_participant(self, account_id: typing.Text) -> participant_entities.Participant | None:
+    def is_participant(self, account_id: str) -> participant_entities.Participant | None:
         """
         Checks if account is participant
         """
         return next((p for p in self.participants if p.account_id == account_id), None)
 
-    def get_events(self) -> typing.List[cqrs.DomainEvent]:
+    def get_events(self) -> list[cqrs.DomainEvent]:
         """
         Returns new domain events
         """

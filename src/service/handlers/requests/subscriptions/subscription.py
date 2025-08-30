@@ -19,13 +19,10 @@ class SubscriptionService:
     ) -> None:
         self.broker = broker
         self.subscription_started = False
-        self.target_account: typing.Text | None = None
+        self.target_account: str | None = None
 
     @contextlib.asynccontextmanager
-    async def start_subscription(
-        self,
-        target_account: typing.Text,
-    ) -> typing.AsyncGenerator[typing.Self, typing.Any]:
+    async def start_subscription(self, target_account: str) -> typing.AsyncGenerator[typing.Self, typing.Any]:
         """
         Opens subscription to broker for the specified account.
         """

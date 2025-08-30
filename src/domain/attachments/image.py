@@ -1,5 +1,4 @@
 import enum
-import typing
 
 import pydantic
 
@@ -14,7 +13,9 @@ class ImageMeta(pydantic.BaseModel):
     height: pydantic.NonNegativeInt
     width: pydantic.NonNegativeInt
 
-    url_100x100: typing.Text
-    url_200x200: typing.Text
+    url_100x100: str
+    url_200x200: str
 
     image_type: ImageTypes
+
+    blurhash: str | None = None
