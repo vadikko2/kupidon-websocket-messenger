@@ -6,13 +6,11 @@ import fastapi
 from cqrs.container import di as di_container_impl
 from cqrs.events import bootstrap as event_bootstrap
 from cqrs.requests import bootstrap as request_bootstrap
-from fastapi import status
 
 from infrastructure import dependencies
 from infrastructure.brokers import messages_broker, redis as redis_broker
 from infrastructure.database.cache.redis import connections
 from infrastructure.storages import s3
-from presentation.api.schema import validators
 from service import mapping
 from service.handlers.requests.subscriptions import subscription as subscription_service
 from service.interfaces import attachment_storage
@@ -61,16 +59,3 @@ async def subscription_service_factory(
     ),
 ) -> subscription_service.SubscriptionService:
     return subscription_service.SubscriptionService(broker=broker)
-
-
-async def get_account_id_ws(
-    account_id: str | None = validators.AccountId(),
-) -> str:
-    """Returns account id from request header for WebSocket endpoints"""
-    if account_id is None:
-        logger.error("AccountID header not provided")
-        raise fastapi.WebSocketException(
-            code=status.HTTP_400_BAD_REQUEST,
-            reason="AccountID header not provided",
-        )
-    return account_id
