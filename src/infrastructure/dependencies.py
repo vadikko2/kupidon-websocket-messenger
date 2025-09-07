@@ -7,8 +7,10 @@ from di import dependent
 from infrastructure import unit_of_work as mock_unit_of_work
 from infrastructure.brokers import messages_broker, redis as redis_broker
 from infrastructure.database.cache.redis import connections as redis_connections
+from infrastructure.services import iam_service
 from infrastructure.storages import s3
 from service.interfaces import attachment_storage, unit_of_work
+from service.interfaces.services import iam_service as iam_service_interface
 
 container = di.Container()
 
@@ -31,6 +33,16 @@ RedisBind = di.bind_by_type(
 AttachmentStorageBind = di.bind_by_type(
     dependent.Dependent(s3.S3AttachmentStorage, scope="request"),
     attachment_storage.AttachmentStorage,
+)
+
+container.bind(
+    di.bind_by_type(
+        dependent.Dependent(
+            iam_service.HttpIAMService,
+            scope="request",
+        ),
+        iam_service_interface.IAMService,
+    ),
 )
 
 container.bind(UoWBind)

@@ -4,7 +4,7 @@ import logging
 import fastapi
 from fastapi import status
 
-from presentation.api import dependencies
+from presentation.api import dependencies, security
 from service.handlers.requests.subscriptions import subscription as subscription_service
 
 router = fastapi.APIRouter(
@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 @router.websocket("")
 async def websocket_endpoint(
     websocket: fastapi.WebSocket,
-    account_id: str = fastapi.Depends(dependencies.get_account_id_ws),
     subscription: subscription_service.SubscriptionService = fastapi.Depends(
         dependency=dependencies.subscription_service_factory,
     ),
@@ -26,6 +25,8 @@ async def websocket_endpoint(
     """
     # Returns all events for the specified account
     """
+    account_id = await security.extract_account_id_ws(websocket)
+
     await websocket.accept()
     logger.debug(f"Websocket connected to {account_id}")
     async with subscription.start_subscription(account_id):

@@ -7,7 +7,7 @@ from fastapi import status
 from fastapi_app import response
 from fastapi_app.exception_handlers import registry
 
-from presentation.api import dependencies
+from presentation.api import dependencies, security
 from service import exceptions
 from service.models.messages import (
     apply_message as apply_message_request,
@@ -26,14 +26,14 @@ logger = logging.getLogger(__name__)
     responses=registry.get_exception_responses(
         exceptions.ChatNotFound,
         exceptions.MessageNotFound,
+        exceptions.GetUserIdError,
+        exceptions.UnauthorizedError,
     ),
 )
 async def apply_message_read(
     message_id: pydantic.UUID4,
-    account_id: str = fastapi.Depends(dependencies.get_account_id),
-    mediator: cqrs.RequestMediator = fastapi.Depends(
-        dependency=dependencies.request_mediator_factory,
-    ),
+    account_id: str = fastapi.Depends(security.extract_account_id),
+    mediator: cqrs.RequestMediator = fastapi.Depends(dependency=dependencies.request_mediator_factory),
 ) -> fastapi.Response:
     """
     # Apply message as read
@@ -54,14 +54,14 @@ async def apply_message_read(
         exceptions.ChatNotFound,
         exceptions.MessageNotFound,
         exceptions.MessageNotForAccount,
+        exceptions.GetUserIdError,
+        exceptions.UnauthorizedError,
     ),
 )
 async def delete_message(
     message_id: pydantic.UUID4,
-    account_id: str = fastapi.Depends(dependencies.get_account_id),
-    mediator: cqrs.RequestMediator = fastapi.Depends(
-        dependency=dependencies.request_mediator_factory,
-    ),
+    account_id: str = fastapi.Depends(security.extract_account_id),
+    mediator: cqrs.RequestMediator = fastapi.Depends(dependency=dependencies.request_mediator_factory),
 ) -> fastapi.Response:
     """
     # Deletes message
@@ -82,14 +82,14 @@ async def delete_message(
         exceptions.MessageNotFound,
         exceptions.ParticipantNotInChat,
         exceptions.ChatNotFound,
+        exceptions.GetUserIdError,
+        exceptions.UnauthorizedError,
     ),
 )
 async def get_message_preview(
     message_id: pydantic.UUID4,
-    account_id: str = fastapi.Depends(dependencies.get_account_id),
-    mediator: cqrs.RequestMediator = fastapi.Depends(
-        dependency=dependencies.request_mediator_factory,
-    ),
+    account_id: str = fastapi.Depends(security.extract_account_id),
+    mediator: cqrs.RequestMediator = fastapi.Depends(dependency=dependencies.request_mediator_factory),
 ) -> response.Response[get_messages_request.MessagePreview]:
     """
     # Returns message preview by message id

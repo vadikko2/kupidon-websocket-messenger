@@ -6,7 +6,7 @@ from fastapi_app.exception_handlers import registry
 from starlette import status
 
 from domain import attachments, exceptions as domain_exceptions
-from presentation.api import dependencies
+from presentation.api import dependencies, security
 from presentation.api.schema.v1 import responses
 from service import exceptions as service_exceptions
 from service.models.attachments import upload_voice as upload_voice_request
@@ -20,13 +20,15 @@ router = fastapi.APIRouter(prefix="")
     responses=registry.get_exception_responses(
         service_exceptions.ChatNotFound,
         service_exceptions.AttachmentUploadError,
-        domain_exceptions.AttachmentAlreadyUploaded,
         service_exceptions.UnsupportedVoiceFormat,
+        service_exceptions.GetUserIdError,
+        service_exceptions.UnauthorizedError,
+        domain_exceptions.AttachmentAlreadyUploaded,
     ),
 )
 async def upload_voice(
     chat_id: pydantic.UUID4,
-    account_id: str = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(security.extract_account_id),
     voice_file: fastapi.UploadFile = fastapi.File(description="Voice file"),
     voice_type: attachments.VoiceTypes = fastapi.Body(description="Voice type", default=attachments.VoiceTypes.MP3),
     duration_milliseconds: pydantic.PositiveInt = fastapi.Body(description="Voice duration in milliseconds"),

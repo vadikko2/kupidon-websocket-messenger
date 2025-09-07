@@ -67,3 +67,11 @@ class MessageNotForAccount(Exception):
         super().__init__(
             f"Message {message_id} not for account {account_id}",
         )
+
+
+class GetUserIdError(Exception):
+    pass
+
+
+class UnauthorizedError(Exception):
+    pass

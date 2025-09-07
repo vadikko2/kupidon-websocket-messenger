@@ -6,7 +6,7 @@ from fastapi_app import response
 from fastapi_app.exception_handlers import registry
 
 from domain import exceptions as domain_exceptions
-from presentation.api import dependencies
+from presentation.api import dependencies, security
 from presentation.api.schema import pagination
 from presentation.api.schema.v1 import requests, responses
 from service import exceptions
@@ -29,15 +29,15 @@ router = fastapi.APIRouter(prefix="/{chat_id}/messages", tags=["Messages"])
         exceptions.AttachmentNotForChat,
         exceptions.AttachmentNotForSender,
         exceptions.ParticipantNotInChat,
+        exceptions.GetUserIdError,
+        exceptions.UnauthorizedError,
     ),
 )
 async def post_message(
     chat_id: pydantic.UUID4,
-    account_id: pydantic.StrictStr = fastapi.Depends(dependencies.get_account_id),
+    account_id: pydantic.StrictStr = fastapi.Depends(security.extract_account_id),
     message: requests.PostMessage = fastapi.Body(...),
-    mediator: cqrs.RequestMediator = fastapi.Depends(
-        dependency=dependencies.request_mediator_factory,
-    ),
+    mediator: cqrs.RequestMediator = fastapi.Depends(dependency=dependencies.request_mediator_factory),
 ) -> response.Response[responses.MessageSent]:
     """
     # Send message to receiver
@@ -66,6 +66,8 @@ async def post_message(
     responses=registry.get_exception_responses(
         exceptions.ChatNotFound,
         exceptions.ParticipantNotInChat,
+        exceptions.GetUserIdError,
+        exceptions.UnauthorizedError,
     ),
     description="Публикация сообщений в чате",
 )
@@ -74,10 +76,8 @@ async def get_messages(
     limit: pydantic.NonNegativeInt = fastapi.Query(default=10),
     latest_message_id: pydantic.UUID4 | None = fastapi.Query(default=None),
     reverse: bool = fastapi.Query(default=False),
-    account_id: pydantic.StrictStr = fastapi.Depends(dependencies.get_account_id),
-    mediator: cqrs.RequestMediator = fastapi.Depends(
-        dependency=dependencies.request_mediator_factory,
-    ),
+    account_id: pydantic.StrictStr = fastapi.Depends(security.extract_account_id),
+    mediator: cqrs.RequestMediator = fastapi.Depends(dependency=dependencies.request_mediator_factory),
 ) -> response.Response[pagination.MessagesPaginator[get_messages_request.MessageInfo]]:
     """
     # Returns chat messages
@@ -111,11 +111,13 @@ async def get_messages(
         exceptions.ParticipantNotInChat,
         exceptions.ChatNotFound,
         exceptions.MessageNotForAccount,
+        exceptions.GetUserIdError,
+        exceptions.UnauthorizedError,
     ),
 )
 async def edit_message(
     chat_id: pydantic.UUID4,
-    account_id: pydantic.StrictStr = fastapi.Depends(dependencies.get_account_id),
+    account_id: pydantic.StrictStr = fastapi.Depends(security.extract_account_id),
     message: requests.UpdateMessage = fastapi.Body(...),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,

@@ -5,7 +5,7 @@ from fastapi_app import response
 from fastapi_app.exception_handlers import registry
 
 from domain import exceptions as domain_exceptions
-from presentation.api import dependencies
+from presentation.api import dependencies, security
 from presentation.api.schema.v1 import responses
 from service import exceptions as service_exceptions
 from service.models.attachments import upload_image as upload_image_requests
@@ -19,12 +19,14 @@ router = fastapi.APIRouter(prefix="")
     responses=registry.get_exception_responses(
         service_exceptions.ChatNotFound,
         service_exceptions.AttachmentUploadError,
+        service_exceptions.GetUserIdError,
+        service_exceptions.UnauthorizedError,
         domain_exceptions.AttachmentAlreadyUploaded,
     ),
 )
 async def upload_image(
     chat_id: pydantic.UUID4,
-    account_id: str = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(security.extract_account_id),
     image_file: fastapi.UploadFile = fastapi.File(description="Image file"),
     image_height: pydantic.NonNegativeInt = fastapi.Body(description="Image height"),
     image_width: pydantic.NonNegativeInt = fastapi.Body(description="Image width"),

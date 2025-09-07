@@ -6,7 +6,7 @@ from fastapi_app import response
 from fastapi_app.exception_handlers import registry
 
 from domain import exceptions as domain_exceptions
-from presentation.api import dependencies
+from presentation.api import dependencies, security
 from presentation.api.schema import pagination, validators
 from presentation.api.schema.v1 import requests
 from service import exceptions as service_exceptions
@@ -26,11 +26,13 @@ router = fastapi.APIRouter(prefix="/reactions", tags=["Reactions"])
         validators.EmojiValidationError,
         domain_exceptions.TooManyReactions,
         service_exceptions.MessageNotFound,
+        service_exceptions.GetUserIdError,
+        service_exceptions.UnauthorizedError,
     ),
 )
 async def react(
     message_id: pydantic.UUID4,
-    account_id: str = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(security.extract_account_id),
     reaction: requests.Reaction = fastapi.Body(...),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
@@ -54,12 +56,14 @@ async def react(
     status_code=status.HTTP_204_NO_CONTENT,
     responses=registry.get_exception_responses(
         service_exceptions.MessageNotFound,
+        service_exceptions.GetUserIdError,
+        service_exceptions.UnauthorizedError,
     ),
 )
 async def unreact(
     message_id: pydantic.UUID4,
     reaction: requests.Reaction = fastapi.Body(...),
-    account_id: str = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(security.extract_account_id),
     mediator: cqrs.RequestMediator = fastapi.Depends(
         dependency=dependencies.request_mediator_factory,
     ),
@@ -84,6 +88,8 @@ async def unreact(
         service_exceptions.MessageNotFound,
         validators.EmojiValidationError,
         service_exceptions.MessageNotFound,
+        service_exceptions.GetUserIdError,
+        service_exceptions.UnauthorizedError,
     ),
 )
 async def get_reactors(
@@ -91,9 +97,8 @@ async def get_reactors(
     reaction: str = fastapi.Depends(validators.emoji_validator),
     limit: pydantic.NonNegativeInt = fastapi.Query(default=10),
     offset: pydantic.NonNegativeInt = fastapi.Query(default=0),
-    mediator: cqrs.RequestMediator = fastapi.Depends(
-        dependency=dependencies.request_mediator_factory,
-    ),
+    _: str = fastapi.Depends(security.extract_account_id),
+    mediator: cqrs.RequestMediator = fastapi.Depends(dependency=dependencies.request_mediator_factory),
 ) -> response.Response[pagination.Pagination[str]]:
     """
     # Returns reactors for message reaction

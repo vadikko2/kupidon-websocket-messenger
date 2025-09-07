@@ -3,7 +3,7 @@ import fastapi
 import pydantic
 from fastapi_app.exception_handlers import registry
 
-from presentation.api import dependencies
+from presentation.api import dependencies, security
 from presentation.api.schema.v1 import requests
 from service import exceptions
 from service.models.chats import add_tag, remove_tag
@@ -18,15 +18,15 @@ router = fastapi.APIRouter(prefix="/{chat_id}/tags", tags=["Tags"])
     responses=registry.get_exception_responses(
         exceptions.ChatNotFound,
         exceptions.ParticipantNotInChat,
+        exceptions.GetUserIdError,
+        exceptions.UnauthorizedError,
     ),
 )
 async def add_chat_tag(
     chat_id: pydantic.UUID4,
-    account_id: str = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(security.extract_account_id),
     tag: requests.ChatTag = fastapi.Body(...),
-    mediator: cqrs.RequestMediator = fastapi.Depends(
-        dependency=dependencies.request_mediator_factory,
-    ),
+    mediator: cqrs.RequestMediator = fastapi.Depends(dependency=dependencies.request_mediator_factory),
 ):
     """
     Creates chat tag
@@ -47,15 +47,15 @@ async def add_chat_tag(
     responses=registry.get_exception_responses(
         exceptions.ChatNotFound,
         exceptions.ParticipantNotInChat,
+        exceptions.GetUserIdError,
+        exceptions.UnauthorizedError,
     ),
 )
 async def remove_chat_tag(
     chat_id: pydantic.UUID4,
-    account_id: str = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(security.extract_account_id),
     tag: requests.ChatTag = fastapi.Body(...),
-    mediator: cqrs.RequestMediator = fastapi.Depends(
-        dependency=dependencies.request_mediator_factory,
-    ),
+    mediator: cqrs.RequestMediator = fastapi.Depends(dependency=dependencies.request_mediator_factory),
 ):
     """
     Removes chat tag

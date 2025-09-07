@@ -63,19 +63,6 @@ async def subscription_service_factory(
     return subscription_service.SubscriptionService(broker=broker)
 
 
-async def get_account_id(
-    account_id: str | None = validators.AccountId(),
-) -> str:
-    """Returns account id from request header"""
-    if account_id is None:
-        logger.error("AccountID header not provided")
-        raise fastapi.HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="AccountID header not provided",
-        )
-    return account_id
-
-
 async def get_account_id_ws(
     account_id: str | None = validators.AccountId(),
 ) -> str:

@@ -125,3 +125,19 @@ def message_not_for_account_handler(
     error: service_exceptions.MessageNotForAccount,
 ) -> models.ErrorResponse:
     return models.ErrorResponse(message=str(error))
+
+
+@bind_exception(status.HTTP_401_UNAUTHORIZED)
+def unauthorized_error_handler(
+    _: requests.Request,
+    error: service_exceptions.UnauthorizedError,
+) -> models.ErrorResponse:
+    return models.ErrorResponse(message=str(error))
+
+
+@bind_exception(status.HTTP_403_FORBIDDEN)
+def get_user_id_error_handler(
+    _: requests.Request,
+    error: service_exceptions.GetUserIdError,
+) -> models.ErrorResponse:
+    return models.ErrorResponse(message=str(error))

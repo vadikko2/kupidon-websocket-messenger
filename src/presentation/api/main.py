@@ -24,6 +24,11 @@ logging.getLogger("asyncio").setLevel(logging.ERROR)
 logging.getLogger("urllib3").setLevel(logging.ERROR)
 logging.getLogger("multipart").setLevel(logging.ERROR)
 logging.getLogger("cqrs").setLevel(logging.ERROR)
+logging.getLogger("httpx").setLevel(logging.ERROR)
+logging.getLogger("httpx").setLevel(logging.ERROR)
+logging.getLogger("httpcore").setLevel(logging.ERROR)
+logging.getLogger("httpx_retries").setLevel(logging.ERROR)
+logging.getLogger("websockets").setLevel(logging.ERROR)
 
 api_router = fastapi.APIRouter(prefix="/api")
 api_router.include_router(v1.router)
@@ -52,6 +57,8 @@ app = fastapi_app.create(
         handlers.subscription_not_started_handler,
         handlers.too_many_reactions_handler,
         handlers.emoji_validation_error_handler,
+        handlers.unauthorized_error_handler,
+        handlers.get_user_id_error_handler,
     ],
     cors_enable=True,
     log_config=log_config,

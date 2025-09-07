@@ -4,7 +4,7 @@ import pydantic
 from fastapi_app.exception_handlers import registry
 
 from domain import events
-from presentation.api import dependencies
+from presentation.api import dependencies, security
 from service import exceptions
 
 router = fastapi.APIRouter(prefix="/{chat_id}/tap", tags=["Tapping"])
@@ -25,12 +25,14 @@ async def send_tap(
     responses=registry.get_exception_responses(
         exceptions.ChatNotFound,
         exceptions.ParticipantNotInChat,
+        exceptions.GetUserIdError,
+        exceptions.UnauthorizedError,
     ),
 )
 async def tap_into_chat(
     chat_id: pydantic.UUID4,
     background_tasks: fastapi.BackgroundTasks,
-    account_id: str = fastapi.Depends(dependencies.get_account_id),
+    account_id: str = fastapi.Depends(security.extract_account_id),
     emitter: cqrs.EventEmitter = fastapi.Depends(
         dependency=dependencies.event_emitter_factory,
     ),
