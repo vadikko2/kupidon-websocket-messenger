@@ -47,6 +47,7 @@ async def open_chat(
             participants=body.participants,
             name=body.name,
             avatar=str(body.avatar),
+            welcome_message=body.welcome_message,
         ),
     )
     return response.Response(result=responses.ChatCreated(chat_id=result.chat_id))

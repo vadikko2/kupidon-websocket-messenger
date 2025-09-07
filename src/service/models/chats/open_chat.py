@@ -7,6 +7,7 @@ class OpenChat(cqrs.Request):
     participants: list[str]
     name: str
     avatar: str | None = pydantic.Field(default=None)
+    welcome_message: str | None = pydantic.Field(default=None)
 
 
 class ChatOpened(cqrs.Response):

@@ -30,6 +30,14 @@ class CreateChat(pydantic.BaseModel, frozen=True):
         default=None,
         description="URL to avatar image",
     )
+    welcome_message: pydantic.StrictStr | None = pydantic.Field(
+        default=None,
+        description="Welcome message",
+        examples=["Hello World!"],
+        min_length=constants.MIN_MESSAGE_LENGTH,
+        max_length=constants.MAX_MESSAGE_LENGTH,
+        json_schema_extra={"nullable": True},
+    )
 
 
 class PostMessage(pydantic.BaseModel, frozen=True):
@@ -43,7 +51,6 @@ class PostMessage(pydantic.BaseModel, frozen=True):
         min_length=constants.MIN_MESSAGE_LENGTH,
         max_length=constants.MAX_MESSAGE_LENGTH,
         json_schema_extra={"nullable": True},
-        frozen=True,
         default=None,
     )
     attachments: list[pydantic.UUID4] = pydantic.Field(
