@@ -35,10 +35,15 @@ class SendMessageHandler(
                 request.sender,
             )
 
-            # Check attachments
-            attachments = await self.uow.attachment_repository.get_many(
-                *request.attachments,
+            # Enforce first-writer rule via validator
+            chat_validators.raise_if_first_writer_required_and_sender_not_allowed(
+                chat,
+                request.chat_id,
+                request.sender,
             )
+
+            # Check attachments
+            attachments = await self.uow.attachment_repository.get_many(*request.attachments)
             attachment_validators.raise_if_attachment_not_found(attachments, request.attachments)
             attachment_validators.raise_if_attachment_not_for_chat(attachments, request.chat_id)
             attachment_validators.raise_if_attachment_not_for_sender(attachments, request.sender)

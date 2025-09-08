@@ -141,3 +141,11 @@ def get_user_id_error_handler(
     error: service_exceptions.GetUserIdError,
 ) -> models.ErrorResponse:
     return models.ErrorResponse(message=str(error))
+
+
+@bind_exception(status.HTTP_400_BAD_REQUEST)
+def first_writer_required_handler(
+    _: requests.Request,
+    error: service_exceptions.FirstWriterRequired,
+) -> models.ErrorResponse:
+    return models.ErrorResponse(message=str(error))

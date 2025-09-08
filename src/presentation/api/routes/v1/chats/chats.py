@@ -15,6 +15,7 @@ from service.models.chats import (
     delete_chat as delete_chat_request,
     get_chats as get_chats_request,
     open_chat as open_chat_request,
+    set_first_writer as set_first_writer_request,
 )
 
 router = fastapi.APIRouter(prefix="")
@@ -45,12 +46,45 @@ async def open_chat(
         open_chat_request.OpenChat(
             initiator=account_id,
             participants=body.participants,
+            first_writers=body.first_writers,
             name=body.name,
             avatar=str(body.avatar),
             welcome_message=body.welcome_message,
         ),
     )
     return response.Response(result=responses.ChatCreated(chat_id=result.chat_id))
+
+
+@router.patch(
+    "/{chat_id}/first-writer",
+    tags=["Chats"],
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses=registry.get_exception_responses(
+        exceptions.ChatNotFound,
+        exceptions.ParticipantNotInChat,
+        exceptions.GetUserIdError,
+        exceptions.UnauthorizedError,
+    ),
+)
+async def set_first_writer(
+    chat_id: pydantic.UUID4,
+    body: requests.SetFirstWriter = fastapi.Body(...),
+    account_id: str = fastapi.Depends(security.extract_account_id),
+    mediator: cqrs.RequestMediator = fastapi.Depends(
+        dependency=dependencies.request_mediator_factory,
+    ),
+) -> fastapi.Response:
+    """
+    # Toggle first-writer flag for a participant in a chat
+    """
+    await mediator.send(
+        set_first_writer_request.SetFirstWriter(
+            chat_id=chat_id,
+            account_id=account_id,
+            first_writer=body.first_writer,
+        ),
+    )
+    return fastapi.Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.get(

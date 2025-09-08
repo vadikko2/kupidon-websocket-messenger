@@ -64,6 +64,8 @@ class Chat(pydantic.BaseModel):
         if message in self.history:
             return
 
+        # Business rules are validated in service validators layer
+
         self.history.append(message)
 
         self.last_message = max((message, self.last_message), key=lambda x: x.created) if self.last_message else message

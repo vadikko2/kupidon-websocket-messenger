@@ -26,6 +26,11 @@ class CreateChat(pydantic.BaseModel, frozen=True):
         description="Participants IDs",
         examples=[["account-id-1", "account-id-2"]],
     )
+    first_writers: list[pydantic.StrictStr] | None = pydantic.Field(
+        default=None,
+        description="Participants allowed to write first",
+        examples=[["account-id-1"]],
+    )
     avatar: pydantic.AnyHttpUrl | None = pydantic.Field(
         default=None,
         description="URL to avatar image",
@@ -91,4 +96,12 @@ class ChatTag(pydantic.BaseModel, frozen=True):
         min_length=1,
         max_length=10,
         examples=["tag-1", "tag-2"],
+    )
+
+
+class SetFirstWriter(pydantic.BaseModel, frozen=True):
+    first_writer: pydantic.StrictBool = pydantic.Field(
+        description="First writer status",
+        examples=[True, False],
+        default=False,
     )

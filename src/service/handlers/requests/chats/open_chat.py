@@ -21,8 +21,18 @@ class OpenChatHandler(cqrs.RequestHandler[open_chat.OpenChat, open_chat.ChatOpen
         )
 
         new_chat.add_participant(request.initiator, request.initiator)
+        first_writers = set(request.first_writers or [])
+        # set initiator as first_writer if specified
+        if request.initiator in first_writers:
+            p = new_chat.is_participant(request.initiator)
+            if p is not None:
+                p.set_first_writer(True)
         for participant in request.participants:
             new_chat.add_participant(participant, request.initiator)
+            if participant in first_writers:
+                p = new_chat.is_participant(participant)
+                if p is not None:
+                    p.set_first_writer(True)
 
         async with self.uow:
             await self.uow.chat_repository.add(new_chat)

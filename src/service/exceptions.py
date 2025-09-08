@@ -75,3 +75,10 @@ class GetUserIdError(Exception):
 
 class UnauthorizedError(Exception):
     pass
+
+
+class FirstWriterRequired(Exception):
+    def __init__(self, chat_id: uuid.UUID, account_id: str) -> None:
+        super().__init__(
+            f"Account {account_id} is not allowed to write first in chat {chat_id}",
+        )

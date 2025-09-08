@@ -28,6 +28,7 @@ from service.handlers.requests.chats import (
     get_chats as get_chats_handler,
     open_chat as open_chat_handler,
     remove_tag as remove_tag_handler,
+    set_first_writer as set_first_writer_handler,
 )
 from service.handlers.requests.messages import (
     apply_message as apply_message_handler,
@@ -53,6 +54,7 @@ from service.models.chats import (
     get_chats as get_chats_model,
     open_chat as open_chat_model,
     remove_tag as remove_tag_model,
+    set_first_writer as set_first_writer_model,
 )
 from service.models.messages import (
     apply_message as apply_message_model,
@@ -81,6 +83,7 @@ def init_requests(mapper: requests.RequestMap) -> None:
     mapper.bind(delete_chat_model.DeleteChat, delete_chat_handler.DeleteChatHandler)
     mapper.bind(add_tag_model.AddTag, add_tag_handler.AddTagHandler)
     mapper.bind(remove_tag_model.RemoveTag, remove_tag_handler.RemoveTagHandler)
+    mapper.bind(set_first_writer_model.SetFirstWriter, set_first_writer_handler.SetFirstWriterHandler)
     mapper.bind(
         send_message_model.SendMessage,
         send_message_handler.SendMessageHandler,

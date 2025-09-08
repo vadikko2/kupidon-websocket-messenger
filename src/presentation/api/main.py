@@ -59,6 +59,7 @@ app = fastapi_app.create(
         handlers.emoji_validation_error_handler,
         handlers.unauthorized_error_handler,
         handlers.get_user_id_error_handler,
+        handlers.first_writer_required_handler,
     ],
     cors_enable=True,
     log_config=log_config,

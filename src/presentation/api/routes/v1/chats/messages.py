@@ -31,6 +31,7 @@ router = fastapi.APIRouter(prefix="/{chat_id}/messages", tags=["Messages"])
         exceptions.ParticipantNotInChat,
         exceptions.GetUserIdError,
         exceptions.UnauthorizedError,
+        exceptions.FirstWriterRequired,
     ),
 )
 async def post_message(

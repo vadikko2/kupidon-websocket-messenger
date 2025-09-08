@@ -22,6 +22,7 @@ class Participant(pydantic.BaseModel):
 
     account_id: str = pydantic.Field(frozen=True)
     initiated_by: str = pydantic.Field(frozen=True)
+    first_writer: bool = False
     tags: set[ChatTag] = pydantic.Field(default_factory=set)
 
     last_read_message: messages.Message | None = pydantic.Field(default=None)
@@ -34,6 +35,9 @@ class Participant(pydantic.BaseModel):
 
     def remove_tag(self, tag: ChatTag):
         self.tags.remove(tag)
+
+    def set_first_writer(self, value: bool) -> None:
+        self.first_writer = value
 
     def __eq__(self, other):
         if not isinstance(other, Participant):
