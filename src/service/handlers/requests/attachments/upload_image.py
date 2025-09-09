@@ -38,13 +38,13 @@ class UploadImageHandler(cqrs.RequestHandler[upload_image.UploadImage, upload_im
                 request.uploader,
             )
 
-            blurhash_value = blurhash.generate_blurhash(io.BytesIO(request.content))
-
             transcode_processor = transcode.JpegTranscodeAttachmentPreprocessor()
             preview_100x100_processor = preview.JPEGPreview100x100AttachmentPreprocessor()
             preview_200x200_processor = preview.JPEGPreview200x200AttachmentPreprocessor()
 
             transcode_io = transcode_processor(io.BytesIO(request.content)).read()
+
+            blurhash_value = blurhash.generate_blurhash(io.BytesIO(transcode_io))
 
             attachment_id = uuid.uuid4()
             uploading_dt = datetime.datetime.now()
